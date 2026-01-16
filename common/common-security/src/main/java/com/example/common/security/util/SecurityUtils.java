@@ -70,4 +70,8 @@ public class SecurityUtils {
 		return roleIds;
 	}
 
+	public static long getCurrentUserId() {
+		ExtraUser user = getUser();
+		return user == null ? 0 : user.getId();
+	}
 }
