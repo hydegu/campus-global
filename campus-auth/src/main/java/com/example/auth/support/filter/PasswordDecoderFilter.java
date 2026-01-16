@@ -1,0 +1,67 @@
+
+package com.example.auth.support.filter;
+
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.Mode;
+import cn.hutool.crypto.Padding;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.symmetric.AES;
+import com.example.common.core.constant.SecurityConstants;
+import com.example.common.core.servlet.RepeatBodyRequestWrapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
+import java.util.Map;
+
+/**
+ * 密码解密过滤器：用于处理登录请求中的密码解密
+ */
+@Component
+@RequiredArgsConstructor
+public class PasswordDecoderFilter extends OncePerRequestFilter {
+
+	private final AuthSecurityConfigProperties authSecurityConfigProperties;
+
+	private static final String PASSWORD = "password";
+
+	private static final String KEY_ALGORITHM = "AES";
+
+	static {
+		// 关闭hutool 强制关闭Bouncy Castle库的依赖
+		SecureUtil.disableBouncyCastle();
+	}
+
+	/**
+	 * 过滤器内部处理逻辑，用于处理登录请求中的密码解密
+	 * @param request HTTP请求对象
+	 * @param response HTTP响应对象
+	 * @param chain 过滤器链
+	 * @throws ServletException 如果发生servlet相关异常
+	 * @throws IOException 如果发生I/O异常
+	 */
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+			throws ServletException, IOException {
+		// 不是登录请求，直接向下执行
+		if (!StrUtil.containsAnyIgnoreCase(request.getRequestURI(), SecurityConstants.OAUTH_TOKEN_URL)) {
+			chain.doFilter(request, response);
+			return;
+		}
+
+		// 将请求流转换为可多次读取的请求流
+		RepeatBodyRequestWrapper requestWrapper = new RepeatBodyRequestWrapper(request);
+		Map<String, String[]> parameterMap = requestWrapper.getParameterMap();
+
+		chain.doFilter(requestWrapper, response);
+	}
+
+}

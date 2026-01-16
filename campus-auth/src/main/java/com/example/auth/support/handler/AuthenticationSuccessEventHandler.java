@@ -1,0 +1,107 @@
+
+package com.example.auth.support.handler;
+
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.StrUtil;
+import com.example.common.core.constant.CommonConstants;
+import com.example.common.core.constant.SecurityConstants;
+import com.example.common.core.util.SpringContextHolder;
+import com.example.common.security.component.CustomOAuth2AccessTokenResponseHttpMessageConverter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+
+/**
+ * 处理认证成功事件的处理器
+ */
+@Slf4j
+public class AuthenticationSuccessEventHandler implements AuthenticationSuccessHandler {
+
+	private final HttpMessageConverter<OAuth2AccessTokenResponse> accessTokenHttpResponseConverter = new CustomOAuth2AccessTokenResponseHttpMessageConverter();
+
+	/**
+	 * 用户认证成功时调用
+	 * @param request 触发认证成功的请求
+	 * @param response 响应对象
+	 * @param authentication 认证过程中创建的认证对象
+	 */
+	@SneakyThrows
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication) {
+		OAuth2AccessTokenAuthenticationToken accessTokenAuthentication = (OAuth2AccessTokenAuthenticationToken) authentication;
+		Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
+		
+		// 从 additionalParameters 中获取用户信息
+		if (MapUtil.isNotEmpty(additionalParameters)) {
+			Map<String, Object> userInfo = (Map<String, Object>) additionalParameters.get(SecurityConstants.DETAILS_USER);
+			if (userInfo != null) {
+				String username = (String) userInfo.get("username");
+				log.info("用户：{} 登录成功", username);
+			}
+		}
+		
+		SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
+		String startTimeStr = request.getHeader(CommonConstants.REQUEST_START_TIME);
+		if (StrUtil.isNotBlank(startTimeStr)) {
+			Long startTime = Long.parseLong(startTimeStr);
+			Long endTime = System.currentTimeMillis();
+		}
+
+		// 输出token
+		sendAccessTokenResponse(request, response, authentication);
+	}
+
+	/**
+	 * 发送访问令牌响应
+	 * @param request HTTP请求
+	 * @param response HTTP响应
+	 * @param authentication 认证信息
+	 * @throws IOException 写入响应时可能抛出IO异常
+	 */
+	private void sendAccessTokenResponse(HttpServletRequest request, HttpServletResponse response,
+			Authentication authentication) throws IOException {
+
+		OAuth2AccessTokenAuthenticationToken accessTokenAuthentication = (OAuth2AccessTokenAuthenticationToken) authentication;
+
+		OAuth2AccessToken accessToken = accessTokenAuthentication.getAccessToken();
+		OAuth2RefreshToken refreshToken = accessTokenAuthentication.getRefreshToken();
+		Map<String, Object> additionalParameters = accessTokenAuthentication.getAdditionalParameters();
+
+		OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken(accessToken.getTokenValue())
+			.tokenType(accessToken.getTokenType())
+			.scopes(accessToken.getScopes());
+		if (accessToken.getIssuedAt() != null && accessToken.getExpiresAt() != null) {
+			builder.expiresIn(ChronoUnit.SECONDS.between(accessToken.getIssuedAt(), accessToken.getExpiresAt()));
+		}
+		if (refreshToken != null) {
+			builder.refreshToken(refreshToken.getTokenValue());
+		}
+		if (!CollectionUtils.isEmpty(additionalParameters)) {
+			builder.additionalParameters(additionalParameters);
+		}
+		OAuth2AccessTokenResponse accessTokenResponse = builder.build();
+		ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+
+		// 无状态 注意删除 context 上下文的信息
+		SecurityContextHolder.clearContext();
+
+		this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
+	}
+
+}

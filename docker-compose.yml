@@ -1,0 +1,76 @@
+services:
+  redis:
+    image: registry.cn-hangzhou.aliyuncs.com/dockerhub_mirror/redis
+    ports:
+      - 36379:6379
+    container_name: redis
+    hostname: redis
+    networks:
+      - spring_cloud_default
+
+  nacos:
+    image: nacos/nacos-server:v3.1.0
+    container_name: nacos
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: 49.232.245.147  # 云数据库地址
+      MYSQL_SERVICE_PORT: 3306  # 云数据库端口
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: root  # 云数据库用户名
+      MYSQL_SERVICE_PASSWORD: admin  # 云数据库密码
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false
+      NACOS_AUTH_ENABLE: true
+      NACOS_AUTH_TOKEN: +kJ8A7Cw9b9hhPNULgUTYsXWLJI0TIsuLtGX99A+I3M=
+      NACOS_AUTH_IDENTITY_KEY: nacos
+      NACOS_AUTH_IDENTITY_VALUE: nacos
+    ports:
+      - 8848:8848
+      - 9848:9848
+      - 8080:8080
+    networks:
+      - spring_cloud_default
+
+  seata:
+    image: seataio/seata-server:1.7.0
+    container_name: seata
+    environment:
+      SEATA_IP: seata
+      SEATA_PORT: 8091
+      STORE_MODE: db
+      SEATA_CONFIG_NAME: file:/root/seata-config/application
+    volumes:
+      - ./seata-config:/root/seata-config
+    ports:
+      - 8091:8091
+      - 7091:7091
+    depends_on:
+      - nacos
+    networks:
+      - spring_cloud_default
+
+  sentinel:
+    image: bladex/sentinel-dashboard:1.8.6
+    container_name: sentinel
+    hostname: sentinel
+    environment:
+      # JVM 参数配置
+      JAVA_OPTS: >-
+        -Dserver.port=8858
+        -Dcsp.sentinel.dashboard.server=sentinel:8858
+        -Dproject.name=sentinel-dashboard
+        -Dcsp.sentinel.api.port=8719
+        -Dsentinel.dashboard.auth.username=sentinel
+        -Dsentinel.dashboard.auth.password=sentinel
+    ports:
+      - 8858:8858  # Sentinel Dashboard Web 端口
+      - 8719:8719  # Sentinel 客户端交互端口
+    depends_on:
+      - nacos
+    networks:
+      - spring_cloud_default
+
+networks:
+  spring_cloud_default:
+    name: spring_cloud_default
+    driver: bridge

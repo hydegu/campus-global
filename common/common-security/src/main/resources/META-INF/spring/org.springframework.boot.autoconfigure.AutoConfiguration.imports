@@ -1,0 +1,6 @@
+com.example.common.security.service.UserDetailsServiceImpl
+com.example.common.security.service.AppUserDetailsServiceImpl
+com.example.common.security.service.RemoteRegisteredClientRepository
+com.example.common.security.service.RedisOAuth2AuthorizationService
+com.example.common.security.service.RedisOAuth2AuthorizationConsentService
+com.example.common.security.component.CorsProperties

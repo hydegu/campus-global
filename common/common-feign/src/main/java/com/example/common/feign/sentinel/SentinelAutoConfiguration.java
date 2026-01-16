@@ -1,0 +1,63 @@
+
+package com.example.common.feign.sentinel;
+
+import com.alibaba.cloud.sentinel.feign.SentinelFeignAutoConfiguration;
+import com.alibaba.csp.sentinel.adapter.spring.webmvc_v6x.callback.BlockExceptionHandler;
+import com.alibaba.csp.sentinel.adapter.spring.webmvc_v6x.callback.RequestOriginParser;
+import com.example.common.feign.sentinel.ext.SentinelFeign;
+import com.example.common.feign.sentinel.handle.UrlBlockHandler;
+import com.example.common.feign.sentinel.parser.HeaderRequestOriginParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Feign;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+
+/**
+ * Sentinel 自动配置类
+ */
+@Configuration(proxyBeanMethods = false)
+@AutoConfigureBefore(SentinelFeignAutoConfiguration.class)
+public class SentinelAutoConfiguration {
+
+	/**
+	 * 创建Feign Sentinel构建器
+	 * @return Feign.Builder实例
+	 * @ConditionalOnMissingBean 当容器中不存在该类型bean时创建
+	 * @ConditionalOnProperty 当配置项spring.cloud.openfeign.sentinel.enabled为true时生效
+	 * @Scope 指定bean作用域为prototype
+	 */
+	@Bean
+	@Scope("prototype")
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "spring.cloud.openfeign.sentinel.enabled")
+	public Feign.Builder feignSentinelBuilder() {
+		return SentinelFeign.builder();
+	}
+
+	/**
+	 * 创建默认的BlockExceptionHandler bean
+	 * @param objectMapper 对象映射器
+	 * @return BlockHandler实例
+	 * @ConditionalOnMissingBean 当容器中不存在该类型bean时创建
+	 */
+	@Bean
+	@ConditionalOnMissingBean
+	public BlockExceptionHandler blockExceptionHandler(ObjectMapper objectMapper) {
+		return new UrlBlockHandler(objectMapper);
+	}
+
+	/**
+	 * 创建并返回一个RequestOriginParser bean，当容器中不存在该类型的bean时生效
+	 * @return 默认的RequestOriginParser实例
+	 */
+	@Bean
+	@ConditionalOnMissingBean
+	public RequestOriginParser requestOriginParser() {
+		return new HeaderRequestOriginParser();
+	}
+
+}
