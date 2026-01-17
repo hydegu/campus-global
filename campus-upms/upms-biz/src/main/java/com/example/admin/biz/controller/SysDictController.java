@@ -1,9 +1,9 @@
 package com.example.admin.biz.controller;
 
-import com.example.admin.biz.dto.SysDictAddDTO;
-import com.example.admin.biz.dto.SysDictPartialUpdateDTO;
+import com.example.admin.api.dto.SysDictAddDTO;
+import com.example.admin.api.dto.SysDictPartialUpdateDTO;
 import com.example.admin.biz.service.SysDictService;
-import com.example.admin.biz.vo.SysDictVO;
+import com.example.admin.api.vo.SysDictVO;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import io.swagger.v3.oas.annotations.Operation;

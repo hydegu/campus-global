@@ -1,10 +1,10 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.admin.biz.dto.AuditDTO;
-import com.example.admin.biz.dto.ServiceStaffAuditQueryDTO;
+import com.example.admin.api.dto.AuditDTO;
+import com.example.admin.api.dto.ServiceStaffAuditQueryDTO;
 import com.example.admin.biz.service.AuditService;
-import com.example.admin.biz.vo.ServiceStaffAuditVO;
+import com.example.admin.api.vo.ServiceStaffAuditVO;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
