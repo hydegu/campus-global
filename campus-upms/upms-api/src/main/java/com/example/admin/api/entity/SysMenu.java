@@ -26,7 +26,7 @@ public class SysMenu extends Model<SysMenu> {
 	/**
 	 * 菜单ID
 	 */
-	@TableId(value = "id", type = IdType.ASSIGN_ID)
+	@TableId(value = "id")
 	@Schema(description = "菜单id")
 	private Long id;
 
@@ -62,12 +62,6 @@ public class SysMenu extends Model<SysMenu> {
 	 */
 	@Schema(description = "排序值")
 	private Integer sortOrder;
-
-	/**
-	 * 菜单名称
-	 */
-	@Schema(description = "菜单名称")
-	private String enName;
 
 	/**
 	 * 菜单权限标识

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class MerchantController {
 
 	@GetMapping("/list")
 	@Operation(summary = "分页查询商家入驻申请列表", description = "根据查询条件分页查询商家入驻申请列表，支持按商家名称、审核状态、所属合伙人ID等条件筛选。返回包含合伙人、结算账户、审核记录等关联信息的分页结果")
-	public Result<Page<MerchantSettleInVO>> listMerchantSettleIn(@Valid MerchantSettleInQueryDTO queryDTO) {
+	public Result<Page<MerchantSettleInVO>> listMerchantSettleIn(@Valid @ParameterObject MerchantSettleInQueryDTO queryDTO) {
 		Page<MerchantSettleInVO> page = auditService.listMerchantSettleIn(queryDTO);
 		return Result.ok(page);
 	}

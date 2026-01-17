@@ -35,6 +35,7 @@ public class SysDict extends Model<SysDict> {
 	/**
 	 * 备注
 	 */
+	@TableField("remark")
 	@Schema(description = "备注")
 	private String remarks;
 

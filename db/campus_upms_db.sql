@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 16/01/2026 22:39:48
+ Date: 17/01/2026 16:45:09
 */
 
 SET NAMES utf8mb4;
@@ -29,14 +29,14 @@ CREATE TABLE `address`  (
   `detail_address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `contact_phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '联系人电话',
   `contact_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '联系人姓名',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `receiver_lat` decimal(10, 6) NOT NULL COMMENT '收货地址纬度',
   `receiver_lng` decimal(10, 6) NOT NULL COMMENT '收货地址经度',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `delete_time` datetime NULL DEFAULT NULL,
+  `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `delete_at` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_delete_time`(`delete_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+  INDEX `idx_delete_time`(`delete_at` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for app_user_address
@@ -67,7 +67,7 @@ CREATE TABLE `audit_record`  (
   UNIQUE INDEX `uk_audit_no`(`audit_no` ASC) USING BTREE,
   INDEX `idx_applicant`(`applicant_id` ASC, `status` ASC) USING BTREE,
   INDEX `idx_delete`(`delete_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4004 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for base_user
@@ -82,7 +82,7 @@ CREATE TABLE `base_user`  (
   `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '头像',
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '手机号',
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '邮箱',
-  `user_type` tinyint UNSIGNED NOT NULL COMMENT '1-系统后台 2-普通用户/服务者 3-商家 4骑手',
+  `user_type` tinyint UNSIGNED NOT NULL COMMENT '1-系统后台 2-普通用户/服务者 3-商家 4-骑手 5-合伙人',
   `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `delete_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
@@ -93,7 +93,7 @@ CREATE TABLE `base_user`  (
   INDEX `idx_delete_time`(`delete_at` ASC) USING BTREE,
   INDEX `idx_user_type`(`user_type` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 9005 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for role
@@ -159,7 +159,7 @@ CREATE TABLE `sys_dict`  (
   `delete_at` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 194 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 504 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for sys_file
@@ -200,7 +200,7 @@ CREATE TABLE `sys_menu`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_parent`(`parent_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 301010102 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 73 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for sys_oauth_client_details
@@ -218,7 +218,8 @@ CREATE TABLE `sys_oauth_client_details`  (
   `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `delete_at` datetime NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_client_id`(`client_id` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '终端信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -261,7 +262,7 @@ CREATE TABLE `user_app`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `base_user_id` bigint UNSIGNED NULL DEFAULT NULL,
   `gender` tinyint UNSIGNED NOT NULL DEFAULT 0 COMMENT '0-未知 1-男 2-女',
-  `openid` char(28) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `openid` char(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `stu_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '学号',
   `balance` decimal(10, 2) NULL DEFAULT NULL COMMENT '余额',
   `total_amount` decimal(10, 2) NULL DEFAULT NULL COMMENT '累计收益',
@@ -277,7 +278,7 @@ CREATE TABLE `user_app`  (
   UNIQUE INDEX `idx_openid`(`openid` ASC) USING BTREE,
   INDEX `idx_delete_time`(`delete_time` ASC) USING BTREE,
   INDEX `idx_audit_id`(`audit_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 902 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for user_mch
@@ -307,7 +308,7 @@ CREATE TABLE `user_mch`  (
   INDEX `idx_delete_time`(`delete_time` ASC) USING BTREE,
   INDEX `idx_audit_id`(`audit_id` ASC) USING BTREE,
   INDEX `idx_is_open`(`is_open` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 902 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for user_partner
@@ -351,16 +352,16 @@ CREATE TABLE `user_rider`  (
   `balance` decimal(10, 2) NULL DEFAULT NULL COMMENT '余额',
   `commission_total` decimal(10, 2) NULL DEFAULT NULL COMMENT '累计收益',
   `address_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '联表地址id',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `delete_time` datetime NULL DEFAULT NULL,
+  `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `delete_at` datetime NULL DEFAULT NULL,
   `card_number` varchar(19) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '银行卡号',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `base_user_id`(`base_user_id` ASC) USING BTREE,
   UNIQUE INDEX `idx_openid`(`openid` ASC) USING BTREE,
-  INDEX `idx_delete_time`(`delete_time` ASC) USING BTREE,
+  INDEX `idx_delete_time`(`delete_at` ASC) USING BTREE,
   INDEX `idx_audit_id`(`audit_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 902 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for user_role

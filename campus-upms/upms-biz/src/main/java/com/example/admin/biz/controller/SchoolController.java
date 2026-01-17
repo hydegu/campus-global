@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,7 +57,7 @@ public class SchoolController {
 
     @GetMapping("/list")
     @Operation(summary = "分页查询学校列表", description = "根据查询条件分页查询学校列表，支持按学校名称、状态等条件筛选。需要权限：system:school:list")
-    public Result<PageResult<SysSchoolVO>> listSchools(@Valid SchoolQueryDTO dto) {
+    public Result<PageResult<SysSchoolVO>> listSchools(@Valid @ParameterObject SchoolQueryDTO dto) {
         PageResult<SysSchoolVO> pageResult = schoolService.listSchools(dto);
         return Result.ok(pageResult);
     }

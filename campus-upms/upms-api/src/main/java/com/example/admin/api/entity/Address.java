@@ -48,19 +48,19 @@ public class Address implements Serializable {
 	@Schema(description = "收货地址经度")
 	private BigDecimal receiverLng;
 
-	@TableField(value = "create_time", fill = FieldFill.INSERT)
+	@TableField(value = "create_at", fill = FieldFill.INSERT)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(description = "创建时间")
-	private LocalDateTime createTime;
+	private LocalDateTime createAt;
 
-	@TableField(value = "update_time", fill = FieldFill.UPDATE)
+	@TableField(value = "update_at", fill = FieldFill.UPDATE)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(description = "更新时间")
-	private LocalDateTime updateTime;
+	private LocalDateTime updateAt;
 
 	@TableLogic
-	@TableField("delete_time")
+	@TableField("delete_at")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(description = "软删除时间")
-	private LocalDateTime deleteTime;
+	private LocalDateTime deleteAt;
 }

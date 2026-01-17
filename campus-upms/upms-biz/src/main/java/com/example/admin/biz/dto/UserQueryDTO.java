@@ -39,7 +39,7 @@ public class UserQueryDTO {
 	@Schema(description = "角色名称")
 	private String roleName;
 
-	@Schema(description = "用户类型:1-系统用户 2-普通用户/服务者 3-商家 4-骑手")
+	@Schema(description = "用户类型:1-系统用户 2-普通用户/服务者 3-商家 4-骑手 5-合伙人")
 	private Integer userType;
 
 	@Schema(description = "开始时间")

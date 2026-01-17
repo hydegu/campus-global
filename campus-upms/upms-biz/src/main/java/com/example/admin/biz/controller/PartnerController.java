@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,7 +28,7 @@ public class PartnerController {
 
 	@GetMapping("/audit/list")
 	@Operation(summary = "分页查询合伙人审核列表", description = "根据查询条件分页查询合伙人审核列表，支持按合伙人姓名、审核状态等条件筛选")
-	public Result<Page<PartnerAuditVO>> listPartnerAudit(@Valid PartnerAuditQueryDTO queryDTO) {
+	public Result<Page<PartnerAuditVO>> listPartnerAudit(@Valid @ParameterObject PartnerAuditQueryDTO queryDTO) {
 		Page<PartnerAuditVO> page = auditService.listPartnerAudit(queryDTO);
 		return Result.ok(page);
 	}
