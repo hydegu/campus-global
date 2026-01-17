@@ -26,7 +26,7 @@ public class SysMenu extends Model<SysMenu> {
 	/**
 	 * 菜单ID
 	 */
-	@TableId(value = "menu_id", type = IdType.ASSIGN_ID)
+	@TableId(value = "id", type = IdType.ASSIGN_ID)
 	@Schema(description = "菜单id")
 	private Long id;
 
