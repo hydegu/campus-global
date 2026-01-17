@@ -8,6 +8,9 @@ import lombok.Data;
 @Schema(description = "菜单更新DTO")
 public class SysMenuUpdateDTO {
 
+	@Schema(description = "菜单ID（可选，用于直接指定菜单ID）", example = "1")
+	private Long id;
+
 	@NotNull(message = "父菜单ID不能为空")
 	@Schema(description = "父菜单ID(0为根菜单)", example = "0")
 	private Long parentId;
