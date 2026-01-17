@@ -63,6 +63,12 @@ public class SysDict extends Model<SysDict> {
 	private Integer level;
 
 	/**
+	 * 状态
+	 */
+	@Schema(description = "状态")
+	private Integer status;
+
+	/**
 	 * 更新时间
 	 */
 	@Schema(description = "更新时间")

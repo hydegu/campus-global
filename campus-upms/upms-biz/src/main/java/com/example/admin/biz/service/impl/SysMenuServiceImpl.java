@@ -36,6 +36,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 	@Override
 	public void addMenu(SysMenuAddDTO dto) {
 		SysMenu menu = new SysMenu();
+		if (dto.getId() != null) {
+			menu.setId(dto.getId());
+		}
 		menu.setParentId(dto.getParentId());
 		menu.setMenuType(dto.getMenuType().toString());
 		menu.setMenuIcon(dto.getMenuIcon());
@@ -51,7 +54,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
 	@Override
 	public void updateMenu(Long id, SysMenuUpdateDTO dto) {
-		SysMenu menu = getById(id);
+		Long menuId = dto.getId() != null ? dto.getId() : id;
+		SysMenu menu = getById(menuId);
 		if (menu == null) {
 			throw new RuntimeException("菜单不存在");
 		}

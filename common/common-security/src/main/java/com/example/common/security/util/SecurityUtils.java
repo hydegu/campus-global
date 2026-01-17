@@ -70,8 +70,21 @@ public class SecurityUtils {
 		return roleIds;
 	}
 
+	/**
+	 * 获取当前认证用户ID
+	 * @return 当前用户ID，未认证时返回0
+	 */
 	public static long getCurrentUserId() {
 		ExtraUser user = getUser();
 		return user == null ? 0 : user.getId();
+	}
+
+	/**
+	 * 获取当前认证用户名
+	 * @return 当前用户名，未认证时返回空字符串
+	 */
+	public static String getCurrentUsername() {
+		ExtraUser user = getUser();
+		return user == null ? "" : user.getUsername();
 	}
 }

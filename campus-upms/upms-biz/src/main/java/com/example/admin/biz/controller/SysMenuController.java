@@ -5,6 +5,7 @@ import com.example.admin.biz.dto.SysMenuUpdateDTO;
 import com.example.admin.biz.service.SysMenuService;
 import com.example.admin.biz.vo.SysMenuVO;
 import com.example.common.core.util.Result;
+import com.example.common.docs.annotation.StandardApiResponses;
 import com.example.common.security.annotation.HasPermission;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/menu")
 @RequiredArgsConstructor
+@StandardApiResponses
 @Tag(name = "菜单管理", description = "系统菜单的增删改查功能")
 public class SysMenuController {
 

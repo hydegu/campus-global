@@ -81,7 +81,6 @@
 <!--    <module>campus-finance</module> &lt;!&ndash; 财务模块 (端口: 4400) &ndash;&gt;-->
 <!--    <module>campus-message</module> &lt;!&ndash; 消息模块 (端口: 4500) &ndash;&gt;-->
 
-
   </modules>
 
   <dependencyManagement>
