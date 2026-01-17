@@ -4,11 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.example.admin.api.dto.UserInfo;
+import com.example.admin.api.dto.*;
 import com.example.admin.api.entity.*;
-import com.example.admin.biz.dto.UserQueryDTO;
-import com.example.admin.biz.dto.UserStatusDTO;
-import com.example.admin.biz.dto.*;
 import com.example.admin.biz.mapper.BaseUserMapper;
 import com.example.admin.biz.mapper.RoleMapper;
 import com.example.admin.biz.mapper.SysSchoolMapper;
@@ -19,13 +16,12 @@ import com.example.admin.biz.mapper.UserRiderMapper;
 import com.example.admin.biz.mapper.UserRoleMapper;
 import com.example.admin.biz.mapper.UserSysMapper;
 import com.example.admin.biz.service.UserService;
-import com.example.admin.biz.vo.UserAppListVO;
-import com.example.admin.biz.vo.UserMchListVO;
-import com.example.admin.biz.vo.UserPartnerListVO;
-import com.example.admin.biz.vo.UserRiderListVO;
-import com.example.admin.biz.vo.UserSysListVO;
-import com.example.admin.biz.vo.*;
-import com.example.common.core.enums.AuditStatus;
+import com.example.admin.api.vo.UserAppListVO;
+import com.example.admin.api.vo.UserMchListVO;
+import com.example.admin.api.vo.UserPartnerListVO;
+import com.example.admin.api.vo.UserRiderListVO;
+import com.example.admin.api.vo.UserSysListVO;
+import com.example.admin.api.vo.AbstractUserVO;
 import com.example.common.core.enums.Gender;
 import com.example.common.core.enums.UserType;
 import com.example.common.core.exception.BusinessException;
@@ -65,6 +61,51 @@ public class UserServiceImpl implements UserService {
 		userWrapper.eq(BaseUser::getUsername, username);
 		BaseUser baseUser = baseUserMapper.selectOne(userWrapper);
 
+		if (baseUser == null) {
+			return null;
+		}
+
+		UserInfo userInfo = new UserInfo();
+		userInfo.setUserId(baseUser.getId());
+		userInfo.setUsername(baseUser.getUsername());
+		userInfo.setNickname(baseUser.getNickname());
+		userInfo.setPassword(baseUser.getPassword());
+		userInfo.setPhone(baseUser.getPhone());
+		userInfo.setEmail(baseUser.getEmail());
+		userInfo.setAvatar(baseUser.getAvatar());
+		userInfo.setStatus(baseUser.getStatus());
+		userInfo.setUserType(baseUser.getUserType());
+		userInfo.setCreateAt(baseUser.getCreateAt());
+		userInfo.setUpdateAt(baseUser.getUpdateAt());
+		userInfo.setDeleteAt(baseUser.getDeleteAt());
+
+		LambdaQueryWrapper<UserRole> userRoleWrapper = Wrappers.lambdaQuery();
+		userRoleWrapper.eq(UserRole::getUserId, baseUser.getId());
+		List<UserRole> userRoles = userRoleMapper.selectList(userRoleWrapper);
+
+		if (userRoles != null && !userRoles.isEmpty()) {
+			List<Long> roleIds = userRoles.stream()
+					.map(UserRole::getRoleId)
+					.collect(Collectors.toList());
+
+			LambdaQueryWrapper<Role> roleWrapper = Wrappers.lambdaQuery();
+			roleWrapper.in(Role::getId, roleIds);
+			List<Role> roles = roleMapper.selectList(roleWrapper);
+			userInfo.setRoleList(roles);
+		} else {
+			userInfo.setRoleList(Collections.emptyList());
+		}
+
+		return userInfo;
+	}
+
+	@Override
+	public UserInfo getUserInfoById(Long id) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
 		if (baseUser == null) {
 			return null;
 		}

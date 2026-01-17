@@ -1,10 +1,14 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.admin.api.dto.ResetPasswordDTO;
 import com.example.admin.api.dto.UserInfo;
-import com.example.admin.biz.dto.*;
+import com.example.admin.api.dto.UserQueryDTO;
+import com.example.admin.api.vo.UserAppListVO;
+import com.example.admin.api.vo.UserMchListVO;
+import com.example.admin.api.vo.UserPartnerListVO;
+import com.example.admin.api.vo.UserRiderListVO;
 import com.example.admin.biz.service.UserService;
-import com.example.admin.biz.vo.*;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +18,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,6 +34,16 @@ public class UserController {
 	@Operation(summary = "查询用户信息", description = "通过用户名查询用户详细信息，包括角色信息")
 	public Result<UserInfo> getUserInfo(String username) {
 		UserInfo userInfo = userService.getUserInfo(username);
+		if (userInfo == null) {
+			return Result.failed("用户不存在");
+		}
+		return Result.ok(userInfo);
+	}
+
+	@GetMapping("/{id}/info")
+	@Operation(summary = "通过用户ID查询用户信息", description = "通过用户ID查询用户详细信息，包括角色信息")
+	public Result<UserInfo> getUserInfoById(@PathVariable Long id) {
+		UserInfo userInfo = userService.getUserInfoById(id);
 		if (userInfo == null) {
 			return Result.failed("用户不存在");
 		}
@@ -63,9 +76,9 @@ public class UserController {
 
 	@GetMapping("/sys-user/list")
 	@Operation(summary = "分页查询系统用户列表", description = "根据查询条件分页查询系统用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	public Result<Page<UserSysListVO>> listSysUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
+	public Result<Page<com.example.admin.api.vo.UserSysListVO>> listSysUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
 		queryDTO.setUserType(1);
-		Page<UserSysListVO> page = userService.listSysUsers(queryDTO);
+		Page<com.example.admin.api.vo.UserSysListVO> page = userService.listSysUsers(queryDTO);
 		return Result.ok(page);
 	}
 
@@ -79,7 +92,7 @@ public class UserController {
 
 	@PutMapping("/app-user/{id}/status")
 	@Operation(summary = "修改用户状态（拉黑/解封）", description = "修改指定用户的状态，支持拉黑或解封操作。需要提供目标状态和操作原因")
-	public Result<Void> updateUserStatus(@PathVariable Long id, @Valid @RequestBody UserStatusDTO statusDTO) {
+	public Result<Void> updateUserStatus(@PathVariable Long id, @Valid @RequestBody com.example.admin.api.dto.UserStatusDTO statusDTO) {
 		userService.updateUserStatus(id, statusDTO);
 		return Result.ok();
 	}

@@ -2,15 +2,15 @@ package com.example.admin.biz.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.admin.api.entity.AuditRecord;
-import com.example.admin.biz.dto.AuditDTO;
-import com.example.admin.biz.dto.MerchantSettleInQueryDTO;
-import com.example.admin.biz.dto.PartnerAuditQueryDTO;
-import com.example.admin.biz.dto.RiderApplyQueryDTO;
-import com.example.admin.biz.dto.ServiceStaffAuditQueryDTO;
-import com.example.admin.biz.vo.MerchantSettleInVO;
-import com.example.admin.biz.vo.PartnerAuditVO;
-import com.example.admin.biz.vo.RiderApplyVO;
-import com.example.admin.biz.vo.ServiceStaffAuditVO;
+import com.example.admin.api.dto.AuditDTO;
+import com.example.admin.api.dto.MerchantSettleInQueryDTO;
+import com.example.admin.api.dto.PartnerAuditQueryDTO;
+import com.example.admin.api.dto.RiderApplyQueryDTO;
+import com.example.admin.api.dto.ServiceStaffAuditQueryDTO;
+import com.example.admin.api.vo.MerchantSettleInVO;
+import com.example.admin.api.vo.PartnerAuditVO;
+import com.example.admin.api.vo.RiderApplyVO;
+import com.example.admin.api.vo.ServiceStaffAuditVO;
 
 public interface AuditService {
 

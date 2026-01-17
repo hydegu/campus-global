@@ -1,13 +1,19 @@
 package com.example.admin.biz.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.admin.api.dto.ResetPasswordDTO;
 import com.example.admin.api.dto.UserInfo;
-import com.example.admin.biz.dto.*;
-import com.example.admin.biz.vo.*;
+import com.example.admin.api.dto.UserQueryDTO;
+import com.example.admin.api.vo.UserAppListVO;
+import com.example.admin.api.vo.UserMchListVO;
+import com.example.admin.api.vo.UserPartnerListVO;
+import com.example.admin.api.vo.UserRiderListVO;
 
 public interface UserService {
 
 	UserInfo getUserInfo(String username);
+
+	UserInfo getUserInfoById(Long id);
 
 	Page<UserAppListVO> listAppUsers(UserQueryDTO queryDTO);
 
@@ -15,11 +21,11 @@ public interface UserService {
 
 	Page<UserRiderListVO> listRiderUsers(UserQueryDTO queryDTO);
 
-	Page<UserSysListVO> listSysUsers(UserQueryDTO queryDTO);
+	Page<com.example.admin.api.vo.UserSysListVO> listSysUsers(UserQueryDTO queryDTO);
 
 	Page<UserPartnerListVO> listPartnerUsers(UserQueryDTO queryDTO);
 
-	void updateUserStatus(Long id, UserStatusDTO statusDTO);
+	void updateUserStatus(Long id, com.example.admin.api.dto.UserStatusDTO statusDTO);
 
 	void updateUser(Long id, Integer userType, Object updateDTO);
 

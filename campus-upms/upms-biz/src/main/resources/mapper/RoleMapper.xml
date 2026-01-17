@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.admin.biz.mapper.RoleMapper">
 
-	<resultMap id="RoleVOMap" type="com.example.admin.biz.vo.RoleVO">
+	<resultMap id="RoleVOMap" type="com.example.admin.api.vo.RoleVO">
 		<id property="id" column="id"/>
 		<result property="roleName" column="role_name"/>
 		<result property="roleCode" column="role_code"/>
@@ -11,10 +11,10 @@
 		<result property="createdAt" column="create_at"/>
 		<result property="updatedAt" column="update_at"/>
 		<collection property="menuIds" ofType="java.lang.Long" column="id" select="selectMenuIdsByRoleId"/>
-		<collection property="menus" ofType="com.example.admin.biz.vo.SysMenuVO" column="id" select="selectMenusByRoleId"/>
+		<collection property="menus" ofType="com.example.admin.api.vo.SysMenuVO" column="id" select="selectMenusByRoleId"/>
 	</resultMap>
 
-	<resultMap id="SysMenuVOMap" type="com.example.admin.biz.vo.SysMenuVO">
+	<resultMap id="SysMenuVOMap" type="com.example.admin.api.vo.SysMenuVO">
 		<id property="id" column="menu_id"/>
 		<result property="parentId" column="parent_id"/>
 		<result property="menuType" column="menu_type"/>

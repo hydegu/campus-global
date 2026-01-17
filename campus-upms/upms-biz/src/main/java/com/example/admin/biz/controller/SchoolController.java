@@ -1,10 +1,10 @@
 package com.example.admin.biz.controller;
 
-import com.example.admin.biz.dto.SchoolAddDTO;
-import com.example.admin.biz.dto.SchoolQueryDTO;
-import com.example.admin.biz.dto.SchoolUpdateDTO;
+import com.example.admin.api.dto.SchoolAddDTO;
+import com.example.admin.api.dto.SchoolQueryDTO;
+import com.example.admin.api.dto.SchoolUpdateDTO;
 import com.example.admin.biz.service.SchoolService;
-import com.example.admin.biz.vo.SysSchoolVO;
+import com.example.admin.api.vo.SysSchoolVO;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import com.example.common.mybatis.utils.PageResult;

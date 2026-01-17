@@ -1,12 +1,12 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.admin.biz.dto.RoleAddDTO;
-import com.example.admin.biz.dto.RoleQueryDTO;
-import com.example.admin.biz.dto.RoleUpdateDTO;
+import com.example.admin.api.dto.RoleAddDTO;
+import com.example.admin.api.dto.RoleQueryDTO;
+import com.example.admin.api.dto.RoleUpdateDTO;
 import com.example.admin.biz.service.RoleService;
-import com.example.admin.biz.vo.RoleVO;
-import com.example.admin.biz.vo.SysMenuVO;
+import com.example.admin.api.vo.RoleVO;
+import com.example.admin.api.vo.SysMenuVO;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import io.swagger.v3.oas.annotations.Operation;

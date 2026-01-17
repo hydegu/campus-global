@@ -1,24 +1,39 @@
-
 package com.example.admin.api.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-/**
- * 前端角色视图对象
- */
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
-@Schema(description = "前端角色展示对象")
+@Schema(description = "角色VO")
 public class RoleVO {
 
-	/**
-	 * 角色id
-	 */
-	private Long roleId;
+	@Schema(description = "角色ID", example = "1")
+	private Long id;
 
-	/**
-	 * 菜单列表
-	 */
-	private String menuIds;
+	@Schema(description = "角色名称", example = "超级管理员")
+	private String roleName;
 
+	@Schema(description = "权限字符", example = "admin")
+	private String roleCode;
+
+	@Schema(description = "排序", example = "1")
+	private Integer sortOrder;
+
+	@Schema(description = "状态", example = "1")
+	private Integer status;
+
+	@Schema(description = "关联的菜单ID集合", example = "[1, 2, 3]")
+	private List<Long> menuIds;
+
+	@Schema(description = "关联的菜单信息列表")
+	private List<SysMenuVO> menus;
+
+	@Schema(description = "创建时间")
+	private LocalDateTime createdAt;
+
+	@Schema(description = "更新时间")
+	private LocalDateTime updatedAt;
 }

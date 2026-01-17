@@ -1,9 +1,9 @@
 package com.example.admin.biz.controller;
 
-import com.example.admin.biz.dto.SysMenuAddDTO;
-import com.example.admin.biz.dto.SysMenuUpdateDTO;
+import com.example.admin.api.dto.SysMenuAddDTO;
+import com.example.admin.api.dto.SysMenuUpdateDTO;
 import com.example.admin.biz.service.SysMenuService;
-import com.example.admin.biz.vo.SysMenuVO;
+import com.example.admin.api.vo.SysMenuVO;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
