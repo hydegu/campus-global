@@ -8,16 +8,19 @@ import com.example.admin.biz.vo.*;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 @StandardApiResponses
+@SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "用户管理", description = "用户信息查询功能")
 public class UserController {
 
@@ -35,7 +38,6 @@ public class UserController {
 
 	@GetMapping("/app-user/list")
 	@Operation(summary = "分页查询C端用户列表", description = "根据查询条件分页查询C端用户列表，支持按用户名、手机号、状态、学校、注册时间等条件筛选")
-	@PreAuthorize("hasAuthority('app:user:list')")
 	public Result<Page<UserAppListVO>> listAppUsers(@Valid UserQueryDTO queryDTO) {
 		queryDTO.setUserType(2);
 		Page<UserAppListVO> page = userService.listAppUsers(queryDTO);
@@ -44,7 +46,6 @@ public class UserController {
 
 	@GetMapping("/mch-user/list")
 	@Operation(summary = "分页查询商家用户列表", description = "根据查询条件分页查询商家用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	@PreAuthorize("hasAuthority('app:user:list')")
 	public Result<Page<UserMchListVO>> listMchUsers(@Valid UserQueryDTO queryDTO) {
 		queryDTO.setUserType(3);
 		Page<UserMchListVO> page = userService.listMchUsers(queryDTO);
@@ -53,7 +54,6 @@ public class UserController {
 
 	@GetMapping("/rider-user/list")
 	@Operation(summary = "分页查询骑手用户列表", description = "根据查询条件分页查询骑手用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	@PreAuthorize("hasAuthority('app:user:list')")
 	public Result<Page<UserRiderListVO>> listRiderUsers(@Valid UserQueryDTO queryDTO) {
 		queryDTO.setUserType(4);
 		Page<UserRiderListVO> page = userService.listRiderUsers(queryDTO);
@@ -62,7 +62,6 @@ public class UserController {
 
 	@GetMapping("/sys-user/list")
 	@Operation(summary = "分页查询系统用户列表", description = "根据查询条件分页查询系统用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	@PreAuthorize("hasAuthority('system:user:list')")
 	public Result<Page<UserSysListVO>> listSysUsers(@Valid UserQueryDTO queryDTO) {
 		queryDTO.setUserType(1);
 		Page<UserSysListVO> page = userService.listSysUsers(queryDTO);
@@ -71,7 +70,6 @@ public class UserController {
 
 	@GetMapping("/partner-user/list")
 	@Operation(summary = "分页查询合伙人用户列表", description = "根据查询条件分页查询合伙人用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	@PreAuthorize("hasAuthority('app:user:list')")
 	public Result<Page<UserPartnerListVO>> listPartnerUsers(@Valid UserQueryDTO queryDTO) {
 		queryDTO.setUserType(5);
 		Page<UserPartnerListVO> page = userService.listPartnerUsers(queryDTO);
@@ -80,7 +78,6 @@ public class UserController {
 
 	@PutMapping("/app-user/{id}/status")
 	@Operation(summary = "修改用户状态（拉黑/解封）", description = "修改指定用户的状态，支持拉黑或解封操作。需要提供目标状态和操作原因")
-	@PreAuthorize("hasAuthority('app:user:updateStatus')")
 	public Result<Void> updateUserStatus(@PathVariable Long id, @Valid @RequestBody UserStatusDTO statusDTO) {
 		userService.updateUserStatus(id, statusDTO);
 		return Result.ok();
@@ -89,7 +86,6 @@ public class UserController {
 
 	@PutMapping("/{id}")
 	@Operation(summary = "编辑用户", description = "编辑用户信息，支持联表更新base_user和对应的扩展表")
-	@PreAuthorize("hasAnyAuthority('app:user:update', 'system:user:update')")
 	public Result<Void> updateUser(@PathVariable Long id, @RequestParam Integer userType, @Valid @RequestBody Object updateDTO) {
 		userService.updateUser(id, userType, updateDTO);
 		return Result.ok();
@@ -97,7 +93,6 @@ public class UserController {
 
 	@PutMapping("/{id}/reset-password")
 	@Operation(summary = "重置用户密码", description = "重置指定用户的密码")
-	@PreAuthorize("hasAnyAuthority('app:user:resetPassword', 'system:user:resetPassword')")
 	public Result<Void> resetUserPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
 		userService.resetUserPassword(id, resetPasswordDTO);
 		return Result.ok();
@@ -105,7 +100,6 @@ public class UserController {
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "删除用户", description = "删除指定用户（逻辑删除），同时删除用户角色关联")
-	@PreAuthorize("hasAnyAuthority('app:user:delete', 'system:user:delete')")
 	public Result<Void> deleteUser(@PathVariable Long id) {
 		userService.deleteUser(id);
 		return Result.ok();

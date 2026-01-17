@@ -8,16 +8,18 @@ import com.example.admin.biz.vo.PartnerAuditVO;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/sys/partner")
+@RequestMapping("/api/sys/partner")
 @RequiredArgsConstructor
 @StandardApiResponses
+@SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "合伙人管理", description = "合伙人的增删改查及审核功能")
 public class PartnerController {
 
@@ -25,7 +27,6 @@ public class PartnerController {
 
 	@GetMapping("/audit/list")
 	@Operation(summary = "分页查询合伙人审核列表", description = "根据查询条件分页查询合伙人审核列表，支持按合伙人姓名、审核状态等条件筛选")
-	@PreAuthorize("hasAuthority('sys:partner:list')")
 	public Result<Page<PartnerAuditVO>> listPartnerAudit(@Valid PartnerAuditQueryDTO queryDTO) {
 		Page<PartnerAuditVO> page = auditService.listPartnerAudit(queryDTO);
 		return Result.ok(page);
@@ -33,7 +34,6 @@ public class PartnerController {
 
 	@PostMapping("/{id}/approve")
 	@Operation(summary = "审批通过合伙人申请", description = "审核通过合伙人申请，可附带审核意见")
-	@PreAuthorize("hasAuthority('sys:partner:approve')")
 	public Result<Void> approvePartner(@PathVariable Long id, @Valid @RequestBody AuditDTO auditDTO) {
 		auditDTO.setAuditStatus(1);
 		auditService.auditPartner(id, auditDTO);
@@ -42,7 +42,6 @@ public class PartnerController {
 
 	@PostMapping("/{id}/reject")
 	@Operation(summary = "审批拒绝合伙人申请", description = "审核拒绝合伙人申请，需填写拒绝原因")
-	@PreAuthorize("hasAuthority('sys:partner:reject')")
 	public Result<Void> rejectPartner(@PathVariable Long id, @Valid @RequestBody AuditDTO auditDTO) {
 		auditDTO.setAuditStatus(2);
 		auditService.auditPartner(id, auditDTO);
