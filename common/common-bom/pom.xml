@@ -98,6 +98,16 @@
             </dependency>
             <dependency>
                 <groupId>com.example</groupId>
+                <artifactId>order-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>order-biz</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
                 <artifactId>forum-api</artifactId>
                 <version>${revision}</version>
             </dependency>

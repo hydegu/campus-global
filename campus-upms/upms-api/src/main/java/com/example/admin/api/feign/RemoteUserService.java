@@ -23,7 +23,7 @@ public interface RemoteUserService {
 	 * @return Result<UserInfo> 用户信息响应对象
 	 */
 	@NoToken
-	@GetMapping("/api/user/info/query")
+	@GetMapping("/user/info/query")
 	Result<UserInfo> getUserInfo(@SpringQueryMap UserDTO user);
 
 	/**
