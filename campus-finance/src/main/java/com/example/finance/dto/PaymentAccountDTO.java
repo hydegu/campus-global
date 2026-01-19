@@ -9,6 +9,12 @@ import java.time.LocalDateTime;
 @Schema(description = "账户DTO")
 public class PaymentAccountDTO {
     /**
+     * 账户ID
+     */
+     @Schema(description = "账户ID")
+     private Long id;
+
+    /**
      * 账户名称
      * account_name
      */
