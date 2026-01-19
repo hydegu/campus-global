@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.forum.biz.mapper.ForumActivityRegistrationMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.forum.api.entity.ForumActivityRegistration">
+            <id property="id" column="id" />
+            <result property="activityId" column="activity_id" />
+            <result property="userId" column="user_id" />
+            <result property="status" column="status" />
+            <result property="createdAt" column="created_at" />
+            <result property="updatedAt" column="updated_at" />
+            <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+
+    <resultMap id="UserRegisteredActivityVOMap" type="com.example.forum.api.vo.UserRegisteredActivityVO">
+        <result property="registrationId" column="registration_id"/>
+        <result property="activityId" column="activity_id"/>
+        <result property="activityTitle" column="activity_title"/>
+        <result property="activityContent" column="activity_content"/>
+        <result property="activityVenue" column="activity_venue"/>
+        <result property="activityTime" column="activity_time"/>
+        <result property="registrationStatus" column="registration_status"/>
+        <result property="registrationTime" column="registration_time"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="currentParticipants" column="current_participants"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,activity_id,user_id,status,created_at,updated_at,
+        deleted_at
+    </sql>
+
+    <select id="selectRegisteredActivitiesByUserId" resultMap="UserRegisteredActivityVOMap">
+        SELECT
+            far.id AS registration_id,
+            fa.id AS activity_id,
+            fa.activity_title,
+            fa.activity_content,
+            fa.activity_venue,
+            fa.activity_time,
+            far.status AS registration_status,
+            far.created_at AS registration_time,
+            fa.max_participants,
+            fa.current_participants
+        FROM forum_activity_registration far
+        JOIN forum_activity fa ON far.activity_id = fa.id
+        WHERE far.user_id = #{userId}
+          AND far.deleted_at IS NULL
+          AND fa.deleted_at IS NULL
+        ORDER BY far.created_at DESC
+    </select>
+</mapper>

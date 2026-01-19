@@ -1,7 +1,0 @@
-spring:
-  datasourse:
-    url: jdbc:mysql://49.232.245.147:3306/campus_forum_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull
-    username: root
-    password: admin
-    driver-class-name: com.mysql.cj.jdbc.Driver
-

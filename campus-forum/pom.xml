@@ -8,70 +8,14 @@
     </parent>
 
     <artifactId>campus-forum</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>campus-forum</name>
-    <url>http://maven.apache.org</url>
+    <description>论坛管理聚合模块</description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <modules>
+        <module>forum-api</module>
+        <module>forum-biz</module>
+    </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <!--通用核心模块-->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>common-core</artifactId>
-        </dependency>
-        <!--安全模块-->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>common-security</artifactId>
-        </dependency>
-        <!--接口文档-->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>common-swagger</artifactId>
-        </dependency>
-        <!--MyBatis-Plus模块-->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>common-mybatis</artifactId>
-        </dependency>
-        <!-- orm 模块-->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-        </dependency>
-        <!--undertow容器-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
-        </dependency>
-        <!--lombok-->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <!--OpenAPI文档支持-->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        </dependency>
-        <!-- Hutool JSON工具类 -->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-json</artifactId>
-        </dependency>
-    </dependencies>
 </project>

@@ -1,0 +1,100 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>campus-forum</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>forum-biz</artifactId>
+    <packaging>jar</packaging>
+
+    <description>论坛业务模块</description>
+
+    <dependencies>
+        <!--upms api、model 模块-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>forum-api</artifactId>
+        </dependency>
+        <!--文件管理-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-oss</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-mybatis</artifactId>
+        </dependency>
+        <!--feign 调用-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-feign</artifactId>
+        </dependency>
+        <!--安全模块-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-security</artifactId>
+        </dependency>
+        <!--接口文档-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-swagger</artifactId>
+        </dependency>
+        <!-- orm 模块-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <!--注册中心客户端-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!--配置中心客户端-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        <!--undertow容器-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <!-- Hutool JSON工具类 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-json</artifactId>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>boot</id>
+        </profile>
+        <profile>
+            <id>cloud</id>
+            <activation>
+                <!-- 默认环境 -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
