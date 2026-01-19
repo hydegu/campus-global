@@ -22,7 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 @StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
