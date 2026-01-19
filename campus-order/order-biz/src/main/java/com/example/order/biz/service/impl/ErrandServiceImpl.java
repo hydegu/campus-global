@@ -1,0 +1,474 @@
+package com.example.order.biz.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.example.common.core.exception.BusinessException;
+import com.example.common.security.util.SecurityUtils;
+import com.example.order.api.dto.ErrandAcceptDTO;
+import com.example.order.api.dto.ErrandCreateDTO;
+import com.example.order.api.dto.ErrandDeliverDTO;
+import com.example.order.api.dto.ErrandPickupDTO;
+import com.example.order.api.dto.ErrandQueryDTO;
+import com.example.order.api.entity.OrderErrand;
+import com.example.order.api.entity.OrderMain;
+import com.example.order.api.enums.OrderStatusEnum;
+import com.example.order.api.enums.OrderTypeEnum;
+import com.example.order.api.enums.PayStatusEnum;
+import com.example.order.api.feign.RemoteUserService;
+import com.example.order.api.vo.ErrandDetailVO;
+import com.example.order.api.vo.ErrandListVO;
+import com.example.order.biz.mapper.OrderErrandMapper;
+import com.example.order.biz.mapper.OrderMainMapper;
+import com.example.order.biz.service.AmapService;
+import com.example.order.biz.service.ErrandService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ErrandServiceImpl implements ErrandService {
+
+	private final OrderMainMapper orderMainMapper;
+	private final OrderErrandMapper orderErrandMapper;
+	private final RemoteUserService remoteUserService;
+	private final AmapService amapService;
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Long createErrand(ErrandCreateDTO createDTO) {
+		if (createDTO == null) {
+			throw new BusinessException("INVALID_PARAM", "服务订单创建参数不能为空");
+		}
+
+		if (createDTO.getServiceTypeId() == null) {
+			throw new BusinessException("INVALID_PARAM", "服务分类ID不能为空");
+		}
+
+		if (createDTO.getPickupAddressId() == null || createDTO.getPickupAddressId().isEmpty()) {
+			throw new BusinessException("INVALID_PARAM", "取货地址ID不能为空");
+		}
+
+		if (createDTO.getDeliveryAddressId() == null || createDTO.getDeliveryAddressId().isEmpty()) {
+			throw new BusinessException("INVALID_PARAM", "送货地址ID不能为空");
+		}
+
+		if (createDTO.getDeliveryFee() == null || createDTO.getDeliveryFee().compareTo(BigDecimal.ZERO) <= 0) {
+			throw new BusinessException("INVALID_PARAM", "配送费必须大于0");
+		}
+
+		Long currentUserId = SecurityUtils.getCurrentUserId();
+		if (currentUserId == null) {
+			throw new BusinessException("NOT_LOGIN", "用户未登录");
+		}
+
+		BigDecimal totalAmount = createDTO.getDeliveryFee();
+		if (createDTO.getDeliveryFee() != null && createDTO.getDeliveryFee().compareTo(BigDecimal.ZERO) > 0) {
+			totalAmount = totalAmount.add(createDTO.getDeliveryFee());
+		}
+
+		OrderMain orderMain = new OrderMain();
+		orderMain.setOrderNo(generateOrderNo());
+		orderMain.setOrderType(OrderTypeEnum.SERVICE.getCode());
+		orderMain.setUserId(currentUserId);
+		orderMain.setTotalAmount(totalAmount);
+		orderMain.setActualAmount(totalAmount);
+		orderMain.setPayStatus(PayStatusEnum.UNPAID.getCode());
+		orderMain.setOrderStatus(OrderStatusEnum.WAIT_ACCEPT.getCode());
+		orderMain.setServiceProviderType(2);
+		orderMain.setRemark(createDTO.getRemark());
+		orderMain.setVersion(0);
+
+		orderMainMapper.insert(orderMain);
+
+		OrderErrand orderErrand = new OrderErrand();
+		orderErrand.setOrderId(orderMain.getId());
+		orderErrand.setServiceFee(createDTO.getDeliveryFee());
+		orderErrand.setServiceTypeId(createDTO.getServiceTypeId());
+		orderErrand.setPickupAddressId(createDTO.getPickupAddressId());
+		orderErrand.setDeliveryAddressId(createDTO.getDeliveryAddressId());
+		orderErrand.setItemDescription(createDTO.getItemDescription());
+		orderErrand.setItemWeight(createDTO.getItemWeight());
+		orderErrand.setLength(createDTO.getLength());
+		orderErrand.setWidth(createDTO.getWidth());
+		orderErrand.setHeight(createDTO.getHeight());
+
+		if (createDTO.getLength() != null && createDTO.getWidth() != null && createDTO.getHeight() != null) {
+			BigDecimal volume = createDTO.getLength()
+					.multiply(createDTO.getWidth())
+					.multiply(createDTO.getHeight());
+			orderErrand.setVolume(volume);
+		}
+
+		orderErrandMapper.insert(orderErrand);
+
+		String pickupAddress = createDTO.getPickupAddressId();
+		String deliveryAddress = createDTO.getDeliveryAddressId();
+
+		try {
+			BigDecimal distance = amapService.getDistance(pickupAddress, deliveryAddress);
+			if (distance != null) {
+				orderMain.setDistance(distance);
+				orderMainMapper.updateById(orderMain);
+			}
+
+			Integer duration = amapService.getDuration(pickupAddress, deliveryAddress);
+			if (duration != null && duration > 0) {
+				LocalDateTime estimatedDeliveryTime = LocalDateTime.now().plusMinutes(duration);
+				orderMain.setEstimatedDeliveryTime(estimatedDeliveryTime);
+				orderMainMapper.updateById(orderMain);
+			}
+		} catch (Exception e) {
+			log.warn("获取预计送达时间失败，pickupAddress：{}，deliveryAddress：{}", pickupAddress, deliveryAddress, e);
+		}
+
+		log.info("服务订单创建成功，订单ID：{}，订单编号：{}，用户ID：{}", 
+				orderMain.getId(), orderMain.getOrderNo(), currentUserId);
+
+		return orderMain.getId();
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void acceptErrand(ErrandAcceptDTO acceptDTO) {
+		if (acceptDTO == null || acceptDTO.getOrderId() == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		Long staffId = SecurityUtils.getCurrentUserId();
+		if (staffId == null) {
+			throw new BusinessException("NOT_LOGIN", "服务人员未登录");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(acceptDTO.getOrderId());
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.SERVICE.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		if (!OrderStatusEnum.WAIT_ACCEPT.getCode().equals(orderMain.getOrderStatus())) {
+			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许接单");
+		}
+
+		orderMain.setOrderStatus(OrderStatusEnum.WAIT_PICKUP.getCode());
+		orderMain.setServiceProviderType(2);
+		orderMain.setServiceProviderId(staffId);
+		orderMain.setEstimatedStartTime(LocalDateTime.now());
+
+		orderMainMapper.updateById(orderMain);
+
+		OrderErrand orderErrand = orderErrandMapper.selectOne(
+				Wrappers.lambdaQuery(OrderErrand.class).eq(OrderErrand::getOrderId, acceptDTO.getOrderId())
+		);
+		if (orderErrand != null) {
+			orderErrand.setStaffId(staffId);
+			orderErrandMapper.updateById(orderErrand);
+		}
+
+		log.info("服务人员接单成功，订单ID：{}，服务人员ID：{}", acceptDTO.getOrderId(), staffId);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void pickupErrand(ErrandPickupDTO pickupDTO) {
+		if (pickupDTO == null || pickupDTO.getOrderId() == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		Long staffId = SecurityUtils.getCurrentUserId();
+		if (staffId == null) {
+			throw new BusinessException("NOT_LOGIN", "服务人员未登录");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(pickupDTO.getOrderId());
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.SERVICE.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		if (!OrderStatusEnum.WAIT_PICKUP.getCode().equals(orderMain.getOrderStatus())) {
+			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许取货");
+		}
+
+		if (!staffId.equals(orderMain.getServiceProviderId())) {
+			throw new BusinessException("PERMISSION_DENIED", "无权操作该订单");
+		}
+
+		orderMain.setOrderStatus(OrderStatusEnum.DELIVERING.getCode());
+
+		orderMainMapper.updateById(orderMain);
+
+		log.info("服务人员取货成功，订单ID：{}，服务人员ID：{}", pickupDTO.getOrderId(), staffId);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void deliverErrand(ErrandDeliverDTO deliverDTO) {
+		if (deliverDTO == null || deliverDTO.getOrderId() == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		Long staffId = SecurityUtils.getCurrentUserId();
+		if (staffId == null) {
+			throw new BusinessException("NOT_LOGIN", "服务人员未登录");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(deliverDTO.getOrderId());
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.SERVICE.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		if (!OrderStatusEnum.DELIVERING.getCode().equals(orderMain.getOrderStatus())) {
+			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许送达");
+		}
+
+		if (!staffId.equals(orderMain.getServiceProviderId())) {
+			throw new BusinessException("PERMISSION_DENIED", "无权操作该订单");
+		}
+
+		orderMain.setOrderStatus(OrderStatusEnum.DELIVERED.getCode());
+		orderMain.setActualDeliveryTime(LocalDateTime.now());
+
+		orderMainMapper.updateById(orderMain);
+
+		log.info("服务人员送达成功，订单ID：{}，服务人员ID：{}", deliverDTO.getOrderId(), staffId);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void cancelErrand(Long orderId, Integer cancelType) {
+		if (orderId == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(orderId);
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.SERVICE.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		if (OrderStatusEnum.CANCELLED.getCode().equals(orderMain.getOrderStatus()) 
+				|| OrderStatusEnum.COMPLETED.getCode().equals(orderMain.getOrderStatus())) {
+			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许取消");
+		}
+
+		orderMain.setOrderStatus(OrderStatusEnum.CANCELLED.getCode());
+		orderMain.setCancelType(cancelType);
+		orderMain.setCancelTime(LocalDateTime.now());
+
+		orderMainMapper.updateById(orderMain);
+
+		log.info("服务订单取消成功，订单ID：{}，取消类型：{}", orderId, cancelType);
+	}
+
+	@Override
+	public ErrandDetailVO getErrandDetail(Long orderId) {
+		if (orderId == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(orderId);
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.SERVICE.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		OrderErrand orderErrand = orderErrandMapper.selectOne(
+				Wrappers.lambdaQuery(OrderErrand.class).eq(OrderErrand::getOrderId, orderId)
+		);
+
+		ErrandDetailVO vo = new ErrandDetailVO();
+		BeanUtils.copyProperties(orderMain, vo);
+
+		if (orderErrand != null) {
+			vo.setServiceFee(orderErrand.getServiceFee());
+			vo.setPickupAddress(orderErrand.getPickupAddressId());
+			vo.setDeliveryAddress(orderErrand.getDeliveryAddressId());
+			vo.setItemDescription(orderErrand.getItemDescription());
+			vo.setItemWeight(orderErrand.getItemWeight());
+			vo.setVolume(orderErrand.getVolume());
+
+			if (orderErrand.getLength() != null && orderErrand.getWidth() != null && orderErrand.getHeight() != null) {
+				String itemSize = String.format("%.0fx%.0fx%.0f", 
+						orderErrand.getLength(), orderErrand.getWidth(), orderErrand.getHeight());
+				vo.setItemSize(itemSize);
+			}
+
+			vo.setServiceTypeName(getServiceTypeName(orderErrand.getServiceTypeId()));
+
+			if (orderErrand.getStaffId() != null) {
+				vo.setStaffName(getUserName(orderErrand.getStaffId()));
+				vo.setStaffPhone(getUserPhone(orderErrand.getStaffId()));
+			}
+		}
+
+		vo.setUserName(getUserName(orderMain.getUserId()));
+		vo.setUserPhone(getUserPhone(orderMain.getUserId()));
+
+		return vo;
+	}
+
+	@Override
+	public Page<ErrandListVO> listErrands(ErrandQueryDTO queryDTO) {
+		if (queryDTO == null) {
+			queryDTO = new ErrandQueryDTO();
+		}
+
+		if (queryDTO.getPageNum() == null || queryDTO.getPageNum() < 1) {
+			queryDTO.setPageNum(1);
+		}
+
+		if (queryDTO.getPageSize() == null || queryDTO.getPageSize() < 1) {
+			queryDTO.setPageSize(10);
+		}
+
+		LambdaQueryWrapper<OrderMain> wrapper = buildErrandQueryWrapper(queryDTO);
+
+		IPage<OrderMain> orderPage = orderMainMapper.selectPage(
+				new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize()), wrapper
+		);
+
+		Page<ErrandListVO> resultPage = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+		resultPage.setTotal(orderPage.getTotal());
+
+		if (orderPage.getRecords().isEmpty()) {
+			return resultPage;
+		}
+
+		resultPage.setRecords(orderPage.getRecords().stream().map(order -> {
+			ErrandListVO vo = new ErrandListVO();
+			BeanUtils.copyProperties(order, vo);
+			vo.setServiceProviderName(getServiceProviderName(order.getServiceProviderId(), order.getServiceProviderType()));
+			return vo;
+		}).collect(java.util.stream.Collectors.toList()));
+
+		return resultPage;
+	}
+
+	private String generateOrderNo() {
+		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) 
+				+ UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+	}
+
+	private LambdaQueryWrapper<OrderMain> buildErrandQueryWrapper(ErrandQueryDTO queryDTO) {
+		LambdaQueryWrapper<OrderMain> wrapper = Wrappers.lambdaQuery();
+
+		wrapper.eq(OrderMain::getOrderType, OrderTypeEnum.SERVICE.getCode());
+
+		if (queryDTO.getQueryType() != null) {
+			if (queryDTO.getQueryType() == 1) {
+				Long userId = SecurityUtils.getCurrentUserId();
+				if (userId == null) {
+					throw new BusinessException("NOT_LOGIN", "用户未登录");
+				}
+				wrapper.eq(OrderMain::getUserId, userId);
+			} else if (queryDTO.getQueryType() == 2) {
+				Long serviceProviderId = queryDTO.getServiceProviderId();
+				if (serviceProviderId == null) {
+					serviceProviderId = SecurityUtils.getCurrentUserId();
+					if (serviceProviderId == null) {
+						throw new BusinessException("NOT_LOGIN", "用户未登录");
+					}
+				}
+				if (queryDTO.getServiceProviderType() != null) {
+					wrapper.eq(OrderMain::getServiceProviderType, queryDTO.getServiceProviderType());
+				}
+				wrapper.eq(OrderMain::getServiceProviderId, serviceProviderId);
+			} else if (queryDTO.getQueryType() == 3) {
+				throw new BusinessException("INVALID_QUERY_TYPE", "服务订单不支持商家查询");
+			}
+		}
+
+		if (queryDTO.getOrderNo() != null) {
+			wrapper.like(OrderMain::getOrderNo, queryDTO.getOrderNo());
+		}
+
+		if (queryDTO.getOrderStatus() != null) {
+			wrapper.eq(OrderMain::getOrderStatus, queryDTO.getOrderStatus());
+		}
+
+		if (queryDTO.getStartTime() != null) {
+			wrapper.ge(OrderMain::getCreateAt, queryDTO.getStartTime());
+		}
+
+		if (queryDTO.getEndTime() != null) {
+			wrapper.le(OrderMain::getCreateAt, queryDTO.getEndTime());
+		}
+
+		wrapper.orderByDesc(OrderMain::getCreateAt);
+
+		return wrapper;
+	}
+
+	private String getUserName(Long userId) {
+		if (userId == null) {
+			return "未知用户";
+		}
+		try {
+			com.example.common.core.util.Result<com.example.admin.api.dto.UserInfo> result = 
+					remoteUserService.getUserInfoById(userId);
+			if (result != null && result.getData() != null) {
+				return result.getData().getNickname();
+			}
+		} catch (Exception e) {
+			log.warn("获取用户名称失败，userId：{}", userId, e);
+		}
+		return "用户" + userId;
+	}
+
+	private String getUserPhone(Long userId) {
+		if (userId == null) {
+			return null;
+		}
+		try {
+			com.example.common.core.util.Result<com.example.admin.api.dto.UserInfo> result = 
+					remoteUserService.getUserInfoById(userId);
+			if (result != null && result.getData() != null) {
+				return result.getData().getPhone();
+			}
+		} catch (Exception e) {
+			log.warn("获取用户电话失败，userId：{}", userId, e);
+		}
+		return null;
+	}
+
+	private String getServiceProviderName(Long serviceProviderId, Integer serviceProviderType) {
+		if (serviceProviderId == null) {
+			return "未知服务提供方";
+		}
+		return getUserName(serviceProviderId);
+	}
+
+	private String getServiceTypeName(Integer serviceTypeId) {
+		if (serviceTypeId == null) {
+			return "未知服务分类";
+		}
+		return "服务分类" + serviceTypeId;
+	}
+}
