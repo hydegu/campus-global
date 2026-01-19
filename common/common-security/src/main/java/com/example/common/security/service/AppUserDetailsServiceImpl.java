@@ -38,7 +38,7 @@ public class AppUserDetailsServiceImpl implements UserDetailsService {
 
 		UserDTO userDTO = new UserDTO();
 		userDTO.setPhone(phone);
-		Result<UserInfo> result = remoteUserService.info(userDTO);
+		Result<UserInfo> result = remoteUserService.getUserInfo(userDTO);
 
 		UserDetails userDetails = getUserDetails(result);
 		if (cache != null) {
