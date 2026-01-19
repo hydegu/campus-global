@@ -14,7 +14,7 @@ public class TestPassword {
 	@Test
 	void testPasswordMatch() {
 		String rawPassword = "admin123";
-		String encodedPassword = "$2a$10$9Ks901oebph0KW8jok9c1ew0mrGFW9LfAfuJjxTSsZWDFD03dvrJ.";
+		String encodedPassword = "$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq";
 		boolean matches = passwordEncoder.matches(rawPassword, encodedPassword);
 		System.out.println("密码匹配结果: " + matches);
 	}
