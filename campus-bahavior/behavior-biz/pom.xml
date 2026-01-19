@@ -3,30 +3,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.example</groupId>
-        <artifactId>campus-message</artifactId>
+        <artifactId>campus-bahavior</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>message-biz</artifactId>
+    <artifactId>behavior-biz</artifactId>
     <packaging>jar</packaging>
 
-    <description>消息业务模块</description>
+    <description>用户行为业务模块</description>
 
     <dependencies>
-        <!--message api、model 模块-->
+        <!--behavior api 模块-->
         <dependency>
             <groupId>com.example</groupId>
-            <artifactId>message-api</artifactId>
-        </dependency>
-        <!--upms-api 依赖-->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>upms-api</artifactId>
-        </dependency>
-        <!--文件管理-->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>common-oss</artifactId>
+            <artifactId>behavior-api</artifactId>
         </dependency>
         <!--feign 调用-->
         <dependency>
