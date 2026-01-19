@@ -8,7 +8,7 @@ public class TestPassword {
 
 	@Test
 	void getPassword() {
-		System.out.println("admin123: " + passwordEncoder.encode("admin123"));
+		System.out.println("123456: " + passwordEncoder.encode("admin123"));
 	}
 
 	@Test

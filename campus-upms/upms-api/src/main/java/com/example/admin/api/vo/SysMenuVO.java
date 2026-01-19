@@ -1,4 +1,4 @@
-package com.example.admin.biz.vo;
+package com.example.admin.api.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
