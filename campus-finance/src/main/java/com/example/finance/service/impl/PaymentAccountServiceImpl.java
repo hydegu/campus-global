@@ -12,6 +12,7 @@ public class PaymentAccountServiceImpl extends ServiceImpl<PaymentAccountMapper,
     /**
      * 添加账户
      * @param paymentAccount 账户信息
+     * @return
      */
     @GlobalTransactional(name = "add-payment-account", rollbackFor = Exception.class)
     @Override
