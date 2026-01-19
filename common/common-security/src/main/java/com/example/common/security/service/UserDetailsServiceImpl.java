@@ -54,7 +54,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		userDTO.setUsername(username);
 		log.info("调用远程服务获取用户信息，参数: {}", userDTO);
 		
-		Result<UserInfo> result = remoteUserService.info(userDTO);
+		Result<UserInfo> result = remoteUserService.getUserInfo(userDTO);
 		log.info("远程服务返回结果: {}", result);
 		
 		if (result.getCode() != 0) {
