@@ -39,13 +39,27 @@ public class AuthenticationFailureEventHandler implements AuthenticationFailureH
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException exception) {
 		String username = request.getParameter(OAuth2ParameterNames.USERNAME);
+		String grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
+		String clientId = request.getParameter(OAuth2ParameterNames.CLIENT_ID);
+		String password = request.getParameter(OAuth2ParameterNames.PASSWORD);
 
+		log.error("=== 登录失败 ===");
+		log.error("用户名: {}", username);
+		log.error("授权类型: {}", grantType);
+		log.error("客户端ID: {}", clientId);
+		log.error("密码长度: {}", password != null ? password.length() : 0);
+		log.error("密码前3位: {}", password != null && password.length() >= 3 ? password.substring(0, 3) : "密码为空或太短");
+		log.error("异常类型: {}", exception.getClass().getName());
+		log.error("异常消息: {}", exception.getLocalizedMessage());
+		log.error("完整异常信息: ", exception);
+		
 		log.info("用户：{} 登录失败，异常：{}", username, exception.getLocalizedMessage());
 		// 发送异步日志事件
 		String startTimeStr = request.getHeader(CommonConstants.REQUEST_START_TIME);
 		if (StrUtil.isNotBlank(startTimeStr)) {
 			Long startTime = Long.parseLong(startTimeStr);
 			Long endTime = System.currentTimeMillis();
+			log.info("请求耗时: {}ms", endTime - startTime);
 		}
 		// 写出错误信息
 		sendErrorResponse(request, response, exception);
