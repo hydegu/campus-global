@@ -24,7 +24,7 @@ public interface RemoteUserService {
 	 */
 	@NoToken
 	@GetMapping("/user/info/query")
-	Result<UserInfo> info(@SpringQueryMap UserDTO user);
+	Result<UserInfo> getUserInfo(@SpringQueryMap UserDTO user);
 
 	/**
 	 * 通过用户ID查询用户信息
@@ -32,7 +32,7 @@ public interface RemoteUserService {
 	 * @return Result<UserInfo> 用户信息响应对象
 	 */
 	@NoToken
-	@GetMapping("/user/{id}/info")
+	@GetMapping("/api/user/{id}/info")
 	Result<UserInfo> getUserInfoById(@PathVariable("id") Long id);
 
 }
