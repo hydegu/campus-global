@@ -31,8 +31,6 @@
             fpc.id,
             fpc.post_id,
             fpc.user_id,
-            au.username as username,
-            au.avatar as avatarUrl,
             fpc.parent_id,
             fpc.root_id,
             fpc.comment_content,
@@ -40,15 +38,14 @@
             fpc.like_count,
             fpc.reply_count,
             fpc.status,
-            fpc.created_at,
-            fpc.deleted_at
+            fpc.create_at,
+            fpc.delete_at
             from forum_post_comment fpc
-            left join app_user au on fpc.user_id = au.id
         where fpc.post_id = #{postId} and fpc.parent_id in
         <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
             #{parentId}
         </foreach>
-        and fpc.deleted_at is null
+        and fpc.delete_at is null
         and fpc.status = 1
     </select>
     
@@ -57,8 +54,6 @@
             fpc.id,
             fpc.post_id,
             fpc.user_id,
-            au.username as username,
-            au.avatar as avatarUrl,
             fpc.parent_id,
             fpc.root_id,
             fpc.comment_content,
@@ -66,17 +61,16 @@
             fpc.like_count,
             fpc.reply_count,
             fpc.status,
-            fpc.created_at,
-            fpc.deleted_at
+            fpc.create_at,
+            fpc.delete_at
             from forum_post_comment fpc
-            left join app_user au on fpc.user_id = au.id
         where fpc.post_id = #{postId} 
         and fpc.parent_id in
         <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
             #{parentId}
         </foreach>
         and fpc.level = #{level}
-        and fpc.deleted_at is null
+        and fpc.delete_at is null
         and fpc.status = 1
     </select>
 
@@ -87,8 +81,6 @@
         fpc.id,
         fpc.post_id,
         fpc.user_id,
-        au.username as username,
-        au.avatar as avatarUrl,
         fpc.parent_id,
         fpc.root_id,
         fpc.comment_content,
@@ -96,16 +88,15 @@
         fpc.like_count,
         fpc.reply_count,
         fpc.status,
-        fpc.created_at,
-        fpc.deleted_at
+        fpc.create_at,
+        fpc.delete_at
         from forum_post_comment fpc
-        left join app_user au on fpc.user_id = au.id
         where fpc.post_id = #{postId}
         and fpc.parent_id in
         <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
             #{parentId}
         </foreach>
-        and fpc.deleted_at is null
+        and fpc.delete_at is null
         and fpc.status = 1
         -- 递归查询：所有后代评论（三级、四级...，通过关联自身ID和父ID实现）
         UNION ALL
@@ -113,8 +104,6 @@
         c.id,
         c.post_id,
         c.user_id,
-        au2.username as username,
-        au2.avatar as avatarUrl,
         c.parent_id,
         c.root_id,
         c.comment_content,
@@ -122,13 +111,12 @@
         c.like_count,
         c.reply_count,
         c.status,
-        c.created_at,
-        c.deleted_at
+        c.create_at,
+        c.delete_at
         from forum_post_comment c
-        left join app_user au2 on c.user_id = au2.id
         inner join comment_recursive cr on c.parent_id = cr.id
         where c.post_id = #{postId}
-        and c.deleted_at is null
+        and c.delete_at is null
         and c.status = 1
         )
         -- 最终查询所有递归结果
@@ -140,8 +128,6 @@
             fpc.id,
             fpc.post_id,
             fpc.user_id,
-            au.username as username,
-            au.avatar as avatarUrl,
             fpc.parent_id,
             fpc.root_id,
             fpc.comment_content,
@@ -149,13 +135,12 @@
             fpc.like_count,
             fpc.reply_count,
             fpc.status,
-            fpc.created_at,
-            fpc.deleted_at
+            fpc.create_at,
+            fpc.delete_at
             from forum_post_comment fpc
-            left join app_user au on fpc.user_id = au.id
         where fpc.post_id = #{postId}
                 and fpc.parent_id = 0
-                and fpc.deleted_at is null
+                and fpc.delete_at is null
                 and fpc.status = 1
         ORDER BY fpc.created_at asc
     </select>

@@ -44,11 +44,9 @@
         audit_id,created_at,updated_at,deleted_at
     </sql>
     
-    <select id="selectForumPostHotPage" resultMap="ForumPostQueryVOResultMap">
+    <select id="selectForumPostHotPage" resultType="com.example.forum.api.vo.ForumPostQueryVO">
         select fp.id,
                fp.user_id,
-               au.username,
-               au.avatar,
                fp.post_title,
                fp.post_content,
                fp.image_urls,
@@ -57,19 +55,15 @@
                fp.share_count,
                fp.favorite_count,
                fp.comment_count,
-               fp.deleted_at,
-               fp.created_at
+               fp.create_at
                from forum_post fp
-               left join app_user au on fp.user_id = au.id
-               where fp.deleted_at is null
-               order by (fp.view_count * 0.1 + fp.comment_count * 2 + fp.like_count * 1 - (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(fp.created_at)) / 86400 * 0.5) desc
+               where fp.delete_at is null
+               order by (fp.view_count * 0.1 + fp.comment_count * 2 + fp.like_count * 1 - (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(fp.create_at)) / 86400 * 0.5) desc
     </select>
     
-    <select id="selectForumPostTimePage" resultMap="ForumPostQueryVOResultMap">
+    <select id="selectForumPostTimePage" resultType="com.example.forum.api.vo.ForumPostQueryVO">
         select fp.id,
                fp.user_id,
-               au.username,
-               au.avatar,
                fp.post_title,
                fp.post_content,
                fp.image_urls,
@@ -78,20 +72,16 @@
                fp.share_count,
                fp.favorite_count,
                fp.comment_count,
-               fp.deleted_at,
-               fp.created_at
+               fp.create_at
                 from forum_post fp
-                left join app_user au on fp.user_id = au.id
-                where fp.deleted_at is null
-                order by fp.created_at desc
+                where fp.delete_at is null
+                order by fp.create_at desc
     </select>
     
-    <select id="selectPostDetailById" resultMap="ForumPostQueryVOResultMap">
+    <select id="selectPostDetailById" resultType="com.example.forum.api.vo.ForumPostQueryVO">
         select
             fp.id,
             fp.user_id,
-            au.username,
-            au.avatar,
             fp.post_title,
             fp.post_content,
             fp.image_urls,
@@ -100,10 +90,8 @@
             fp.share_count,
             fp.favorite_count,
             fp.comment_count,
-            fp.deleted_at,
-            fp.created_at
+            fp.create_at
         from forum_post fp
-        left join app_user au on fp.user_id = au.id
         where fp.id = #{id}
     </select>
     
@@ -111,7 +99,7 @@
     <update id="updateCommentCount">
         UPDATE forum_post 
         SET comment_count = GREATEST(0, COALESCE(comment_count, 0) + #{increment}),
-            updated_at = NOW()
+            update_at = NOW()
         WHERE id = #{postId}
     </update>
 </mapper>

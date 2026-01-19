@@ -79,8 +79,8 @@
         from forum_activity
         where status = 2
             and is_visible = 1
-            and deleted_at is null
-        order by created_at desc
+            and delete_at is null
+        order by create_at desc
 
     </select>
     <select id="selectDetailById" resultMap="DetailResultMap">
@@ -102,12 +102,12 @@
             fa.status,
             fa.is_visible,
             fa.images,
-            fa.created_at,
-            fa.deleted_at
+            fa.create_at,
+            fa.delete_at
         from forum_activity fa
         left join sys_school ss on fa.school_id = ss.id
         where fa.id = #{id}
-          and fa.deleted_at is null
+          and fa.delete_at is null
     </select>
     <select id="selectCommentById" resultType="com.example.forum.api.entity.ForumActivityComment">
         select
@@ -122,18 +122,18 @@
             reply_count,
             status,
             deleted_by,
-            deleted_at,
-            created_at,
-            updated_at
+            delete_at,
+            create_at,
+            update_at
         from forum_activity_comment
         where activity_id = #{id}
-          and deleted_at is null
+          and delete_at is null
     </select>
 
     <update id="updateCommentCount">
         update forum_activity
         set comment_count = GREATEST(0, COALESCE(comment_count, 0) + #{increment}),
-            updated_at = NOW()
+            update_at = NOW()
         where id = #{activityId}
     </update>
 </mapper>

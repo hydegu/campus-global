@@ -41,14 +41,14 @@
             fa.activity_venue,
             fa.activity_time,
             far.status AS registration_status,
-            far.created_at AS registration_time,
+            far.create_at AS registration_time,
             fa.max_participants,
             fa.current_participants
         FROM forum_activity_registration far
         JOIN forum_activity fa ON far.activity_id = fa.id
         WHERE far.user_id = #{userId}
-          AND far.deleted_at IS NULL
-          AND fa.deleted_at IS NULL
-        ORDER BY far.created_at DESC
+          AND far.delete_at IS NULL
+          AND fa.delete_at IS NULL
+        ORDER BY far.create_at DESC
     </select>
 </mapper>

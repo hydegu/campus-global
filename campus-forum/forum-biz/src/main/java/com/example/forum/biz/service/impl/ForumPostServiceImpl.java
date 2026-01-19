@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.admin.api.dto.UserInfo;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.exception.ForbiddenException;
 import com.example.common.core.exception.ResourceNotFoundException;
+import com.example.common.core.util.Result;
 import com.example.common.mybatis.utils.PageResult;
 import com.example.common.security.util.SecurityUtils;
 import com.example.forum.biz.utils.PageUtil;
@@ -34,9 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +56,7 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
     private final ForumLikeRecordMapper forumLikeRecordMapper;
     private final ForumPostCommentService forumPostCommentService;
     private final BrowsingHistoryMapper browsingHistoryMapper;
+    private final RemoteUserService remoteUserService;
 
 
     @Override
@@ -63,7 +65,12 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         Page<ForumPostQueryVO> forumPostPage = PageUtil.createPage(
                 queryDTO.getPage(),
                 queryDTO.getSize());
-        return forumPostMapper.selectForumPostHotPage(forumPostPage);
+        
+        IPage<ForumPostQueryVO> pageResult = forumPostMapper.selectForumPostHotPage(forumPostPage);
+        
+        fillUserInfo(pageResult.getRecords());
+        
+        return pageResult;
     }
 
     @Override
@@ -72,7 +79,58 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         Page<ForumPostQueryVO> forumPostPage = PageUtil.createPage(
                 queryDTO.getPage(),
                 queryDTO.getSize());
-        return forumPostMapper.selectForumPostTimePage(forumPostPage);
+        
+        IPage<ForumPostQueryVO> pageResult = forumPostMapper.selectForumPostTimePage(forumPostPage);
+        
+        fillUserInfo(pageResult.getRecords());
+        
+        return pageResult;
+    }
+
+    private void fillUserInfo(List<ForumPostQueryVO> records) {
+        if (records == null || records.isEmpty()) {
+            return;
+        }
+        
+        List<Long> userIds = records.stream()
+                .map(ForumPostQueryVO::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        Map<Long, UserInfo> userInfoMap = batchGetUserInfo(userIds);
+        
+        records.forEach(vo -> {
+            UserInfo userInfo = userInfoMap.get(vo.getUserId());
+            if (userInfo != null) {
+                vo.setUsername(userInfo.getUsername());
+                vo.setAvatarUrl(userInfo.getAvatar());
+            } else {
+                vo.setUsername("匿名用户");
+                vo.setAvatarUrl("");
+            }
+        });
+    }
+
+    private Map<Long, UserInfo> batchGetUserInfo(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        
+        Map<Long, UserInfo> userInfoMap = new HashMap<>();
+        
+        for (Long userId : userIds) {
+            try {
+                Result<UserInfo> result = remoteUserService.getUserInfoById(userId);
+                if (result.getCode() == 0 && result.getData() != null) {
+                    UserInfo userInfo = result.getData();
+                    userInfoMap.put(userId, userInfo);
+                }
+            } catch (Exception e) {
+                log.error("获取用户[{}]信息失败: {}", userId, e.getMessage());
+            }
+        }
+        
+        return userInfoMap;
     }
 
     @Override
@@ -80,13 +138,14 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         if(id == null){
             throw new IllegalArgumentException("帖子ID不能为空");
         }
-        // 查询帖子详情 无评论
+        
         ForumPostQueryVO forumPost = forumPostMapper.selectPostDetailById(id);
         if(forumPost == null){
             throw new IllegalArgumentException("帖子不存在");
         }
 
-        // 增加浏览量（异步更新，不影响查询性能）
+        fillUserInfo(Collections.singletonList(forumPost));
+
         incrementViewCount(id);
 
         return convertVoToVO(forumPost);

@@ -36,8 +36,6 @@ import org.springframework.web.bind.annotation.*;
 public class ForumActivityController {
     private final ForumActivityService forumActivityService;
     private final ForumActivityCommentService forumActivityCommentService;
-    private final ForumActivityRegistrationService forumActivityRegistrationService;
-
     /**
      * 获取活动列表
      * @param queryDTO 查询条件（分页参数等）

@@ -3,8 +3,11 @@ package com.example.forum.biz.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.admin.api.dto.UserInfo;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.exception.ForbiddenException;
 import com.example.common.core.exception.ResourceNotFoundException;
+import com.example.common.core.util.Result;
 import com.example.common.mybatis.utils.PageResult;
 import com.example.common.security.util.SecurityUtils;
 import com.example.forum.biz.utils.PageUtil;
@@ -21,15 +24,13 @@ import com.example.forum.biz.mapper.ForumPostCommentMapper;
 import com.example.forum.biz.mapper.ForumPostMapper;
 import com.example.forum.biz.service.ForumPostCommentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -38,12 +39,14 @@ import java.util.stream.Collectors;
 * @createDate 2025-12-09 17:36:38
 */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMapper, ForumPostComment>
     implements ForumPostCommentService {
 
     private final ForumPostMapper forumPostMapper;
     private final ForumLikeRecordMapper forumLikeRecordMapper;
+    private final RemoteUserService remoteUserService;
 
     @Override
     public PageResult<MyCommentVO> getMyComments(ForumPostQueryDTO queryDTO) {
@@ -117,6 +120,7 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         // 查询所有匹配的子评论
         List<ForumPostCommentQueryVO> allDescendantComments  = baseMapper.selectAllDescendantCommentsByParentIds(activityId, firstLevelCommentIds);
         if(CollectionUtils.isEmpty(allDescendantComments)) {
+            fillCommentUserInfo(firstLevelComments);
             return forumPostCommentPageList;
         }
         // 对所有后代评论按【根评论ID】分组，方便快速查找子评论（提高查询效率）
@@ -129,9 +133,81 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
             comment.setChildComments(allChildComments);
         });
 
+        // 填充用户信息
+        fillCommentUserInfo(firstLevelComments);
+        allDescendantComments.forEach(this::fillSingleCommentUserInfo);
+
         // 5. 封装最终分页结果并返回
         forumPostCommentPageList.setRecords(firstLevelComments);
         return forumPostCommentPageList;
+    }
+
+    private void fillCommentUserInfo(List<ForumPostCommentQueryVO> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return;
+        }
+        
+        List<Long> userIds = comments.stream()
+                .map(ForumPostCommentQueryVO::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        Map<Long, UserInfo> userInfoMap = batchGetCommentUserInfo(userIds);
+        
+        comments.forEach(comment -> {
+            UserInfo userInfo = userInfoMap.get(comment.getUserId());
+            if (userInfo != null) {
+                comment.setUsername(userInfo.getUsername());
+                comment.setAvatarUrl(userInfo.getAvatar());
+            } else {
+                comment.setUsername("匿名用户");
+                comment.setAvatarUrl("");
+            }
+        });
+    }
+
+    private void fillSingleCommentUserInfo(ForumPostCommentQueryVO comment) {
+        if (comment == null) {
+            return;
+        }
+        
+        try {
+            Result<UserInfo> result = remoteUserService.getUserInfoById(comment.getUserId());
+            if (result.getCode() == 0 && result.getData() != null) {
+                UserInfo userInfo = result.getData();
+                comment.setUsername(userInfo.getUsername());
+                comment.setAvatarUrl(userInfo.getAvatar());
+            } else {
+                comment.setUsername("匿名用户");
+                comment.setAvatarUrl("");
+            }
+        } catch (Exception e) {
+            log.error("获取用户[{}]信息失败: {}", comment.getUserId(), e.getMessage());
+            comment.setUsername("匿名用户");
+            comment.setAvatarUrl("");
+        }
+    }
+
+    private Map<Long, UserInfo> batchGetCommentUserInfo(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        
+        Map<Long, UserInfo> userInfoMap = new HashMap<>();
+        
+        for (Long userId : userIds) {
+            try {
+                Result<UserInfo> result = remoteUserService.getUserInfoById(userId);
+                if (result.getCode() == 0 && result.getData() != null) {
+                    UserInfo userInfo = result.getData();
+                    userInfoMap.put(userId, userInfo);
+                }
+            } catch (Exception e) {
+                log.error("获取用户[{}]信息失败: {}", userId, e.getMessage());
+            }
+        }
+        
+        return userInfoMap;
     }
     /**
      * 递归收集某个评论的所有后代评论（三级及以上，不限制层级，统一归为同一级）

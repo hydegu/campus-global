@@ -15,8 +15,8 @@
         <result property="likeCount" column="like_count" />
         <result property="replyCount" column="reply_count" />
         <result property="status" column="status" />
-        <result property="deletedBy" column="deleted_by" />
-        <result property="deletedAt" column="deleted_at" />
+        <result property="deletedBy" column="delete_by" />
+        <result property="deletedAt" column="delete_at" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
     </resultMap>
@@ -34,15 +34,15 @@
             fac.like_count,
             fac.reply_count,
             fac.status,
-            fac.created_at,
-            fac.deleted_at
+            fac.create_at,
+            fac.delete_at
         from forum_activity_comment fac
         left join app_user au on fac.user_id = au.id
         where fac.activity_id = #{activityId}
             and fac.parent_id = 0
             and fac.status = 1
-            and fac.deleted_at is null
-        ORDER BY fac.created_at DESC
+            and fac.delete_at is null
+        ORDER BY fac.create_at DESC
     </select>
 
     <select id="selectCommentByParentId" resultType="com.example.forum.api.vo.ForumActivityCommentQueryVO">
@@ -58,8 +58,8 @@
             fac.like_count,
             fac.reply_count,
             fac.status,
-            fac.created_at,
-            fac.deleted_at
+            fac.create_at,
+            fac.delete_at
         from forum_activity_comment fac
         left join app_user au on fac.user_id = au.id
         where fac.activity_id = #{activityId} and fac.parent_id in
@@ -84,8 +84,8 @@
         fac.like_count,
         fac.reply_count,
         fac.status,
-        fac.created_at,
-        fac.deleted_at
+        fac.create_at,
+        fac.delete_at
         from forum_activity_comment fac
         left join app_user au on fac.user_id = au.id
         where fac.activity_id = #{activityId}
@@ -93,7 +93,7 @@
         <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
             #{parentId}
         </foreach>
-        and fac.deleted_at is null
+        and fac.delete_at is null
         and fac.status = 1
         -- 递归查询：所有后代评论（三级、四级...，通过关联自身ID和父ID实现）
         UNION ALL
@@ -110,17 +110,17 @@
         c.like_count,
         c.reply_count,
         c.status,
-        c.created_at,
-        c.deleted_at
+        c.create_at,
+        c.delete_at
         from forum_activity_comment c
         left join app_user au2 on c.user_id = au2.id
         inner join comment_recursive cr on c.parent_id = cr.id
         where c.activity_id = #{activityId}
-        and c.deleted_at is null
+        and c.delete_at is null
         and c.status = 1
         )
         -- 最终查询所有递归结果
-        select * from comment_recursive order by created_at ASC
+        select * from comment_recursive order by create_at ASC
     </select>
 
 
@@ -129,7 +129,7 @@
         SET
             status = 2,
             deleted_by = #{userId},
-            deleted_at = NOW()
+            delete_at = NOW()
         WHERE activity_id = #{activityId} AND status = 1
     </update>
 
@@ -147,8 +147,8 @@
         fpc.like_count,
         fpc.reply_count,
         fpc.status,
-        fpc.created_at,
-        fpc.deleted_at
+        fpc.create_at,
+        fpc.delete_at
         from forum_activity_comment fpc
         left join app_user au on fpc.user_id = au.id
         where fpc.activity_id = #{activityId}
@@ -157,7 +157,7 @@
             #{parentId}
         </foreach>
         and fpc.level = #{level}
-        and fpc.deleted_at is null
+        and fpc.delete_at is null
         and fpc.status = 1
     </select>
 </mapper>
