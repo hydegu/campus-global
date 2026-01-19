@@ -1,12 +1,100 @@
 spring:
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:admin}
-    url: jdbc:mysql://${MYSQL_HOST:49.232.245.147}:${MYSQL_PORT:3306}/${MYSQL_UPMS_DB:campus_upms_db}?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      password: ${REDIS_PASSWORD:}
+      port: ${REDIS_PORT:36379}
+      database: ${REDIS_DATABASE:0}
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      username: nacos
+      password: nacos
+    sentinel:
+      eager: true
+      enabled: true
+      transport:
+        dashboard: localhost:8858
+    openfeign:
+      sentinel:
+        enabled: true
+      okhttp:
+        enabled: true
+      httpclient:
+        enabled: false
+      compression:
+        request:
+          enabled: true
+        response:
+          enabled: true
+    # seata:
+    #   enabled: true  # 启用开关
+    #   application-id: ${spring.application.name}  # 应用ID
+    #   tx-service-group: campus_tx_group  # 事务分组（必须）
+
+# 暴露监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+# mybaits-plus配置
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      table-underline: true
+      logic-delete-value: 'now()'
+      logic-not-delete-value: 'null'
+  type-handlers-package: com.example.common.mybatis.handler
+  configuration:
+    map-underscore-to-camel-case: true
+    shrink-whitespaces-in-sql: true
+
+# 短信插件配置：https://www.yuque.com/vxixfq/pig/zw8udk 暂时冗余
+sms:
+  is-print: false # 是否打印日志
+  config-type: yaml # 配置类型，yaml
 
 security:
-  encode-key: 'admin123'
-  ignore-clients:
-    - test
+  cors:
+    enabled: true
+    allowed-origin-patterns:
+      - "*"
+    allowed-headers:
+      - "*"
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      - PATCH
+    allow-credentials: true
+    path-pattern: "/**"
+  oauth2:
+    ignore:
+      urls:
+        # 客户端详情查询
+        - /client/**
+        # 用户信息查询
+        - /user/info/query
+        # 其他内部服务接口
+        - /user/**
+        - /role/**
+        - /menu/**
+
+# 日志配置（开发环境详细日志）
+logging:
+  level:
+    com.example.campusapp: debug
+    org.springframework.security: debug
+

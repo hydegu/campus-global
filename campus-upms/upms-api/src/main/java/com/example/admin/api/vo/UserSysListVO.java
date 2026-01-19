@@ -1,0 +1,50 @@
+package com.example.admin.api.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Schema(description = "系统用户列表VO")
+public class UserSysListVO extends AbstractUserVO implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Schema(description = "用户ID", example = "1")
+	private Long id;
+
+	@Schema(description = "用户名", example = "admin")
+	private String username;
+
+	@Schema(description = "手机号（已脱敏）", example = "138****8000")
+	private String phone;
+
+	@Schema(description = "头像URL", example = "http://example.com/avatar.jpg")
+	private String avatar;
+
+	@Schema(description = "昵称", example = "管理员")
+	private String nickname;
+
+	@Schema(description = "邮箱", example = "admin@example.com")
+	private String email;
+
+	@Schema(description = "真实姓名")
+	private String realName;
+
+	@Schema(description = "性别", example = "男")
+	private String gender;
+
+	@Schema(description = "状态")
+	private Integer status;
+
+	@Schema(description = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(description = "最后登录时间")
+	private LocalDateTime lastLoginAt;
+
+	@Schema(description = "用户类型:1-系统用户 2-普通用户/服务者 3-商家 4-骑手")
+	private Integer userType;
+}
