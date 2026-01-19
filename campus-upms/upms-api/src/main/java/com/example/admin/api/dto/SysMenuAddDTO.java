@@ -1,4 +1,4 @@
-package com.example.admin.biz.dto;
+package com.example.admin.api.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +7,9 @@ import lombok.Data;
 @Data
 @Schema(description = "菜单新增DTO")
 public class SysMenuAddDTO {
+
+	@Schema(description = "菜单ID（可选，用于直接指定菜单ID）", example = "1")
+	private Long id;
 
 	@NotNull(message = "父菜单ID不能为空")
 	@Schema(description = "父菜单ID(0为根菜单）", example = "0")

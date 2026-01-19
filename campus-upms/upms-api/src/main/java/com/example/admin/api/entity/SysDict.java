@@ -35,6 +35,7 @@ public class SysDict extends Model<SysDict> {
 	/**
 	 * 备注
 	 */
+	@TableField("remark")
 	@Schema(description = "备注")
 	private String remarks;
 
@@ -61,6 +62,12 @@ public class SysDict extends Model<SysDict> {
 	 */
 	@Schema(description = "层级")
 	private Integer level;
+
+	/**
+	 * 状态
+	 */
+	@Schema(description = "状态")
+	private Integer status;
 
 	/**
 	 * 更新时间
