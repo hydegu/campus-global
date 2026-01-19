@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(contextId = "remoteUserService", value = ServiceNameConstants.UPMS_SERVICE)
+@FeignClient(contextId = "remoteMessageUserService", value = ServiceNameConstants.UPMS_SERVICE)
 public interface RemoteUserService {
 
 	@NoToken

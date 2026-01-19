@@ -156,7 +156,7 @@ public class MessageServiceImpl implements MessageService {
 			throw new BusinessException("MESSAGE_NOT_FOUND", "消息不存在");
 		}
 
-		if (!message.getReceiverId().equals(currentUserId)) {
+		if (!message.getReceiverId().equals(currentUserId) && !isSystemMessage(message)) {
 			throw new BusinessException("PERMISSION_DENIED", "无权查看该消息");
 		}
 
@@ -247,5 +247,10 @@ public class MessageServiceImpl implements MessageService {
 			log.warn("获取接收者名称失败，receiverId：{}", receiverId, e);
 		}
 		return "用户" + receiverId;
+	}
+
+	private boolean isSystemMessage(Message message) {
+		return message.getSenderType() != null && message.getSenderType() == 1 
+			|| "system".equals(message.getMessageType());
 	}
 }
