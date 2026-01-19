@@ -18,6 +18,11 @@
             <groupId>com.example</groupId>
             <artifactId>message-api</artifactId>
         </dependency>
+        <!--upms-api 依赖-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>upms-api</artifactId>
+        </dependency>
         <!--文件管理-->
         <dependency>
             <groupId>com.example</groupId>

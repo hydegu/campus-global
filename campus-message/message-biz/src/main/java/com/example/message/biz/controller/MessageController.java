@@ -44,7 +44,7 @@ public class MessageController {
 	}
 
 	@GetMapping("/{id}")
-	@Operation(summary = "查询消息详情", description = "根据消息ID查询当前用户的消息详细信息")
+	@Operation(summary = "查询消息详情", description = "根据消息ID查询消息详细信息，系统消息允许所有人查看")
 	public Result<MessageDetailVO> getMessageDetail(@PathVariable Long id) {
 		Long currentUserId = SecurityUtils.getCurrentUserId();
 		MessageDetailVO detailVO = messageService.getMessageDetail(currentUserId, id);
