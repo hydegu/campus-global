@@ -9,6 +9,7 @@ import com.example.common.feign.annotation.NoToken;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * 远程用户服务接口：提供用户信息查询功能
@@ -24,5 +25,14 @@ public interface RemoteUserService {
 	@NoToken
 	@GetMapping("/user/info/query")
 	Result<UserInfo> info(@SpringQueryMap UserDTO user);
+
+	/**
+	 * 通过用户ID查询用户信息
+	 * @param id 用户ID
+	 * @return Result<UserInfo> 用户信息响应对象
+	 */
+	@NoToken
+	@GetMapping("/user/{id}/info")
+	Result<UserInfo> getUserInfoById(@PathVariable("id") Long id);
 
 }

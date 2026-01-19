@@ -1,14 +1,16 @@
 package com.example.admin.biz.service;
 
-import com.example.admin.biz.dto.SysMenuAddDTO;
-import com.example.admin.biz.dto.SysMenuUpdateDTO;
-import com.example.admin.biz.vo.SysMenuVO;
+import com.example.admin.api.dto.SysMenuAddDTO;
+import com.example.admin.api.dto.SysMenuUpdateDTO;
+import com.example.admin.api.vo.SysMenuVO;
 
 import java.util.List;
 
 public interface SysMenuService {
 
 	List<SysMenuVO> getMenuTree();
+
+	List<SysMenuVO> getCurrentUserMenuTree();
 
 	SysMenuVO getMenuDetail(Long id);
 
