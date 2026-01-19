@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.forum.forum.mapper.ForumActivityMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.forum.entity.ForumActivity">
+            <id property="id" column="id" />
+            <result property="activityTitle" column="activity_title" />
+            <result property="activityContent" column="activity_content" />
+            <result property="activityVenue" column="activity_venue" />
+            <result property="schoolId" column="school_id" />
+            <result property="maxParticipants" column="max_participants" />
+            <result property="currentParticipants" column="current_participants" />
+            <result property="likeCount" column="like_count"/>
+            <result property="commentCount" column="comment_count"/>
+            <result property="shareCount" column="share_count"/>
+            <result property="registrationStartTime" column="registration_start_time" />
+            <result property="registrationEndTime" column="registration_end_time" />
+            <result property="activityTime" column="activity_time" />
+            <result property="images" column="images"  typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+            <result property="auditId" column="audit_id" />
+            <result property="isVisible" column="is_visible" />
+            <result property="status" column="status" />
+            <result property="createdAt" column="created_at" />
+            <result property="updatedAt" column="updated_at" />
+            <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+    <resultMap id="DetailResultMap" type="com.example.forum.vo.ForumActivityDetailVO">
+        <id property="id" column="id" />
+        <result property="activityTitle" column="activity_title" />
+        <result property="activityContent" column="activity_content" />
+        <result property="activityVenue" column="activity_venue" />
+        <result property="schoolId" column="school_id" />
+        <result property="schoolName" column="school_name" />
+        <result property="maxParticipants" column="max_participants" />
+        <result property="likeCount" column="like_count" />
+        <result property="commentCount" column="comment_count"/>
+        <result property="shareCount" column="share_count"/>
+        <result property="currentParticipants" column="current_participants" />
+        <result property="registrationStartTime" column="registration_start_time" />
+        <result property="registrationEndTime" column="registration_end_time" />
+        <result property="activityTime" column="activity_time" />
+        <result property="images" column="images"  typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="isVisible" column="is_visible"/>
+        <result property="status" column="status" />
+        <result property="createdAt" column="created_at" />
+        <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+    <resultMap id="QueryResultMap" type="com.example.forum.vo.ForumActivityQueryVO">
+        <id property="id" column="id" />
+        <result property="activityTitle" column="activity_title" />
+        <result property="activityContent" column="activity_content" />
+        <result property="maxParticipants" column="max_participants" />
+        <result property="currentParticipants" column="current_participants" />
+        <result property="activityTime" column="activity_time" />
+        <result property="images" column="images"  typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="createdAt" column="created_at" />
+        <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,activity_title,activity_content,activity_venue,school_id,max_participants,
+        current_participants,registration_start_time,registration_end_time,activity_time,images,
+        audit_id,is_visible,status,created_at,updated_at,
+        deleted_at
+    </sql>
+    <select id="selectForumActivityPage" resultMap="QueryResultMap">
+        select
+            id,
+            activity_title,
+            activity_content,
+            max_participants,
+            current_participants,
+            activity_time,
+            images,
+            created_at,
+            deleted_at
+        from forum_activity
+        where status = 2
+            and is_visible = 1
+            and deleted_at is null
+        order by created_at desc
+
+    </select>
+    <select id="selectDetailById" resultMap="DetailResultMap">
+        select
+            fa.id,
+            fa.activity_title,
+            fa.activity_content,
+            fa.activity_venue,
+            fa.school_id,
+            ss.org_name as school_name,
+            fa.max_participants,
+            fa.current_participants,
+            fa.like_count,
+            fa.comment_count,
+            fa.share_count,
+            fa.registration_start_time,
+            fa.registration_end_time,
+            fa.activity_time,
+            fa.status,
+            fa.is_visible,
+            fa.images,
+            fa.created_at,
+            fa.deleted_at
+        from forum_activity fa
+        left join sys_school ss on fa.school_id = ss.id
+        where fa.id = #{id}
+          and fa.deleted_at is null
+    </select>
+    <select id="selectCommentById" resultType="com.example.forum.entity.ForumActivityComment">
+        select
+            id,
+            activity_id,
+            user_id,
+            comment_content,
+            parent_id,
+            root_id,
+            level,
+            like_count,
+            reply_count,
+            status,
+            deleted_by,
+            deleted_at,
+            created_at,
+            updated_at
+        from forum_activity_comment
+        where activity_id = #{id}
+          and deleted_at is null
+    </select>
+
+    <update id="updateCommentCount">
+        update forum_activity
+        set comment_count = GREATEST(0, COALESCE(comment_count, 0) + #{increment}),
+            updated_at = NOW()
+        where id = #{activityId}
+    </update>
+</mapper>

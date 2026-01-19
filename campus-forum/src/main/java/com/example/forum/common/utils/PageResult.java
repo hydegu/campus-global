@@ -1,0 +1,51 @@
+package com.example.forum.common.utils;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.List;
+
+/**
+ * 分页查询VO，与PageUtil.PageResult保持兼容
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class PageResult<T> {
+    private Long total;       // 总条数
+    private Long current;     // 当前页，从1开始
+    private Long pageSize;    // 每页条数
+    private Long pages;       // 总页数
+    private List<T> list;     // 数据列表（兼容原records字段）
+
+    public PageResult() {}
+
+    public PageResult(long current, long pageSize, long total, List<T> list) {
+        this.current = current;
+        this.pageSize = pageSize;
+        this.total = total;
+        this.list = list;
+        this.pages = total > 0 ? (total + pageSize - 1) / pageSize : 0;
+    }
+
+    /**
+     * 从MyBatis-Plus IPage快速转换，推荐Service层统一调用PageUtil.toPageResult(ipage)
+     */
+    public static <T> PageResult<T> of(IPage<T> iPage) {
+        return new PageResult<>(
+                iPage.getCurrent(),
+                iPage.getSize(),
+                iPage.getTotal(),
+                iPage.getRecords()
+        );
+    }
+
+    // 计算辅助方法
+    public boolean hasNext() {
+        return current < pages;
+    }
+
+    public boolean hasPrevious() {
+        return current > 1;
+    }
+}

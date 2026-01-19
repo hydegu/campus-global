@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.forum.forum.mapper.ForumPostCommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.forum.entity.ForumPostComment">
+            <id property="id" column="id" />
+            <result property="postId" column="post_id" />
+            <result property="userId" column="user_id" />
+            <result property="commentContent" column="comment_content" />
+            <result property="parentId" column="parent_id" />
+            <result property="rootId" column="root_id" />
+            <result property="level" column="level" />
+            <result property="likeCount" column="like_count" />
+            <result property="replyCount" column="reply_count" />
+            <result property="status" column="status" />
+            <result property="deletedBy" column="deleted_by" />
+            <result property="deletedAt" column="deleted_at" />
+            <result property="createdAt" column="created_at" />
+            <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,post_id,user_id,comment_content,parent_id,root_id,
+        level,like_count,reply_count,status,deleted_by,
+        deleted_at,created_at,updated_at
+    </sql>
+    <select id="selectCommentByParentId" resultType="com.example.forum.vo.ForumPostCommentQueryVO" >
+        select
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            au.username as username,
+            au.avatar as avatarUrl,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.created_at,
+            fpc.deleted_at
+            from forum_post_comment fpc
+            left join app_user au on fpc.user_id = au.id
+        where fpc.post_id = #{postId} and fpc.parent_id in
+        <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+            #{parentId}
+        </foreach>
+        and fpc.deleted_at is null
+        and fpc.status = 1
+    </select>
+    
+    <select id="selectCommentByParentIdsAndLevel" resultType="com.example.forum.vo.ForumPostCommentQueryVO" >
+        select
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            au.username as username,
+            au.avatar as avatarUrl,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.created_at,
+            fpc.deleted_at
+            from forum_post_comment fpc
+            left join app_user au on fpc.user_id = au.id
+        where fpc.post_id = #{postId} 
+        and fpc.parent_id in
+        <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+            #{parentId}
+        </foreach>
+        and fpc.level = #{level}
+        and fpc.deleted_at is null
+        and fpc.status = 1
+    </select>
+
+    <select id="selectAllDescendantCommentsByParentIds" resultType="com.example.forum.vo.ForumPostCommentQueryVO">
+        WITH RECURSIVE comment_recursive AS (
+        -- 基础查询：一级评论的直接子级（二级评论）
+        select
+        fpc.id,
+        fpc.post_id,
+        fpc.user_id,
+        au.username as username,
+        au.avatar as avatarUrl,
+        fpc.parent_id,
+        fpc.root_id,
+        fpc.comment_content,
+        fpc.level,
+        fpc.like_count,
+        fpc.reply_count,
+        fpc.status,
+        fpc.created_at,
+        fpc.deleted_at
+        from forum_post_comment fpc
+        left join app_user au on fpc.user_id = au.id
+        where fpc.post_id = #{postId}
+        and fpc.parent_id in
+        <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+            #{parentId}
+        </foreach>
+        and fpc.deleted_at is null
+        and fpc.status = 1
+        -- 递归查询：所有后代评论（三级、四级...，通过关联自身ID和父ID实现）
+        UNION ALL
+        select
+        c.id,
+        c.post_id,
+        c.user_id,
+        au2.username as username,
+        au2.avatar as avatarUrl,
+        c.parent_id,
+        c.root_id,
+        c.comment_content,
+        c.level,
+        c.like_count,
+        c.reply_count,
+        c.status,
+        c.created_at,
+        c.deleted_at
+        from forum_post_comment c
+        left join app_user au2 on c.user_id = au2.id
+        inner join comment_recursive cr on c.parent_id = cr.id
+        where c.post_id = #{postId}
+        and c.deleted_at is null
+        and c.status = 1
+        )
+        -- 最终查询所有递归结果
+        select * from comment_recursive order by created_at ASC
+    </select>
+
+    <select id="selectCommentPageByPostId" resultType="com.example.forum.vo.ForumPostCommentQueryVO">
+        select
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            au.username as username,
+            au.avatar as avatarUrl,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.created_at,
+            fpc.deleted_at
+            from forum_post_comment fpc
+            left join app_user au on fpc.user_id = au.id
+        where fpc.post_id = #{postId}
+                and fpc.parent_id = 0
+                and fpc.deleted_at is null
+                and fpc.status = 1
+        ORDER BY fpc.created_at asc
+    </select>
+    
+    <!-- 根据帖子ID软删除所有评论 -->
+    <update id="updateDeleteByPostId">
+        UPDATE forum_post_comment 
+        SET 
+            status = 2,
+            deleted_by = #{userId},
+            deleted_at = NOW()
+        WHERE post_id = #{postId} AND status = 1
+    </update>
+
+    <select id="selectCountByPostId" resultType="int">
+        select count(*)
+        from forum_post_comment
+        where post_id = #{postId}
+            and status = 1
+            and deleted_at is null
+    </select>
+</mapper>
