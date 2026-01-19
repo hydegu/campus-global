@@ -13,12 +13,12 @@ public class DeliveryCalculateVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Schema(description = "距离（公里）")
+	@Schema(description = "距离（公里）", example = "3.5")
 	private BigDecimal distance;
 
-	@Schema(description = "配送费")
+	@Schema(description = "配送费", example = "8.00")
 	private BigDecimal deliveryFee;
 
-	@Schema(description = "预计送达时间")
+	@Schema(description = "预计送达时间", example = "2026-01-19T12:30:00")
 	private LocalDateTime estimatedDeliveryTime;
 }

@@ -14,14 +14,14 @@ public class DeliveryCalculateDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@NotNull(message = "商家ID不能为空")
-	@Schema(description = "商家ID")
+	@Schema(description = "商家ID", example = "1001")
 	private Long merchantId;
 
 	@NotNull(message = "收货地址ID不能为空")
-	@Schema(description = "收货地址ID")
+	@Schema(description = "收货地址ID", example = "2001")
 	private Long deliveryAddressId;
 
 	@NotNull(message = "商品金额不能为空")
-	@Schema(description = "商品金额")
+	@Schema(description = "商品金额", example = "68.00")
 	private BigDecimal goodsAmount;
 }
