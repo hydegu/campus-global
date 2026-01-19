@@ -75,11 +75,14 @@
     <module>campus-auth</module> <!-- 认证模块 (端口: 3000) -->
     <module>campus-upms</module> <!-- 用户权限管理模块 (端口: 4000) -->
     <module>campus-message</module> <!-- 消息模块 (端口: 4500) -->
+    <module>campus-finance</module> <!-- 财务模块 (端口: 4400) -->
 
 <!--    <module>campus-forum</module> &lt;!&ndash; 论坛模块 (端口: 4100) &ndash;&gt;-->
 <!--    <module>campus-merchant</module> &lt;!&ndash; 商家模块 (端口: 4200) &ndash;&gt;-->
 <!--    <module>campus-order</module> &lt;!&ndash; 订单模块 (端口: 4300) &ndash;&gt;-->
 <!--    <module>campus-finance</module> &lt;!&ndash; 财务模块 (端口: 4400) &ndash;&gt;-->
+<!--    <module>campus-message</module> &lt;!&ndash; 消息模块 (端口: 4500) &ndash;&gt;-->
+
 
   </modules>
 
