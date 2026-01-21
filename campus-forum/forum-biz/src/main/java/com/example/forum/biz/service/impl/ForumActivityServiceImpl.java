@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.admin.api.feign.RemoteSchoolService;
+import com.example.forum.api.feign.RemoteSchoolService;
 import com.example.admin.api.vo.SysSchoolVO;
 import com.example.common.core.exception.DuplicateException;
 import com.example.common.core.exception.ForbiddenException;

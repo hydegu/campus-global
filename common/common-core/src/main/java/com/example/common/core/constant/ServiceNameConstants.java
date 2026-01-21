@@ -16,4 +16,7 @@ public interface ServiceNameConstants {
 	 */
 	String UPMS_SERVICE = "upms-biz";
 
+	/**
+	 */
+
 }
