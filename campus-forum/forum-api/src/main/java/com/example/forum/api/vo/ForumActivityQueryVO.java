@@ -55,20 +55,32 @@ public class ForumActivityQueryVO {
     /**
      * 照片
      */
-    @Schema(description = "活动照片列表", example = "[\"photo1.jpg\", \"photo2.jpg\"]")
+    @Schema(description = "活动照片列表", example = "[]")
     private List<String> images;
+
+    /**
+     * 是否显示(1-显示 0-隐藏)
+     */
+    @Schema(description = "是否显示(1-显示 0-隐藏)",example = "1")
+    private Integer isVisible;
+
+    /**
+     * 活动状态(0-草稿 1-待审核 2-已发布 3-已取消)
+     */
+    @Schema(description = "活动状态(0-草稿 1-待审核 2-已发布 3-已取消)",example = "1")
+    private Integer status;
 
     /**
      * 创建时间
      */
     @NotNull
-    @Schema(description = "创建时间", example = "2023-09-01T10:00:00")
+    @Schema(description = "创建时间", example = "2023-09-0110:00:00")
     private LocalDateTime createdAt;
 
     /**
      * 删除时间
      */
-    @Schema(description = "删除时间", example = "2023-09-15T10:00:00")
+    @Schema(description = "删除时间", example = "2023-09-1510:00:00")
     private LocalDateTime deletedAt;
 
 }

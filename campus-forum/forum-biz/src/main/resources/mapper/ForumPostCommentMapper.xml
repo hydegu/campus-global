@@ -92,10 +92,15 @@
         fpc.delete_at
         from forum_post_comment fpc
         where fpc.post_id = #{postId}
-        and fpc.parent_id in
-        <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
-            #{parentId}
-        </foreach>
+        <if test="parentIds != null and parentIds.size() > 0">
+            and fpc.parent_id in
+            <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+                #{parentId}
+            </foreach>
+        </if>
+        <if test="parentIds == null or parentIds.size() == 0">
+            and 1 = 2
+        </if>
         and fpc.delete_at is null
         and fpc.status = 1
         -- 递归查询：所有后代评论（三级、四级...，通过关联自身ID和父ID实现）
@@ -120,7 +125,7 @@
         and c.status = 1
         )
         -- 最终查询所有递归结果
-        select * from comment_recursive order by created_at ASC
+        select * from comment_recursive order by create_at ASC
     </select>
 
     <select id="selectCommentPageByPostId" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO">
@@ -142,7 +147,7 @@
                 and fpc.parent_id = 0
                 and fpc.delete_at is null
                 and fpc.status = 1
-        ORDER BY fpc.created_at asc
+        ORDER BY fpc.create_at asc
     </select>
     
     <!-- 根据帖子ID软删除所有评论 -->
@@ -151,7 +156,7 @@
         SET 
             status = 2,
             deleted_by = #{userId},
-            deleted_at = NOW()
+            delete_at = NOW()
         WHERE post_id = #{postId} AND status = 1
     </update>
 
@@ -160,6 +165,6 @@
         from forum_post_comment
         where post_id = #{postId}
             and status = 1
-            and deleted_at is null
+            and delete_at is null
     </select>
 </mapper>

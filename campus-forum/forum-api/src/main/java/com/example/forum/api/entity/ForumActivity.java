@@ -125,18 +125,21 @@ public class ForumActivity implements Serializable {
      * 创建时间
      */
     @Schema(description = "创建时间")
+    @TableField("create_at")
     private LocalDateTime createdAt;
 
     /**
      * 更新时间
      */
     @Schema(description = "更新时间")
+    @TableField("update_at")
     private LocalDateTime updatedAt;
 
     /**
      * 软删除时间
      */
     @Schema(description = "软删除时间")
+    @TableField("delete_at")
     private LocalDateTime deletedAt;
 
     @TableField(exist = false)

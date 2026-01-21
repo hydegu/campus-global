@@ -39,7 +39,7 @@ public class ForumActivityAddDTO {
      * 学校ID
      */
     @NotNull(message = "学校ID不能为空")
-    @Schema(description = "学校ID", example = "1")
+    @Schema(description = "学校ID", example = "1001")
     private Long schoolId;
 
     /**
@@ -53,21 +53,21 @@ public class ForumActivityAddDTO {
      * 报名开始时间
      */
     @NotNull(message = "报名开始时间不能为空")
-    @Schema(description = "报名开始时间", example = "2023-09-01T00:00:00")
+    @Schema(description = "报名开始时间", example = "2023-09-0100:00:00")
     private LocalDateTime registrationStartTime;
 
     /**
      * 报名截止时间
      */
     @NotNull(message = "报名截止时间不能为空")
-    @Schema(description = "报名截止时间", example = "2023-09-30T00:00:00")
+    @Schema(description = "报名截止时间", example = "2023-09-3000:00:00")
     private LocalDateTime registrationEndTime;
 
     /**
      * 活动时间
      */
     @NotNull(message = "活动时间不能为空")
-    @Schema(description = "活动时间", example = "2023-10-15T00:00:00")
+    @Schema(description = "活动时间", example = "2023-10-1500:00:00")
     private LocalDateTime activityTime;
 
     /**
