@@ -82,19 +82,19 @@ public class ForumActivityComment {
      * 软删除时间
      */
     @Schema(description = "软删除时间")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deleteAt;
 
     /**
      * 评论时间
      */
     @Schema(description = "评论时间")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
     /**
      * 更新时间
      */
     @Schema(description = "更新时间")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateAt;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

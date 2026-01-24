@@ -9,6 +9,7 @@
             <result property="activityTitle" column="activity_title" />
             <result property="activityContent" column="activity_content" />
             <result property="activityVenue" column="activity_venue" />
+            <result property="publisherId" column="publisher_id" />
             <result property="schoolId" column="school_id" />
             <result property="maxParticipants" column="max_participants" />
             <result property="currentParticipants" column="current_participants" />
@@ -22,9 +23,9 @@
             <result property="auditId" column="audit_id" />
             <result property="isVisible" column="is_visible" />
             <result property="status" column="status" />
-            <result property="createdAt" column="create_at" />
-            <result property="updatedAt" column="update_at" />
-            <result property="deletedAt" column="delete_at" />
+            <result property="createAt" column="create_at" />
+            <result property="updateAt" column="update_at" />
+            <result property="deleteAt" column="delete_at" />
     </resultMap>
     <resultMap id="DetailResultMap" type="com.example.forum.api.vo.ForumActivityDetailVO">
         <id property="id" column="id" />
@@ -44,8 +45,7 @@
         <result property="images" column="images"  typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result property="isVisible" column="is_visible"/>
         <result property="status" column="status" />
-        <result property="createdAt" column="create_at" />
-        <result property="deletedAt" column="delete_at" />
+        <result property="createAt" column="create_at" />
     </resultMap>
     <resultMap id="QueryResultMap" type="com.example.forum.api.vo.ForumActivityQueryVO">
         <id property="id" column="id" />
@@ -55,12 +55,11 @@
         <result property="currentParticipants" column="current_participants" />
         <result property="activityTime" column="activity_time" />
         <result property="images" column="images"  typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
-        <result property="createdAt" column="create_at" />
-        <result property="deletedAt" column="delete_at" />
+        <result property="createAt" column="create_at" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,activity_title,activity_content,activity_venue,school_id,max_participants,
+        id,activity_title,activity_content,activity_venue,publisher_id,school_id,max_participants,
         current_participants,registration_start_time,registration_end_time,activity_time,images,
         audit_id,is_visible,status,create_at,update_at,
         delete_at
@@ -74,12 +73,16 @@
             current_participants,
             activity_time,
             images,
-            status,
             is_visible,
-            create_at,
-            delete_at
+            create_at
         from forum_activity
-        where delete_at is null
+        where
+            <if test="publisherId != null">
+                fa.publisher_id = #{queryDTO.publisherId}
+                and
+            </if>
+            delete_at is null
+            and status = 2
         order by create_at desc
     </select>
     <select id="selectDetailById" resultMap="DetailResultMap">

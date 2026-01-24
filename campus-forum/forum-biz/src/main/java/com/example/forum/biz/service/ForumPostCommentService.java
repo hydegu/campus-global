@@ -2,6 +2,7 @@ package com.example.forum.biz.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.admin.api.dto.UserInfo;
 import com.example.common.mybatis.utils.PageResult;
 import com.example.forum.api.dto.forumcomment.ForumCommentListDTO;
 import com.example.forum.api.dto.forumpost.ForumPostQueryDTO;

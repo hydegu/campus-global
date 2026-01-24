@@ -25,6 +25,8 @@ import com.example.forum.biz.mapper.ForumPostMapper;
 import com.example.forum.biz.service.ForumPostCommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -59,8 +61,8 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         // 构建查询条件
         LambdaQueryWrapper<ForumPostComment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ForumPostComment::getUserId, currentUserId)
-                .isNull(ForumPostComment::getDeletedAt)  // 只查询未删除的评论
-                .orderByDesc(ForumPostComment::getCreatedAt); // 按创建时间倒序
+                .isNull(ForumPostComment::getDeleteAt)  // 只查询未删除的评论
+                .orderByDesc(ForumPostComment::getCreateAt); // 按创建时间倒序
 
         // 执行分页查询
         IPage<ForumPostComment> resultPage = page(page, queryWrapper);
@@ -90,8 +92,8 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         vo.setCommentContent(comment.getCommentContent());
         vo.setLikeCount(comment.getLikeCount());
         vo.setReplyCount(comment.getReplyCount());
-        vo.setCreatedAt(comment.getCreatedAt());
-        vo.setUpdatedAt(comment.getUpdatedAt());
+        vo.setCreateAt(comment.getCreateAt());
+        vo.setUpdateAt(comment.getUpdateAt());
 
         // 获取帖子标题
         ForumPost post = forumPostMapper.selectById(comment.getPostId());
@@ -102,27 +104,38 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         return vo;
     }
     @Override
-    public IPage<ForumPostCommentQueryVO> getForumPostCommentPageList(Long activityId, ForumCommentListDTO queryDTO) {
+    public IPage<ForumPostCommentQueryVO> getForumPostCommentPageList(Long postId, ForumCommentListDTO queryDTO) {
+        // 参数验证
+        if (postId == null || postId <= 0) {
+            throw new IllegalArgumentException("帖子ID不能为空");
+        }
+        
         IPage<ForumPostCommentQueryVO> page = PageUtil.createPage(
                 queryDTO.getPage(),
                 queryDTO.getSize()
         );
+        
         // 查询一级评论
-        IPage<ForumPostCommentQueryVO> forumPostCommentPageList = baseMapper.selectCommentPageByPostId(page, activityId);
+        IPage<ForumPostCommentQueryVO> forumPostCommentPageList = baseMapper.selectCommentPageByPostId(page, postId);
         List<ForumPostCommentQueryVO> firstLevelComments  = forumPostCommentPageList.getRecords();
         if (CollectionUtils.isEmpty(firstLevelComments)) {
+            log.info("帖子无一级评论，直接返回 - postId: {}", postId);
             return forumPostCommentPageList;
         }
+        
         // 提取所有一级评论的ID，批量查询其直接子评论（二级评论，第二层）
         List<Long> firstLevelCommentIds  = firstLevelComments.stream()
                 .map(ForumPostCommentQueryVO::getId)
-                .collect(Collectors.toList());
-        // 查询所有匹配的子评论
-        List<ForumPostCommentQueryVO> allDescendantComments  = baseMapper.selectAllDescendantCommentsByParentIds(activityId, firstLevelCommentIds);
+                .collect(Collectors.toList());        
+        // 查询所有匹配的子评论（使用非递归方式，性能更好）
+        List<ForumPostCommentQueryVO> allDescendantComments  = baseMapper.selectAllDescendantCommentsByParentIdsNonRecursive(postId, firstLevelCommentIds);
+        
         if(CollectionUtils.isEmpty(allDescendantComments)) {
+            // 只有一级评论，批量填充用户信息
             fillCommentUserInfo(firstLevelComments);
-            return forumPostCommentPageList;
+           return forumPostCommentPageList;
         }
+        
         // 对所有后代评论按【根评论ID】分组，方便快速查找子评论（提高查询效率）
         Map<Long, List<ForumPostCommentQueryVO>> descendantCommentMap = allDescendantComments.stream()
                 .collect(Collectors.groupingBy(ForumPostCommentQueryVO::getRootId));
@@ -133,11 +146,13 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
             comment.setChildComments(allChildComments);
         });
 
-        // 填充用户信息
-        fillCommentUserInfo(firstLevelComments);
-        allDescendantComments.forEach(this::fillSingleCommentUserInfo);
+        // 批量填充所有评论的用户信息（一级评论 + 子评论）
+        List<ForumPostCommentQueryVO> allComments = new ArrayList<>(firstLevelComments);
+        allComments.addAll(allDescendantComments);
+        fillCommentUserInfo(allComments);
+        log.info("填充所有评论用户信息");
 
-        // 5. 封装最终分页结果并返回
+        // 封装最终分页结果并返回
         forumPostCommentPageList.setRecords(firstLevelComments);
         return forumPostCommentPageList;
     }
@@ -166,40 +181,19 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         });
     }
 
-    private void fillSingleCommentUserInfo(ForumPostCommentQueryVO comment) {
-        if (comment == null) {
-            return;
-        }
-        
-        try {
-            Result<UserInfo> result = remoteUserService.getUserInfoById(comment.getUserId());
-            if (result.getCode() == 0 && result.getData() != null) {
-                UserInfo userInfo = result.getData();
-                comment.setUsername(userInfo.getUsername());
-                comment.setAvatarUrl(userInfo.getAvatar());
-            } else {
-                comment.setUsername("匿名用户");
-                comment.setAvatarUrl("");
-            }
-        } catch (Exception e) {
-            log.error("获取用户[{}]信息失败: {}", comment.getUserId(), e.getMessage());
-            comment.setUsername("匿名用户");
-            comment.setAvatarUrl("");
-        }
-    }
-
     private Map<Long, UserInfo> batchGetCommentUserInfo(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return Collections.emptyMap();
         }
         
+        log.info("批量查询用户信息 - userIds: {}", userIds);
         Map<Long, UserInfo> userInfoMap = new HashMap<>();
         
         for (Long userId : userIds) {
             try {
                 Result<UserInfo> result = remoteUserService.getUserInfoById(userId);
-                if (result.getCode() == 0 && result.getData() != null) {
-                    UserInfo userInfo = result.getData();
+                UserInfo userInfo = result.getData();
+                if (result.getCode() == 0 && userInfo != null) {
                     userInfoMap.put(userId, userInfo);
                 }
             } catch (Exception e) {
@@ -207,31 +201,10 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
             }
         }
         
+        log.info("批量查询用户信息完成 - 成功: {}/{}", userInfoMap.size(), userIds.size());
         return userInfoMap;
     }
-    /**
-     * 递归收集某个评论的所有后代评论（三级及以上，不限制层级，统一归为同一级）
-     */
-    private List<ForumPostCommentQueryVO> collectAllDescendantComments(Long parentCommentId, Map<Long, List<ForumPostCommentQueryVO>> descendantCommentMap) {
-        // 存储所有后代评论（最终返回，不嵌套）
-        List<ForumPostCommentQueryVO> allDescendants = new ArrayList<>();
 
-        // 获取当前父评论的直接子评论
-        List<ForumPostCommentQueryVO> directChildren = descendantCommentMap.getOrDefault(parentCommentId, Collections.emptyList());
-        if (CollectionUtils.isEmpty(directChildren)) {
-            return allDescendants;
-        }
-
-        // 1. 添加直接子评论到结果集（三级、四级等，统一平铺）
-        allDescendants.addAll(directChildren);
-
-        // 2. 递归查询直接子评论的后代，继续添加到结果集（不嵌套，仅平铺）
-        directChildren.forEach(child -> {
-            allDescendants.addAll(collectAllDescendantComments(child.getId(), descendantCommentMap));
-        });
-
-        return allDescendants;
-    }
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createComment(Long userId,Long postId,ForumPostComment comment) {
@@ -325,7 +298,7 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         LambdaQueryWrapper<ForumPostComment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ForumPostComment::getParentId, commentId)
                 .eq(ForumPostComment::getStatus, 1) // 只统计正常的评论
-                .isNull(ForumPostComment::getDeletedAt);
+                .isNull(ForumPostComment::getDeleteAt);
         Long directRepliesLong = count(queryWrapper);
         int directReplies = directRepliesLong.intValue();
 
@@ -380,7 +353,7 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         // 5. 软删除评论
         existingComment.setStatus(2); // 2-用户删除
         existingComment.setDeletedBy(userId);
-        existingComment.setDeletedAt(LocalDateTime.now());
+        existingComment.setDeleteAt(LocalDateTime.now());
         updateById(existingComment);
     }
 
@@ -410,7 +383,7 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
         }
         // 2. 增加点赞数
         comment.setLikeCount((comment.getLikeCount() != null ? comment.getLikeCount() : 0) + 1);
-        comment.setUpdatedAt(LocalDateTime.now());
+        comment.setUpdateAt(LocalDateTime.now());
         updateById(comment);
         forumLikeRecordMapper.addLikeRecord(likeDTO);
     }
@@ -433,7 +406,7 @@ public class ForumPostCommentServiceImpl extends ServiceImpl<ForumPostCommentMap
             throw new ResourceNotFoundException("该评论未点赞");
         }
         comment.setLikeCount((comment.getLikeCount() != null ? comment.getLikeCount() : 0) - 1);
-        comment.setUpdatedAt(LocalDateTime.now());
+        comment.setUpdateAt(LocalDateTime.now());
         updateById(comment);
         forumLikeRecordMapper.subLikeRecord(likeDTO);
     }

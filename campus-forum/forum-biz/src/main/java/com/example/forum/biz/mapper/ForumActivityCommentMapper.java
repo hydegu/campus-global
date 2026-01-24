@@ -35,6 +35,15 @@ public interface ForumActivityCommentMapper extends BaseMapper<ForumActivityComm
      * @return 所有后代评论列表
      */
     List<ForumActivityCommentQueryVO> selectAllDescendantCommentsByParentIds(@Param("activityId") Long activityId, @Param("parentIds") List<Long> parentIds);
+
+    /**
+     * 批量查询指定父评论ID的所有后代评论（非递归方式，使用root_id）
+     * @param activityId 活动ID
+     * @param parentIds 父评论ID列表（一级评论ID）
+     * @return 所有后代评论列表
+     */
+    List<ForumActivityCommentQueryVO> selectAllDescendantCommentsByParentIdsNonRecursive(@Param("activityId") Long activityId, @Param("parentIds") List<Long> parentIds);
+
    /**
      * 根据活动ID软删除所有评论
      * @param activityId 活动ID

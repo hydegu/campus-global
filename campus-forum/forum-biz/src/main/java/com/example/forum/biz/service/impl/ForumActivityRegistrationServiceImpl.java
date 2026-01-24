@@ -44,9 +44,6 @@ public class ForumActivityRegistrationServiceImpl extends ServiceImpl<ForumActiv
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void registerForActivity(Long userId, Long activityId) {
-        if(userId == null){
-            throw new ForbiddenException("用户未登录");
-        }
         ForumActivity activity = forumActivityService.findById(activityId);
         if(activity == null){
             throw new ResourceNotFoundException("活动不存在");
@@ -59,24 +56,24 @@ public class ForumActivityRegistrationServiceImpl extends ServiceImpl<ForumActiv
 
         // 检查活动状态（0-草稿 1-待审核 2-已发布 3-已取消）
         if(activity.getStatus() == null || activity.getStatus() != 2) {
-            throw new BusinessException("活动未发布，无法报名", "FORBIDDEN");
+            throw new BusinessException("FORBIDDEN", "活动未发布，无法报名");
         }
         if(activity.getStatus() == 3) {
-            throw new BusinessException("活动已取消，无法报名", "FORBIDDEN");
+            throw new BusinessException("FORBIDDEN", "活动已取消，无法报名");
         }
 
         // 检查报名时间
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
         if(activity.getRegistrationStartTime() != null && now.isBefore(activity.getRegistrationStartTime())) {
-            throw new BusinessException("报名尚未开始", "FORBIDDEN");
+            throw new BusinessException("FORBIDDEN", "报名尚未开始");
         }
         if(activity.getRegistrationEndTime() != null && now.isAfter(activity.getRegistrationEndTime())) {
-            throw new BusinessException("活动已结束，无法报名", "FORBIDDEN");
+            throw new BusinessException("FORBIDDEN", "活动已结束，无法报名");
         }
 
         // 检查活动是否已结束
         if(activity.getActivityTime() != null && now.isAfter(activity.getActivityTime())) {
-            throw new BusinessException("报名已截止", "FORBIDDEN");
+            throw new BusinessException("FORBIDDEN", "报名已截止");
         }
 
         // 检查是否已报名
@@ -99,7 +96,7 @@ public class ForumActivityRegistrationServiceImpl extends ServiceImpl<ForumActiv
         boolean success = forumActivityService.addParticipants(activityId);
         if (!success) {
             // 如果增加失败（人数已满），抛出异常触发事务回滚
-            throw new BusinessException("报名失败，活动人数已满", "FORBIDDEN");
+            throw new BusinessException("FORBIDDEN", "报名失败，活动人数已满");
         }
     }
 

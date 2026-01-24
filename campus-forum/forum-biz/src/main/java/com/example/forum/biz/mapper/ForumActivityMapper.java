@@ -3,6 +3,7 @@ package com.example.forum.biz.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.forum.api.dto.forumActivity.ForumActivityListDTO;
 import com.example.forum.api.entity.ForumActivity;
 import com.example.forum.api.entity.ForumActivityComment;
 import com.example.forum.api.vo.ForumActivityDetailVO;
@@ -19,7 +20,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ForumActivityMapper extends BaseMapper<ForumActivity> {
 
-    IPage<ForumActivityQueryVO> selectForumActivityPage(Page<ForumActivityQueryVO> page);
+    IPage<ForumActivityQueryVO> selectForumActivityPage(Page<ForumActivityQueryVO> page, @Param("queryDTO") ForumActivityListDTO queryDTO);
 
     ForumActivityDetailVO selectDetailById(@Param("id") Long id);
 

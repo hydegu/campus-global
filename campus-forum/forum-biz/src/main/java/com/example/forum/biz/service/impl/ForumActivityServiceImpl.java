@@ -51,7 +51,7 @@ public class ForumActivityServiceImpl extends ServiceImpl<ForumActivityMapper, F
                 queryDTO.getPage(),
                 queryDTO.getSize()
         );
-        return baseMapper.selectForumActivityPage(iPage);
+        return baseMapper.selectForumActivityPage(iPage, queryDTO);
     }
 
     @Override
@@ -120,6 +120,7 @@ public class ForumActivityServiceImpl extends ServiceImpl<ForumActivityMapper, F
             // 可选：设置空JSON数组或null
             activity.setImages("[]");
         }
+
         save(activity);
     }
 
@@ -169,7 +170,7 @@ public class ForumActivityServiceImpl extends ServiceImpl<ForumActivityMapper, F
             throw new DuplicateException("用户已点赞");
         }
         activity.setLikeCount((activity.getLikeCount() != null ? activity.getLikeCount() : 0) + 1);
-        activity.setUpdatedAt(LocalDateTime.now());
+        activity.setUpdateAt(LocalDateTime.now());
         updateById(activity);
         forumLikeRecordMapper.addLikeRecord(likeDTO);
     }
@@ -195,7 +196,7 @@ public class ForumActivityServiceImpl extends ServiceImpl<ForumActivityMapper, F
             throw new ResourceNotFoundException("用户未点赞");
         }
         activity.setLikeCount((activity.getLikeCount() != null ? activity.getLikeCount() : 0) - 1);
-        activity.setUpdatedAt(LocalDateTime.now());
+        activity.setUpdateAt(LocalDateTime.now());
         updateById(activity);
         forumLikeRecordMapper.subLikeRecord(likeDTO);
     }

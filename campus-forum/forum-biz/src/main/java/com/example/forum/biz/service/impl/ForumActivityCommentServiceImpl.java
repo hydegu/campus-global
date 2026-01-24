@@ -3,9 +3,13 @@ package com.example.forum.biz.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.admin.api.dto.UserInfo;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.exception.DuplicateException;
 import com.example.common.core.exception.ForbiddenException;
 import com.example.common.core.exception.ResourceNotFoundException;
+import com.example.common.core.util.Result;
+import com.example.common.docs.annotation.StandardApiResponses;
 import com.example.forum.biz.utils.PageUtil;
 import com.example.forum.api.dto.ForumLikeDTO;
 import com.example.forum.api.dto.forumcomment.ForumCommentListDTO;
@@ -16,28 +20,28 @@ import com.example.forum.biz.mapper.ForumActivityCommentMapper;
 import com.example.forum.biz.mapper.ForumActivityMapper;
 import com.example.forum.biz.mapper.ForumLikeRecordMapper;
 import com.example.forum.biz.service.ForumActivityCommentService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
+@CacheConfig(cacheNames = "userCache")
 public class ForumActivityCommentServiceImpl extends ServiceImpl<ForumActivityCommentMapper, ForumActivityComment>
 implements ForumActivityCommentService {
 
     private final ForumLikeRecordMapper forumLikeRecordMapper;
     private final ForumActivityMapper forumActivityMapper;
-
-    public ForumActivityCommentServiceImpl(ForumLikeRecordMapper forumLikeRecordMapper, ForumActivityMapper forumActivityMapper) {
-        this.forumLikeRecordMapper = forumLikeRecordMapper;
-        this.forumActivityMapper = forumActivityMapper;
-    }
+    private final RemoteUserService remoteUserService;
 
     @Override
     public IPage<ForumActivityCommentQueryVO> getForumActivityCommentPageList(Long activityId, ForumCommentListDTO queryDTO) {
@@ -73,29 +77,6 @@ implements ForumActivityCommentService {
         // 5. 封装最终分页结果并返回
         forumActivityCommentPageList.setRecords(firstLevelComments);
         return forumActivityCommentPageList;
-    }
-    /**
-     * 递归收集某个评论的所有后代评论（三级及以上，不限制层级，统一归为同一级）
-     */
-    private List<ForumActivityCommentQueryVO> collectAllDescendantComments(Long parentCommentId, Map<Long, List<ForumActivityCommentQueryVO>> descendantCommentMap) {
-        // 存储所有后代评论（最终返回，不嵌套）
-        List<ForumActivityCommentQueryVO> allDescendants = new ArrayList<>();
-
-        // 获取当前父评论的直接子评论
-        List<ForumActivityCommentQueryVO> directChildren = descendantCommentMap.getOrDefault(parentCommentId, Collections.emptyList());
-        if (CollectionUtils.isEmpty(directChildren)) {
-            return allDescendants;
-        }
-
-        // 1. 添加直接子评论到结果集（三级、四级等，统一平铺）
-        allDescendants.addAll(directChildren);
-
-        // 2. 递归查询直接子评论的后代，继续添加到结果集（不嵌套，仅平铺）
-        directChildren.forEach(child -> {
-            allDescendants.addAll(collectAllDescendantComments(child.getId(), descendantCommentMap));
-        });
-
-        return allDescendants;
     }
 
 
@@ -203,14 +184,14 @@ implements ForumActivityCommentService {
         }
         comment.setStatus(2);
         comment.setDeletedBy(userId);
-        comment.setDeletedAt(LocalDateTime.now());
+        comment.setDeleteAt(LocalDateTime.now());
         updateById(comment);
     }
     private int countChildComments(Long commentId){
         LambdaQueryWrapper<ForumActivityComment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ForumActivityComment::getParentId,commentId)
                 .eq(ForumActivityComment::getStatus,1)
-                .isNull(ForumActivityComment::getDeletedAt);
+                .isNull(ForumActivityComment::getDeleteAt);
         Long directRepliesLong = count(queryWrapper);
         int directReplies = directRepliesLong.intValue();
 
@@ -238,7 +219,7 @@ implements ForumActivityCommentService {
             throw new ResourceNotFoundException("评论不存在");
         }
         comment.setLikeCount((comment.getLikeCount() != null ? comment.getLikeCount() : 0) + 1);
-        comment.setUpdatedAt(LocalDateTime.now());
+        comment.setUpdateAt(LocalDateTime.now());
         // 单人点赞
         ForumLikeDTO likeDTO = new ForumLikeDTO();
         likeDTO.setUserId(userId);
@@ -277,9 +258,69 @@ implements ForumActivityCommentService {
         int currentLikeCount = comment.getLikeCount() != null ? comment.getLikeCount() : 0;
         if (currentLikeCount > 0) {
             comment.setLikeCount(currentLikeCount - 1);
-            comment.setUpdatedAt(LocalDateTime.now());
+            comment.setUpdateAt(LocalDateTime.now());
             updateById(comment);
         }
+    }
+
+    private void fillCommentUserInfo(List<ForumActivityCommentQueryVO> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return;
+        }
+
+        List<Long> userIds = comments.stream()
+                .map(ForumActivityCommentQueryVO::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Long, UserInfo> userInfoMap = batchGetCommentUserInfo(userIds);
+
+        comments.forEach(comment -> {
+            UserInfo userInfo = userInfoMap.get(comment.getUserId());
+            if (userInfo != null) {
+                comment.setUsername(userInfo.getUsername());
+                comment.setAvatarUrl(userInfo.getAvatar());
+            } else {
+                comment.setUsername("匿名用户");
+                comment.setAvatarUrl("");
+            }
+        });
+    }
+
+    private Map<Long, UserInfo> batchGetCommentUserInfo(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        log.info("批量查询用户信息 - userIds: {}", userIds);
+        Map<Long, UserInfo> userInfoMap = new HashMap<>();
+
+        for (Long userId : userIds) {
+            try {
+                UserInfo userInfo = getUserInfoWithCache(userId);
+                if (userInfo != null) {
+                    userInfoMap.put(userId, userInfo);
+                }
+            } catch (Exception e) {
+                log.error("获取用户[{}]信息失败: {}", userId, e.getMessage());
+            }
+        }
+
+        log.info("批量查询用户信息完成 - 成功: {}/{}", userInfoMap.size(), userIds.size());
+        return userInfoMap;
+    }
+
+    @Cacheable(key = "#userId", unless = "#result == null")
+    public UserInfo getUserInfoWithCache(Long userId) {
+        try {
+            Result<UserInfo> result = remoteUserService.getUserInfoById(userId);
+            if (result.getCode() == 0 && result.getData() != null) {
+                return result.getData();
+            }
+        } catch (Exception e) {
+            log.error("获取用户[{}]信息失败: {}", userId, e.getMessage());
+        }
+        return null;
     }
 
 }

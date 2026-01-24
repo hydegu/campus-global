@@ -16,9 +16,9 @@
         <result property="replyCount" column="reply_count" />
         <result property="status" column="status" />
         <result property="deletedBy" column="delete_by" />
-        <result property="deletedAt" column="delete_at" />
-        <result property="createdAt" column="created_at" />
-        <result property="updatedAt" column="updated_at" />
+        <result property="deleteAt" column="delete_at" />
+        <result property="createAt" column="created_at" />
+        <result property="updateAt" column="updated_at" />
     </resultMap>
 
     <select id="selectCommentByActivityId" resultType="com.example.forum.api.vo.ForumActivityCommentQueryVO">
@@ -26,7 +26,6 @@
             fac.id,
             fac.activity_id,
             fac.user_id,
-            au.username as username,
             fac.parent_id,
             fac.root_id,
             fac.comment_content,
@@ -37,7 +36,6 @@
             fac.create_at,
             fac.delete_at
         from forum_activity_comment fac
-        left join app_user au on fac.user_id = au.id
         where fac.activity_id = #{activityId}
             and fac.parent_id = 0
             and fac.status = 1
@@ -50,7 +48,6 @@
             fac.id,
             fac.activity_id,
             fac.user_id,
-            au.username as username,
             fac.parent_id,
             fac.root_id,
             fac.comment_content,
@@ -61,7 +58,6 @@
             fac.create_at,
             fac.delete_at
         from forum_activity_comment fac
-        left join app_user au on fac.user_id = au.id
         where fac.activity_id = #{activityId} and fac.parent_id in
         <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
             #{parentId}
@@ -75,8 +71,6 @@
         fac.id,
         fac.activity_id,
         fac.user_id,
-        au.username as username,
-        au.avatar as avatarUrl,
         fac.parent_id,
         fac.root_id,
         fac.comment_content,
@@ -85,9 +79,9 @@
         fac.reply_count,
         fac.status,
         fac.create_at,
-        fac.delete_at
+        fac.delete_at,
+        1 as depth
         from forum_activity_comment fac
-        left join app_user au on fac.user_id = au.id
         where fac.activity_id = #{activityId}
         and fac.parent_id in
         <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
@@ -95,14 +89,13 @@
         </foreach>
         and fac.delete_at is null
         and fac.status = 1
+        
         -- 递归查询：所有后代评论（三级、四级...，通过关联自身ID和父ID实现）
         UNION ALL
         select
         c.id,
         c.activity_id,
         c.user_id,
-        au2.username as username,
-        au2.avatar as avatarUrl,
         c.parent_id,
         c.root_id,
         c.comment_content,
@@ -111,11 +104,11 @@
         c.reply_count,
         c.status,
         c.create_at,
-        c.delete_at
+        c.delete_at,
+        cr.depth + 1 as depth
         from forum_activity_comment c
-        left join app_user au2 on c.user_id = au2.id
         inner join comment_recursive cr on c.parent_id = cr.id
-        where c.activity_id = #{activityId}
+        where cr.depth &lt; 10  -- 限制递归深度，避免性能问题
         and c.delete_at is null
         and c.status = 1
         )
@@ -123,6 +116,36 @@
         select * from comment_recursive order by create_at ASC
     </select>
 
+    <select id="selectAllDescendantCommentsByParentIdsNonRecursive" resultType="com.example.forum.api.vo.ForumActivityCommentQueryVO">
+        select
+            fac.id,
+            fac.activity_id,
+            fac.user_id,
+            fac.parent_id,
+            fac.root_id,
+            fac.comment_content,
+            fac.level,
+            fac.like_count,
+            fac.reply_count,
+            fac.status,
+            fac.create_at,
+            fac.delete_at
+        from forum_activity_comment fac
+        where fac.activity_id = #{activityId}
+        <if test="parentIds != null and parentIds.size() > 0">
+            and fac.root_id in
+            <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+                #{parentId}
+            </foreach>
+        </if>
+        <if test="parentIds == null or parentIds.size() == 0">
+            and 1 = 2
+        </if>
+        and fac.delete_at is null
+        and fac.status = 1
+        and fac.level &gt; 0  -- 排除根评论本身
+        order by fac.create_at ASC
+    </select>
 
     <update id="updateDeleteByActivityId">
         UPDATE forum_activity_comment
@@ -138,8 +161,6 @@
         fpc.id,
         fpc.activity_id,
         fpc.user_id,
-        au.username as username,
-        au.avatar as avatarUrl,
         fpc.parent_id,
         fpc.root_id,
         fpc.comment_content,
@@ -150,7 +171,6 @@
         fpc.create_at,
         fpc.delete_at
         from forum_activity_comment fpc
-        left join app_user au on fpc.user_id = au.id
         where fpc.activity_id = #{activityId}
         and fpc.parent_id in
         <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">

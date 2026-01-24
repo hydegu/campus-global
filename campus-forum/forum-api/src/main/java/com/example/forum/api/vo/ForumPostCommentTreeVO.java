@@ -97,13 +97,13 @@ public class ForumPostCommentTreeVO {
      */
     @NotNull
     @Schema(description = "创建时间", example = "2023-09-01T10:00:00")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
 
     /**
      * 删除时间
      */
     @Schema(description = "删除时间", example = "2023-09-15T10:00:00")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deleteAt;
 
 }

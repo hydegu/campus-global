@@ -54,8 +54,8 @@ public class ForumPostQueryVO {
     private Integer commentCount;
 
     @Schema(description = "创建时间", example = "2023-09-01T10:00:00")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
     @Schema(description = "删除时间", example = "2023-09-15T10:00:00")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deleteAt;
 }

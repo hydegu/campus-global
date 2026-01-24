@@ -97,19 +97,19 @@ public class ForumPost implements Serializable {
      * 发布时间
      */
     @Schema(description = "发布时间")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
     /**
      * 更新时间
      */
     @Schema(description = "更新时间")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateAt;
 
     /**
      * 软删除时间
      */
     @Schema(description = "软删除时间")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deleteAt;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

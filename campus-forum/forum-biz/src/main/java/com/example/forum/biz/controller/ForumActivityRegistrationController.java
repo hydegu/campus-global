@@ -77,4 +77,8 @@ public class ForumActivityRegistrationController {
         forumActivityRegistrationService.cancelRegistration(userId,id);
         return Result.ok();
     }
+
+    /**
+     *
+     */
 }

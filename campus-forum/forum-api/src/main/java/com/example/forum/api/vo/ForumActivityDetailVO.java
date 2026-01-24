@@ -134,13 +134,8 @@ public class ForumActivityDetailVO {
      */
     @NotNull
     @Schema(description = "创建时间", example = "2023-08-01T00:00:00")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
-    /**
-     * 软删除时间
-     */
-    @Schema(description = "软删除时间", example = "2023-12-01T00:00:00")
-    private LocalDateTime deletedAt;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

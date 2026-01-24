@@ -43,6 +43,12 @@ public class ForumActivity implements Serializable {
     @Schema(description = "活动场地")
     private String activityVenue;
 
+     /**
+     * 发布用户ID
+     */
+    @Schema(description = "发布用户ID")
+    private Long publisherId;
+
     /**
      * 发布区域-学校ID
      */
@@ -125,22 +131,19 @@ public class ForumActivity implements Serializable {
      * 创建时间
      */
     @Schema(description = "创建时间")
-    @TableField("create_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
     /**
      * 更新时间
      */
     @Schema(description = "更新时间")
-    @TableField("update_at")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateAt;
 
     /**
      * 软删除时间
      */
     @Schema(description = "软删除时间")
-    @TableField("delete_at")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deleteAt;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

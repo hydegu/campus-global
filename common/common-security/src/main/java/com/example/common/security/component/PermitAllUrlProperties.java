@@ -35,69 +35,13 @@ public class PermitAllUrlProperties implements InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		log.info("=== PermitAllUrlProperties 初始化开始 ===");
 		urls.addAll(Arrays.asList(DEFAULT_IGNORE_URLS));
-		log.info("默认URL列表: {}", urls);
-		
 		RequestMappingHandlerMapping mapping = SpringUtil.getBean("requestMappingHandlerMapping");
 		Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
-		log.info("找到的HandlerMethod数量: {}", map.size());
-		
-		log.info("开始收集带有@Inner注解的Controller方法路径...");
-		
+
 		map.keySet().forEach(info -> {
 			HandlerMethod handlerMethod = map.get(info);
-			Inner inner = handlerMethod.getMethodAnnotation(Inner.class);
-			if (inner == null) {
-				inner = handlerMethod.getBeanType().getAnnotation(Inner.class);
-			}
-			if (inner != null) {
-				log.info("发现带有@Inner注解的方法: {} - {}", 
-					handlerMethod.getBeanType().getSimpleName(), 
-					handlerMethod.getMethod().getName());
-				
-				try {
-					if (info.getPathPatternsCondition() != null) {
-						log.info("PathPatternsCondition类型: {}", info.getPathPatternsCondition().getClass().getName());
-						log.info("PathPatternsCondition可用方法: {}", 
-							Arrays.stream(info.getPathPatternsCondition().getClass().getMethods())
-								.map(m -> m.getName())
-								.sorted()
-								.toList());
-						
-						info.getPathPatternsCondition().getPatterns().forEach(pathPattern -> {
-							String url = pathPattern.getPatternString();
-							String processedUrl = PATTERN.matcher(url).replaceAll("*");
-							log.info("添加路径到允许列表: {} -> {}", url, processedUrl);
-							urls.add(processedUrl);
-						});
-					} else {
-						log.warn("PathPatternsCondition为null，尝试使用PatternsCondition");
-						if (info.getPatternsCondition() != null) {
-							info.getPatternsCondition().getPatterns().forEach(url -> {
-								String processedUrl = PATTERN.matcher(url).replaceAll("*");
-								log.info("添加路径到允许列表(Spring Boot 2.x API): {} -> {}", url, processedUrl);
-								urls.add(processedUrl);
-							});
-						}
-					}
-				} catch (Exception e) {
-					log.error("使用Spring Boot 3.x API失败: {}", e.getMessage(), e);
-					try {
-						if (info.getPatternsCondition() != null) {
-							info.getPatternsCondition().getPatterns().forEach(url -> {
-								String processedUrl = PATTERN.matcher(url).replaceAll("*");
-								log.info("添加路径到允许列表(Spring Boot 2.x API): {} -> {}", url, processedUrl);
-								urls.add(processedUrl);
-							});
-						}
-					} catch (Exception e2) {
-						log.error("使用Spring Boot 2.x API也失败: {}", e2.getMessage(), e2);
-					}
-				}
-			}
+
 		});
-		
-		log.info("=== 最终允许无认证访问的URL列表: {} ===", urls);
 	}
 }

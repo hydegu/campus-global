@@ -158,9 +158,9 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
     private void incrementViewCount(Long postId) {
         try {
             ForumPost post = getById(postId);
-            if (post != null && post.getDeletedAt() == null) {
+            if (post != null && post.getDeleteAt() == null) {
                 post.setViewCount((post.getViewCount() != null ? post.getViewCount() : 0) + 1);
-                post.setUpdatedAt(LocalDateTime.now());
+                post.setUpdateAt(LocalDateTime.now());
                 updateById(post);
                 log.debug("帖子[{}]浏览量+1，当前浏览量: {}", postId, post.getViewCount());
             }
@@ -209,7 +209,7 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         }
 
         // 4. 软删除帖子
-        existingPost.setDeletedAt(LocalDateTime.now());
+        existingPost.setDeleteAt(LocalDateTime.now());
         updateById(existingPost);
 
         // 5. 级联删除该帖子的所有评论（在事务内执行，确保原子性）
@@ -237,7 +237,6 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         }
         // 2. 增加点赞数
         post.setLikeCount((post.getLikeCount() != null ? post.getLikeCount() : 0) + 1);
-        post.setUpdatedAt(LocalDateTime.now());
         updateById(post);
         forumLikeRecordMapper.addLikeRecord(likeDTO);
         log.info("帖子[{}]点赞成功，当前点赞数: {}", postId, post.getLikeCount());
@@ -264,7 +263,7 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         int currentLikeCount = post.getLikeCount() != null ? post.getLikeCount() : 0;
         if (currentLikeCount > 0) {
             post.setLikeCount(currentLikeCount - 1);
-            post.setUpdatedAt(LocalDateTime.now());
+            post.setUpdateAt(LocalDateTime.now());
             updateById(post);
             forumLikeRecordMapper.subLikeRecord(likeDTO);
         }
@@ -306,7 +305,7 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         vo.setShareCount(dto.getShareCount());
         vo.setFavoriteCount(dto.getFavoriteCount());
         vo.setCommentCount(dto.getCommentCount());
-        vo.setCreatedAt(dto.getCreatedAt());
+        vo.setCreateAt(dto.getCreateAt());
 
 
         // 处理imageUrls（List<String>转String数组）
@@ -329,8 +328,8 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         // 构建查询条件
         LambdaQueryWrapper<ForumPost> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ForumPost::getUserId, currentUserId)
-                .isNull(ForumPost::getDeletedAt)  // 只查询未删除的帖子
-                .orderByDesc(ForumPost::getCreatedAt); // 按创建时间倒序
+                .isNull(ForumPost::getDeleteAt)  // 只查询未删除的帖子
+                .orderByDesc(ForumPost::getCreateAt); // 按创建时间倒序
         // 执行分页查询
         IPage<ForumPost> resultPage = page(page, queryWrapper);
 
@@ -392,8 +391,8 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
         vo.setShareCount(forumPost.getShareCount());
         vo.setFavoriteCount(forumPost.getFavoriteCount());
         vo.setCommentCount(forumPost.getCommentCount());
-        vo.setCreatedAt(forumPost.getCreatedAt());
-        vo.setUpdatedAt(forumPost.getUpdatedAt());
+        vo.setCreateAt(forumPost.getCreateAt());
+        vo.setUpdateAt(forumPost.getUpdateAt());
 
         // 处理图片URL数组
         if (forumPost.getImageUrls() != null && !forumPost.getImageUrls().isEmpty()) {

@@ -1,5 +1,6 @@
 package com.example.forum.api.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -37,6 +38,12 @@ public class ForumActivityCommentQueryVO {
     @NotNull
     @Schema(description = "用户名", example = "张三")
     private String username;
+
+    /**
+     * 用户头像
+     */
+    @Schema(description = "用户头像")
+    private String avatarUrl;
 
     /**
      * 父评论ID
@@ -90,7 +97,7 @@ public class ForumActivityCommentQueryVO {
      */
     @NotNull
     @Schema(description = "创建时间", example = "2023-09-01T10:00:00")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
     /**
      * 子评论列表
@@ -102,5 +109,5 @@ public class ForumActivityCommentQueryVO {
      * 删除时间
      */
     @Schema(description = "删除时间", example = "2023-09-15T10:00:00")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deleteAt;
 }

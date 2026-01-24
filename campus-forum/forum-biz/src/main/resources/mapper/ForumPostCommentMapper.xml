@@ -16,9 +16,9 @@
             <result property="replyCount" column="reply_count" />
             <result property="status" column="status" />
             <result property="deletedBy" column="deleted_by" />
-            <result property="deletedAt" column="deleted_at" />
-            <result property="createdAt" column="created_at" />
-            <result property="updatedAt" column="updated_at" />
+            <result property="createAt" column="create_at" />
+            <result property="updateAt" column="update_at" />
+            <result property="deleteAt" column="delete_at" />
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -74,26 +74,24 @@
         and fpc.status = 1
     </select>
 
-    <select id="selectAllDescendantCommentsByParentIds" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO">
-        WITH RECURSIVE comment_recursive AS (
-        -- 基础查询：一级评论的直接子级（二级评论）
+    <select id="selectAllDescendantCommentsByParentIdsNonRecursive" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO">
         select
-        fpc.id,
-        fpc.post_id,
-        fpc.user_id,
-        fpc.parent_id,
-        fpc.root_id,
-        fpc.comment_content,
-        fpc.level,
-        fpc.like_count,
-        fpc.reply_count,
-        fpc.status,
-        fpc.create_at,
-        fpc.delete_at
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.create_at,
+            fpc.delete_at
         from forum_post_comment fpc
         where fpc.post_id = #{postId}
         <if test="parentIds != null and parentIds.size() > 0">
-            and fpc.parent_id in
+            and fpc.root_id in
             <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
                 #{parentId}
             </foreach>
@@ -103,29 +101,8 @@
         </if>
         and fpc.delete_at is null
         and fpc.status = 1
-        -- 递归查询：所有后代评论（三级、四级...，通过关联自身ID和父ID实现）
-        UNION ALL
-        select
-        c.id,
-        c.post_id,
-        c.user_id,
-        c.parent_id,
-        c.root_id,
-        c.comment_content,
-        c.level,
-        c.like_count,
-        c.reply_count,
-        c.status,
-        c.create_at,
-        c.delete_at
-        from forum_post_comment c
-        inner join comment_recursive cr on c.parent_id = cr.id
-        where c.post_id = #{postId}
-        and c.delete_at is null
-        and c.status = 1
-        )
-        -- 最终查询所有递归结果
-        select * from comment_recursive order by create_at ASC
+        and fpc.level &gt; 0  -- 排除根评论本身
+        order by fpc.create_at ASC
     </select>
 
     <select id="selectCommentPageByPostId" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO">

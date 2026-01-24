@@ -27,12 +27,13 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "活动管理", description = "活动列表")
+
 @StandardApiResponses
 @RestController
 @RequestMapping("/api/forum/activities")
 @RequiredArgsConstructor
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
+@Tag(name = "活动管理", description = "活动列表")
 public class ForumActivityController {
     private final ForumActivityService forumActivityService;
     private final ForumActivityCommentService forumActivityCommentService;
@@ -131,13 +132,11 @@ public class ForumActivityController {
     public Result<PageUtil.PageResult<ForumActivityCommentQueryVO>> getForumActivityCommentList(
         @Parameter(
             description = "活动ID",
-            example = "1",
+            example = "21",
             required = true
         )
         @PathVariable Long id,
-        @Parameter(
-            description = "分页查询参数",
-            schema = @Schema(implementation = ForumCommentListDTO.class)
+        @Parameter(description = "分页查询参数", schema = @Schema(implementation = ForumCommentListDTO.class)
         )
         @ModelAttribute @ParameterObject @Valid ForumCommentListDTO queryDTO
     ) {

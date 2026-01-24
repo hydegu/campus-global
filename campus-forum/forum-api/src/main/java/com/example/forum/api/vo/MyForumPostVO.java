@@ -39,8 +39,8 @@ public class MyForumPostVO {
     private Integer commentCount;
 
     @Schema(description = "创建时间", example = "2025-12-01T10:00:00")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
     @Schema(description = "更新时间", example = "2025-12-01T10:00:00")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateAt;
 }

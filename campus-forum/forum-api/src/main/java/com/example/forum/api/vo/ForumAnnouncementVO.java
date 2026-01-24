@@ -30,7 +30,7 @@ public class ForumAnnouncementVO implements Serializable {
      */
     private String schoolName;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateAt;
 }

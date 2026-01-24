@@ -53,11 +53,11 @@ public interface ForumPostCommentMapper extends BaseMapper<ForumPostComment> {
     List<ForumPostCommentQueryVO> selectCommentByParentIdsAndLevel(@Param("postId")Long postId, @Param("parentIds")List<Long> parentIds, @Param("level")Integer level);
 
     /**
-     * 批量查询指定父评论ID的所有后代评论（二级、三级、四级...）
+     * 批量查询指定父评论ID的所有后代评论（非递归方式，使用root_id）
      * @param postId 活动ID
      * @param parentIds 父评论ID列表（一级评论ID）
      * @return 所有后代评论列表
      */
-    List<ForumPostCommentQueryVO> selectAllDescendantCommentsByParentIds(@Param("postId") Long postId, @Param("parentIds") List<Long> parentIds);
+    List<ForumPostCommentQueryVO> selectAllDescendantCommentsByParentIdsNonRecursive(@Param("postId") Long postId, @Param("parentIds") List<Long> parentIds);
 
 }
