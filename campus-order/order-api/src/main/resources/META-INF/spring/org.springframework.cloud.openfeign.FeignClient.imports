@@ -1,0 +1,2 @@
+com.example.order.api.feign.RemoteUserService
+com.example.order.api.feign.RemoteMerchantService

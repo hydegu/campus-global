@@ -1,8 +1,7 @@
 package com.example.auth.password;
 
 import com.example.auth.support.base.OAuth2ResourceOwnerBaseAuthenticationProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -21,10 +20,9 @@ import static com.example.common.core.constant.SecurityConstants.PASSWORD;
 /**
  * OAuth2 资源所有者密码认证提供者
  */
+@Slf4j
 public class OAuth2ResourceOwnerPasswordAuthenticationProvider
 		extends OAuth2ResourceOwnerBaseAuthenticationProvider<OAuth2ResourceOwnerPasswordAuthenticationToken> {
-
-	private static final Logger LOGGER = LogManager.getLogger(OAuth2ResourceOwnerPasswordAuthenticationProvider.class);
 
 	/**
 	 * 使用提供的参数构造一个OAuth2ResourceOwnerPasswordAuthenticationProvider
@@ -48,6 +46,11 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider
 	public UsernamePasswordAuthenticationToken buildToken(Map<String, Object> reqParameters) {
 		String username = (String) reqParameters.get(OAuth2ParameterNames.USERNAME);
 		String password = (String) reqParameters.get(OAuth2ParameterNames.PASSWORD);
+		log.info("=== 开始构建认证令牌 ===");
+		log.info("用户名: {}", username);
+		log.info("密码长度: {}", password != null ? password.length() : 0);
+		log.info("密码前3位: {}", password != null && password.length() >= 3 ? password.substring(0, 3) : "密码为空或太短");
+		log.info("所有请求参数: {}", reqParameters);
 		return new UsernamePasswordAuthenticationToken(username, password);
 	}
 
@@ -59,7 +62,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider
 	@Override
 	public boolean supports(Class<?> authentication) {
 		boolean supports = OAuth2ResourceOwnerPasswordAuthenticationToken.class.isAssignableFrom(authentication);
-		LOGGER.debug("supports authentication=" + authentication + " returning " + supports);
+		log.debug("supports authentication=" + authentication + " returning " + supports);
 		return supports;
 	}
 
