@@ -6,6 +6,7 @@ import com.example.common.core.util.WebUtils;
 import com.example.common.security.service.UserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -33,6 +34,7 @@ import static com.example.common.core.constant.SecurityConstants.PASSWORD;
 /**
  * 基于DAO的认证提供者实现，用于处理用户名密码认证
  */
+@Slf4j
 public class DaoAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
 	/**
@@ -70,21 +72,40 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 	protected void additionalAuthenticationChecks(UserDetails userDetails,
 			UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
 
-		// 只有密码模式需要校验密码
 		String grantType = WebUtils.getRequest().get().getParameter(OAuth2ParameterNames.GRANT_TYPE);
+		log.info("=== 开始额外认证检查 ===");
+		log.info("授权类型: {}", grantType);
+		log.info("用户名: {}", userDetails.getUsername());
+		log.info("用户状态 - enabled: {}, accountNonExpired: {}, credentialsNonExpired: {}, accountNonLocked: {}", 
+			userDetails.isEnabled(), userDetails.isAccountNonExpired(), 
+			userDetails.isCredentialsNonExpired(), userDetails.isAccountNonLocked());
+
 		if (!StrUtil.equals(PASSWORD, grantType)) {
+			log.info("非密码模式，跳过密码验证");
 			return;
 		}
 
 		if (authentication.getCredentials() == null) {
-			this.logger.debug("认证失败：未提供凭证");
+			log.error("认证失败：未提供凭证");
+			log.error("用户名: {}", userDetails.getUsername());
 			throw new BadCredentialsException("用户名或密码错误");
 		}
 		String presentedPassword = authentication.getCredentials().toString();
-		if (!this.passwordEncoder.matches(presentedPassword, userDetails.getPassword())) {
-			this.logger.debug("认证失败：密码不匹配");
+		log.info("输入的密码长度: {}", presentedPassword.length());
+		log.info("输入的密码前3位: {}", presentedPassword.length() >= 3 ? presentedPassword.substring(0, 3) : "密码太短");
+		log.info("数据库中的密码: {}", userDetails.getPassword());
+		
+		boolean passwordMatches = this.passwordEncoder.matches(presentedPassword, userDetails.getPassword());
+		log.info("密码匹配结果: {}", passwordMatches);
+		
+		if (!passwordMatches) {
+			log.error("认证失败：密码不匹配");
+			log.error("用户名: {}", userDetails.getUsername());
+			log.error("输入密码长度: {}", presentedPassword.length());
+			log.error("数据库密码: {}", userDetails.getPassword());
 			throw new BadCredentialsException("用户名或密码错误");
 		}
+		log.info("密码验证成功");
 	}
 
 	/**
@@ -99,6 +120,9 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 	@SneakyThrows
 	@Override
 	protected final UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) {
+		log.info("=== 开始检索用户 ===");
+		log.info("用户名: {}", username);
+		
 		prepareTimingAttackProtection();
 		HttpServletRequest request = WebUtils.getRequest()
 			.orElseThrow(
@@ -106,15 +130,22 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 
 		String grantType = WebUtils.getRequest().get().getParameter(OAuth2ParameterNames.GRANT_TYPE);
 		String clientId = WebUtils.getRequest().get().getParameter(OAuth2ParameterNames.CLIENT_ID);
+		
+		log.info("授权类型: {}", grantType);
+		log.info("客户端ID: {}", clientId);
 
 		if (StrUtil.isBlank(clientId)) {
 			clientId = Optional.ofNullable(basicConvert.convert(request))
 				.map(UsernamePasswordAuthenticationToken::getName)
 				.orElse(null);
+			log.info("从Basic Auth中获取客户端ID: {}", clientId);
 		}
 
 		Map<String, UserDetailsService> userDetailsServiceMap = SpringUtil
 			.getBeansOfType(UserDetailsService.class);
+		
+		log.info("找到的UserDetailsService数量: {}", userDetailsServiceMap.size());
+		userDetailsServiceMap.forEach((key, value) -> log.info("UserDetailsService: {} - {}", key, value.getClass().getName()));
 
 		String finalClientId = clientId;
 		Optional<UserDetailsService> optional = userDetailsServiceMap.values()
@@ -123,25 +154,37 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 			.max(Comparator.comparingInt(Ordered::getOrder));
 
 		if (optional.isEmpty()) {
+			log.error("未找到匹配的UserDetailsService");
+			log.error("客户端ID: {}, 授权类型: {}", finalClientId, grantType);
 			throw new InternalAuthenticationServiceException("UserDetailsService 错误，未注册");
 		}
+		
+		UserDetailsService selectedService = optional.get();
+		log.info("选择的UserDetailsService: {}", selectedService.getClass().getName());
+		log.info("UserDetailsService Order: {}", selectedService.getOrder());
 
 		try {
-			UserDetails loadedUser = optional.get().loadUserByUsername(username);
+			UserDetails loadedUser = selectedService.loadUserByUsername(username);
 			if (loadedUser == null) {
+				log.error("UserDetailsService返回null");
+				log.error("UserDetailsService: {}", selectedService.getClass().getName());
 				throw new InternalAuthenticationServiceException(
 						"UserDetailsService 返回 null，违反了接口契约");
 			}
+			log.info("用户检索成功");
 			return loadedUser;
 		}
 		catch (UsernameNotFoundException ex) {
+			log.error("用户未找到: {}", ex.getMessage());
 			mitigateAgainstTimingAttack(authentication);
 			throw ex;
 		}
 		catch (InternalAuthenticationServiceException ex) {
+			log.error("内部认证服务异常: {}", ex.getMessage(), ex);
 			throw ex;
 		}
 		catch (Exception ex) {
+			log.error("检索用户时发生异常: {}", ex.getMessage(), ex);
 			throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
 		}
 	}

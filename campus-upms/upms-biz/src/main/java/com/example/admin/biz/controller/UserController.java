@@ -11,6 +11,7 @@ import com.example.admin.api.vo.UserRiderListVO;
 import com.example.admin.biz.service.UserService;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
+import com.example.common.security.annotation.Inner;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 @StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
@@ -31,6 +32,7 @@ public class UserController {
 	private final UserService userService;
 
 	@GetMapping("/info/query")
+	@Inner
 	@Operation(summary = "查询用户信息", description = "通过用户名查询用户详细信息，包括角色信息")
 	public Result<UserInfo> getUserInfo(String username) {
 		UserInfo userInfo = userService.getUserInfo(username);
