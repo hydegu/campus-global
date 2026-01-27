@@ -22,6 +22,12 @@ public class UserAppListVO extends AbstractUserVO implements Serializable {
 	@Schema(description = "手机号（已脱敏）", example = "138****8000")
 	private String phone;
 
+	@Schema(description = "昵称", example = "小明")
+	private String nickname;
+
+	@Schema(description = "邮箱", example = "user@example.com")
+	private String email;
+
 	@Schema(description = "学号", example = "20240001")
 	private String code;
 

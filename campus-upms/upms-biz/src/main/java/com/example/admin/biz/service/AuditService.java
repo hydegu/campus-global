@@ -1,12 +1,15 @@
 package com.example.admin.biz.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.admin.api.entity.AuditRecord;
 import com.example.admin.api.dto.AuditDTO;
+import com.example.admin.api.dto.AuditRecordQueryDTO;
+import com.example.admin.api.dto.CreateAuditRecordDTO;
 import com.example.admin.api.dto.MerchantSettleInQueryDTO;
 import com.example.admin.api.dto.PartnerAuditQueryDTO;
 import com.example.admin.api.dto.RiderApplyQueryDTO;
 import com.example.admin.api.dto.ServiceStaffAuditQueryDTO;
+import com.example.admin.api.entity.AuditRecord;
+import com.example.admin.api.vo.AuditRecordVO;
 import com.example.admin.api.vo.MerchantSettleInVO;
 import com.example.admin.api.vo.PartnerAuditVO;
 import com.example.admin.api.vo.RiderApplyVO;
@@ -31,4 +34,25 @@ public interface AuditService {
 	Page<ServiceStaffAuditVO> listServiceStaffAudit(ServiceStaffAuditQueryDTO queryDTO);
 
 	Page<PartnerAuditVO> listPartnerAudit(PartnerAuditQueryDTO queryDTO);
+
+	/**
+	 * 创建审核记录
+	 * @param dto 创建审核记录DTO
+	 * @return 审核记录ID
+	 */
+	Long createAuditRecord(CreateAuditRecordDTO dto);
+
+	/**
+	 * 根据ID查询审核记录
+	 * @param id 审核记录ID
+	 * @return 审核记录VO
+	 */
+	AuditRecordVO getAuditRecordById(Long id);
+
+	/**
+	 * 分页查询审核记录
+	 * @param queryDTO 查询条件DTO
+	 * @return 审核记录分页列表
+	 */
+	Page<AuditRecordVO> listAuditRecords(AuditRecordQueryDTO queryDTO);
 }

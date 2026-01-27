@@ -1,9 +1,7 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.admin.api.dto.ResetPasswordDTO;
-import com.example.admin.api.dto.UserInfo;
-import com.example.admin.api.dto.UserQueryDTO;
+import com.example.admin.api.dto.*;
 import com.example.admin.api.vo.*;
 import com.example.admin.biz.service.UserService;
 import com.example.common.core.util.Result;
@@ -109,6 +107,41 @@ public class UserController {
 	public Result<Void> resetUserPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
 		userService.resetUserPassword(id, resetPasswordDTO);
 		return Result.ok();
+	}
+
+	@PostMapping("/app-user/create")
+	@Operation(summary = "创建C端用户", description = "创建新的C端用户，同时插入base_user表和user_app表。需要提供用户名、密码、手机号等必填信息")
+	public Result<UserAppListVO> createAppUser(@Valid @RequestBody CreateAppUserDTO dto) {
+		UserAppListVO result = userService.createAppUser(dto);
+		return Result.ok(result);
+	}
+
+	@PostMapping("/mch-user/create")
+	@Operation(summary = "创建商家用户", description = "创建新的商家用户，同时插入base_user表和user_mch表。需要提供用户名、密码、手机号、商户名等必填信息")
+	public Result<UserMchListVO> createMchUser(@Valid @RequestBody CreateMchUserDTO dto) {
+		UserMchListVO result = userService.createMchUser(dto);
+		return Result.ok(result);
+	}
+
+	@PostMapping("/rider-user/create")
+	@Operation(summary = "创建骑手用户", description = "创建新的骑手用户，同时插入base_user表和user_rider表。需要提供用户名、密码、手机号、真实姓名、身份证号等必填信息")
+	public Result<UserRiderListVO> createRiderUser(@Valid @RequestBody CreateRiderUserDTO dto) {
+		UserRiderListVO result = userService.createRiderUser(dto);
+		return Result.ok(result);
+	}
+
+	@PostMapping("/sys-user/create")
+	@Operation(summary = "创建系统用户", description = "创建新的系统用户，同时插入base_user表和user_sys表。需要提供用户名、密码、手机号等必填信息")
+	public Result<UserSysListVO> createSysUser(@Valid @RequestBody CreateSysUserDTO dto) {
+		UserSysListVO result = userService.createSysUser(dto);
+		return Result.ok(result);
+	}
+
+	@PostMapping("/partner-user/create")
+	@Operation(summary = "创建合伙人用户", description = "创建新的合伙人用户，同时插入base_user表和user_partner表。需要提供用户名、密码、手机号、合伙人姓名等必填信息")
+	public Result<UserPartnerListVO> createPartnerUser(@Valid @RequestBody CreatePartnerUserDTO dto) {
+		UserPartnerListVO result = userService.createPartnerUser(dto);
+		return Result.ok(result);
 	}
 
 	@DeleteMapping("/{id}")

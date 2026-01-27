@@ -22,6 +22,12 @@ public class UserPartnerListVO extends AbstractUserVO implements Serializable {
 	@Schema(description = "手机号（已脱敏）", example = "138****8000")
 	private String phone;
 
+	@Schema(description = "昵称", example = "合伙人001")
+	private String nickname;
+
+	@Schema(description = "邮箱", example = "partner@example.com")
+	private String email;
+
 	@Schema(description = "头像URL", example = "http://example.com/avatar.jpg")
 	private String avatar;
 
@@ -42,6 +48,9 @@ public class UserPartnerListVO extends AbstractUserVO implements Serializable {
 
 	@Schema(description = "上级合伙人ID", example = "0")
 	private Long parentId;
+
+	@Schema(description = "上级合伙人名称", example = "张三")
+	private String parentName;
 
 	@Schema(description = "合伙人状态:1启用 0禁用")
 	private Integer partnerStatus;

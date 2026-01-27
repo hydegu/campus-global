@@ -23,6 +23,12 @@ public class UserMchListVO extends AbstractUserVO implements Serializable {
 	@Schema(description = "手机号（已脱敏）", example = "138****8000")
 	private String phone;
 
+	@Schema(description = "昵称", example = "美味餐厅")
+	private String nickname;
+
+	@Schema(description = "邮箱", example = "merchant@example.com")
+	private String email;
+
 	@Schema(description = "头像URL", example = "http://example.com/avatar.jpg")
 	private String avatar;
 
@@ -30,10 +36,13 @@ public class UserMchListVO extends AbstractUserVO implements Serializable {
 	private String mchName;
 
 	@Schema(description = "商户logo", example = "http://example.com/logo.jpg")
-	private String mchLogo;
+	private String logo;
 
 	@Schema(description = "联系人姓名", example = "张三")
 	private String contactName;
+
+	@Schema(description = "合伙人名称", example = "合伙人001")
+	private String partnerName;
 
 	@Schema(description = "最低起送金额", example = "20.00")
 	private BigDecimal minimumOrderAmount;

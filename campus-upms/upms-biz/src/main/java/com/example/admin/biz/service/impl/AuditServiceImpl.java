@@ -12,6 +12,8 @@ import com.example.admin.api.entity.UserMch;
 import com.example.admin.api.entity.UserPartner;
 import com.example.admin.api.entity.UserRider;
 import com.example.admin.api.dto.AuditDTO;
+import com.example.admin.api.dto.AuditRecordQueryDTO;
+import com.example.admin.api.dto.CreateAuditRecordDTO;
 import com.example.admin.api.dto.MerchantSettleInQueryDTO;
 import com.example.admin.api.dto.PartnerAuditQueryDTO;
 import com.example.admin.api.dto.RiderApplyQueryDTO;
@@ -25,6 +27,7 @@ import com.example.admin.biz.mapper.UserMchMapper;
 import com.example.admin.biz.mapper.UserPartnerMapper;
 import com.example.admin.biz.mapper.UserRiderMapper;
 import com.example.admin.biz.service.AuditService;
+import com.example.admin.api.vo.AuditRecordVO;
 import com.example.admin.api.vo.MerchantSettleInVO;
 import com.example.admin.api.vo.PartnerAuditVO;
 import com.example.admin.api.vo.RiderApplyVO;
@@ -619,5 +622,93 @@ public class AuditServiceImpl implements AuditService {
 		if (size == null || size < 1 || size > 1000) {
 			throw new BusinessException("INVALID_SIZE", "每页数量必须在1-1000之间");
 		}
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Long createAuditRecord(CreateAuditRecordDTO dto) {
+		if (dto == null) {
+			throw new BusinessException("INVALID_PARAM", "创建参数不能为空");
+		}
+
+		AuditRecord auditRecord = new AuditRecord();
+		auditRecord.setBizType(dto.getBizType());
+		auditRecord.setApplicantId(dto.getApplicantId());
+		auditRecord.setRemark(dto.getRemark());
+		auditRecord.setStatus(AuditStatus.PENDING.getCode());
+		auditRecord.setAuditNo(generateAuditNo(dto.getBizType()));
+		auditRecord.setCreateAt(java.time.LocalDateTime.now());
+		auditRecord.setUpdateAt(java.time.LocalDateTime.now());
+
+		auditRecordMapper.insert(auditRecord);
+
+		log.info("创建审核记录成功，审核编号：{}，业务类型：{}，申请人ID：{}", 
+			auditRecord.getAuditNo(), dto.getBizType(), dto.getApplicantId());
+
+		return auditRecord.getId();
+	}
+
+	@Override
+	public AuditRecordVO getAuditRecordById(Long id) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "审核记录ID不能为空");
+		}
+
+		AuditRecord auditRecord = auditRecordMapper.selectById(id);
+		if (auditRecord == null) {
+			throw new BusinessException("AUDIT_RECORD_NOT_FOUND", "审核记录不存在");
+		}
+
+		return convertToVO(auditRecord);
+	}
+
+	@Override
+	public Page<AuditRecordVO> listAuditRecords(AuditRecordQueryDTO queryDTO) {
+		validatePageParams(queryDTO.getPage(), queryDTO.getSize());
+
+		Page<AuditRecord> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
+
+		LambdaQueryWrapper<AuditRecord> wrapper = Wrappers.lambdaQuery();
+		if (queryDTO.getStatus() != null) {
+			wrapper.eq(AuditRecord::getStatus, queryDTO.getStatus());
+		}
+		if (StringUtils.hasText(queryDTO.getBizType())) {
+			wrapper.eq(AuditRecord::getBizType, queryDTO.getBizType());
+		}
+		wrapper.orderByDesc(AuditRecord::getCreateAt);
+
+		Page<AuditRecord> auditPage = auditRecordMapper.selectPage(page, wrapper);
+
+		Page<AuditRecordVO> resultPage = new Page<>(auditPage.getCurrent(), auditPage.getSize(), auditPage.getTotal());
+		resultPage.setRecords(auditPage.getRecords().stream()
+				.map(this::convertToVO)
+				.collect(Collectors.toList()));
+
+		return resultPage;
+	}
+
+	private String generateAuditNo(String bizType) {
+		String prefix = "AUD";
+		if (StringUtils.hasText(bizType)) {
+			prefix = bizType.substring(0, Math.min(3, bizType.length()));
+		}
+		return prefix + System.currentTimeMillis();
+	}
+
+	private AuditRecordVO convertToVO(AuditRecord auditRecord) {
+		if (auditRecord == null) {
+			return null;
+		}
+		AuditRecordVO vo = new AuditRecordVO();
+		vo.setId(auditRecord.getId());
+		vo.setAuditNo(auditRecord.getAuditNo());
+		vo.setBizType(auditRecord.getBizType());
+		vo.setApplicantId(auditRecord.getApplicantId());
+		vo.setStatus(auditRecord.getStatus());
+		vo.setAuditorId(auditRecord.getAuditorId());
+		vo.setRemark(auditRecord.getRemark());
+		vo.setCreateAt(auditRecord.getCreateAt());
+		vo.setUpdateAt(auditRecord.getUpdateAt());
+		return vo;
 	}
 }

@@ -1,5 +1,6 @@
 package com.example.admin.biz.service.impl;
 
+import cn.hutool.extra.qrcode.QrCodeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -25,12 +26,19 @@ import com.example.admin.api.vo.AbstractUserVO;
 import com.example.common.core.enums.Gender;
 import com.example.common.core.enums.UserType;
 import com.example.common.core.exception.BusinessException;
+import com.example.common.file.core.FileTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
@@ -50,6 +58,8 @@ public class UserServiceImpl implements UserService {
 	private final UserPartnerMapper userPartnerMapper;
 	private final UserSysMapper userSysMapper;
 	private final SysSchoolMapper sysSchoolMapper;
+	private final FileTemplate fileTemplate;
+	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	@Override
 	public UserInfo getUserInfo(String username) {
@@ -499,7 +509,7 @@ public class UserServiceImpl implements UserService {
 		UserMch userMch = userMchMap.get(userId);
 		if (userMch != null) {
 			vo.setMchName(userMch.getMchName());
-			vo.setMchLogo(userMch.getLogo());
+			vo.setLogo(userMch.getLogo());
 			vo.setContactName(userMch.getContactName());
 			vo.setIsOpen(userMch.getIsOpen());
 			vo.setMinimumOrderAmount(userMch.getMinimumOrderAmount());
@@ -890,6 +900,396 @@ public class UserServiceImpl implements UserService {
 		userRoleMapper.delete(roleWrapper);
 
 		log.info("用户删除成功，用户ID：{}", id);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public UserAppListVO createAppUser(CreateAppUserDTO dto) {
+		// 校验用户名唯一性
+		LambdaQueryWrapper<BaseUser> usernameWrapper = Wrappers.lambdaQuery();
+		usernameWrapper.eq(BaseUser::getUsername, dto.getUsername());
+		if (baseUserMapper.selectCount(usernameWrapper) > 0) {
+			throw new BusinessException("USERNAME_EXISTS", "用户名已存在");
+		}
+
+		// 校验手机号唯一性
+		LambdaQueryWrapper<BaseUser> phoneWrapper = Wrappers.lambdaQuery();
+		phoneWrapper.eq(BaseUser::getPhone, dto.getPhone());
+		if (baseUserMapper.selectCount(phoneWrapper) > 0) {
+			throw new BusinessException("PHONE_EXISTS", "手机号已存在");
+		}
+
+		// 密码加密处理
+		String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+		// 插入base_user表
+		BaseUser baseUser = new BaseUser();
+		baseUser.setUsername(dto.getUsername());
+		baseUser.setPassword(encodedPassword);
+		baseUser.setPhone(dto.getPhone());
+		baseUser.setEmail(dto.getEmail());
+		baseUser.setNickname(dto.getNickname());
+		baseUser.setAvatar(dto.getAvatar());
+		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+		baseUser.setUserType(UserType.APP.getCode());
+		baseUserMapper.insert(baseUser);
+
+		// 插入user_app表
+		UserApp userApp = new UserApp();
+		userApp.setBaseUserId(baseUser.getId());
+		userApp.setRealName(dto.getRealName());
+		userApp.setGender(dto.getGender());
+		userApp.setSchoolId(dto.getSchoolId());
+		userApp.setStuCode(dto.getStuCode());
+		userApp.setBalance(BigDecimal.ZERO);
+		userApp.setTotalAmount(BigDecimal.ZERO);
+		userAppMapper.insert(userApp);
+
+		log.info("C端用户创建成功，用户ID：{}，用户名：{}", baseUser.getId(), dto.getUsername());
+
+		// 构建并返回UserAppListVO
+		UserAppListVO vo = new UserAppListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(maskPhone(baseUser.getPhone()));
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setRealName(userApp.getRealName());
+		vo.setGender(Gender.getText(userApp.getGender()));
+		vo.setCode(userApp.getStuCode());
+		vo.setBalance(userApp.getBalance());
+		vo.setCommissionTotal(userApp.getTotalAmount());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		// 获取学校名称
+		if (userApp.getSchoolId() != null) {
+			SysSchool school = sysSchoolMapper.selectById(userApp.getSchoolId());
+			if (school != null) {
+				vo.setSchoolName(school.getSchoolName());
+			}
+		}
+
+		return vo;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public UserMchListVO createMchUser(CreateMchUserDTO dto) {
+		// 校验用户名唯一性
+		LambdaQueryWrapper<BaseUser> usernameWrapper = Wrappers.lambdaQuery();
+		usernameWrapper.eq(BaseUser::getUsername, dto.getUsername());
+		if (baseUserMapper.selectCount(usernameWrapper) > 0) {
+			throw new BusinessException("USERNAME_EXISTS", "用户名已存在");
+		}
+
+		// 校验手机号唯一性
+		LambdaQueryWrapper<BaseUser> phoneWrapper = Wrappers.lambdaQuery();
+		phoneWrapper.eq(BaseUser::getPhone, dto.getPhone());
+		if (baseUserMapper.selectCount(phoneWrapper) > 0) {
+			throw new BusinessException("PHONE_EXISTS", "手机号已存在");
+		}
+
+		// 密码加密处理
+		String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+		// 插入base_user表
+		BaseUser baseUser = new BaseUser();
+		baseUser.setUsername(dto.getUsername());
+		baseUser.setPassword(encodedPassword);
+		baseUser.setPhone(dto.getPhone());
+		baseUser.setEmail(dto.getEmail());
+		baseUser.setNickname(dto.getNickname());
+		baseUser.setAvatar(dto.getAvatar());
+		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+		baseUser.setUserType(UserType.MERCHANT.getCode());
+		baseUserMapper.insert(baseUser);
+
+		// 插入user_mch表
+		UserMch userMch = new UserMch();
+		userMch.setBaseUserId(baseUser.getId());
+		userMch.setMchName(dto.getMchName());
+		userMch.setContactName(dto.getContactName());
+		userMch.setLogo(dto.getLogo());
+		userMch.setBusinessLicenseUrls(dto.getBusinessLicenseUrls());
+		userMch.setPartnerId(dto.getPartnerId());
+		userMch.setIdCard(dto.getIdCard());
+		userMch.setMinimumOrderAmount(dto.getMinimumOrderAmount() != null ? dto.getMinimumOrderAmount() : BigDecimal.ZERO);
+		userMch.setCardNumber(dto.getCardNumber());
+		userMch.setIsOpen(0);
+		userMchMapper.insert(userMch);
+
+		log.info("商家用户创建成功，用户ID：{}，用户名：{}，商户名：{}", baseUser.getId(), dto.getUsername(), dto.getMchName());
+
+		// 构建并返回UserMchListVO
+		UserMchListVO vo = new UserMchListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(maskPhone(baseUser.getPhone()));
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setMchName(userMch.getMchName());
+		vo.setContactName(userMch.getContactName());
+		vo.setLogo(userMch.getLogo());
+		vo.setIsOpen(userMch.getIsOpen());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		// 获取合伙人名称
+		if (userMch.getPartnerId() != null) {
+			UserPartner partner = userPartnerMapper.selectOne(
+				Wrappers.lambdaQuery(UserPartner.class).eq(UserPartner::getBaseUserId, userMch.getPartnerId())
+			);
+			if (partner != null) {
+				vo.setPartnerName(partner.getPartnerName());
+			}
+		}
+
+		return vo;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public UserRiderListVO createRiderUser(CreateRiderUserDTO dto) {
+		// 校验用户名唯一性
+		LambdaQueryWrapper<BaseUser> usernameWrapper = Wrappers.lambdaQuery();
+		usernameWrapper.eq(BaseUser::getUsername, dto.getUsername());
+		if (baseUserMapper.selectCount(usernameWrapper) > 0) {
+			throw new BusinessException("USERNAME_EXISTS", "用户名已存在");
+		}
+
+		// 校验手机号唯一性
+		LambdaQueryWrapper<BaseUser> phoneWrapper = Wrappers.lambdaQuery();
+		phoneWrapper.eq(BaseUser::getPhone, dto.getPhone());
+		if (baseUserMapper.selectCount(phoneWrapper) > 0) {
+			throw new BusinessException("PHONE_EXISTS", "手机号已存在");
+		}
+
+		// 密码加密处理
+		String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+		// 插入base_user表
+		BaseUser baseUser = new BaseUser();
+		baseUser.setUsername(dto.getUsername());
+		baseUser.setPassword(encodedPassword);
+		baseUser.setPhone(dto.getPhone());
+		baseUser.setEmail(dto.getEmail());
+		baseUser.setNickname(dto.getNickname());
+		baseUser.setAvatar(dto.getAvatar());
+		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+		baseUser.setUserType(UserType.RIDER.getCode());
+		baseUserMapper.insert(baseUser);
+
+		// 插入user_rider表
+		UserRider userRider = new UserRider();
+		userRider.setBaseUserId(baseUser.getId());
+		userRider.setRealName(dto.getRealName());
+		userRider.setGender(dto.getGender());
+		userRider.setIdCard(dto.getIdCard());
+		userRider.setIdCardFront(dto.getIdCardFront());
+		userRider.setIdCardBack(dto.getIdCardBack());
+		userRider.setCardNumber(dto.getCardNumber());
+		userRider.setEmergencyContactName(dto.getEmergencyContactName());
+		userRider.setEmergencyContactPhone(dto.getEmergencyContactPhone());
+		userRider.setBalance(BigDecimal.ZERO);
+		userRider.setCommissionTotal(BigDecimal.ZERO);
+		userRiderMapper.insert(userRider);
+
+		log.info("骑手用户创建成功，用户ID：{}，用户名：{}，真实姓名：{}", baseUser.getId(), dto.getUsername(), dto.getRealName());
+
+		// 构建并返回UserRiderListVO
+		UserRiderListVO vo = new UserRiderListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(maskPhone(baseUser.getPhone()));
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setRealName(userRider.getRealName());
+		vo.setGender(Gender.getText(userRider.getGender()));
+		vo.setIdCard(maskIdCard(userRider.getIdCard()));
+		vo.setEmergencyContactName(userRider.getEmergencyContactName());
+		vo.setEmergencyContactPhone(userRider.getEmergencyContactPhone());
+		vo.setBalance(userRider.getBalance());
+		vo.setCommissionTotal(userRider.getCommissionTotal());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		return vo;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public UserSysListVO createSysUser(CreateSysUserDTO dto) {
+		// 校验用户名唯一性
+		LambdaQueryWrapper<BaseUser> usernameWrapper = Wrappers.lambdaQuery();
+		usernameWrapper.eq(BaseUser::getUsername, dto.getUsername());
+		if (baseUserMapper.selectCount(usernameWrapper) > 0) {
+			throw new BusinessException("USERNAME_EXISTS", "用户名已存在");
+		}
+
+		// 校验手机号唯一性
+		LambdaQueryWrapper<BaseUser> phoneWrapper = Wrappers.lambdaQuery();
+		phoneWrapper.eq(BaseUser::getPhone, dto.getPhone());
+		if (baseUserMapper.selectCount(phoneWrapper) > 0) {
+			throw new BusinessException("PHONE_EXISTS", "手机号已存在");
+		}
+
+		// 密码加密处理
+		String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+		// 插入base_user表
+		BaseUser baseUser = new BaseUser();
+		baseUser.setUsername(dto.getUsername());
+		baseUser.setPassword(encodedPassword);
+		baseUser.setPhone(dto.getPhone());
+		baseUser.setEmail(dto.getEmail());
+		baseUser.setNickname(dto.getNickname());
+		baseUser.setAvatar(dto.getAvatar());
+		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+		baseUser.setUserType(UserType.SYSTEM.getCode());
+		baseUserMapper.insert(baseUser);
+
+		// 插入user_sys表
+		UserSys userSys = new UserSys();
+		userSys.setBaseUserId(baseUser.getId());
+		userSys.setRealName(dto.getRealName());
+		userSys.setGender(dto.getGender());
+		userSysMapper.insert(userSys);
+
+		log.info("系统用户创建成功，用户ID：{}，用户名：{}，真实姓名：{}", baseUser.getId(), dto.getUsername(), dto.getRealName());
+
+		// 构建并返回UserSysListVO
+		UserSysListVO vo = new UserSysListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(maskPhone(baseUser.getPhone()));
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setRealName(userSys.getRealName());
+		vo.setGender(Gender.getText(userSys.getGender()));
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		return vo;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public UserPartnerListVO createPartnerUser(CreatePartnerUserDTO dto) {
+		// 校验用户名唯一性
+		LambdaQueryWrapper<BaseUser> usernameWrapper = Wrappers.lambdaQuery();
+		usernameWrapper.eq(BaseUser::getUsername, dto.getUsername());
+		if (baseUserMapper.selectCount(usernameWrapper) > 0) {
+			throw new BusinessException("USERNAME_EXISTS", "用户名已存在");
+		}
+
+		// 校验手机号唯一性
+		LambdaQueryWrapper<BaseUser> phoneWrapper = Wrappers.lambdaQuery();
+		phoneWrapper.eq(BaseUser::getPhone, dto.getPhone());
+		if (baseUserMapper.selectCount(phoneWrapper) > 0) {
+			throw new BusinessException("PHONE_EXISTS", "手机号已存在");
+		}
+
+		// 密码加密处理
+		String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+		// 插入base_user表
+		BaseUser baseUser = new BaseUser();
+		baseUser.setUsername(dto.getUsername());
+		baseUser.setPassword(encodedPassword);
+		baseUser.setPhone(dto.getPhone());
+		baseUser.setEmail(dto.getEmail());
+		baseUser.setNickname(dto.getNickname());
+		baseUser.setAvatar(dto.getAvatar());
+		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+		baseUser.setUserType(UserType.PARTNER.getCode());
+		baseUserMapper.insert(baseUser);
+
+		// 生成邀请码（使用用户ID+随机字符串）
+		String inviteCode = "INV" + baseUser.getId() + generateRandomCode(4);
+
+		// 生成二维码并上传到OSS
+		String inviteCodePath = null;
+		try {
+			// 使用Hutool的QrCodeUtil生成二维码到临时文件
+			File tempFile = File.createTempFile("qrcode_", ".png");
+			tempFile.deleteOnExit();
+			QrCodeUtil.generate(inviteCode, 300, 300, tempFile);
+
+			// 上传到OSS（bucket: local, 路径: qrcode/邀请码.png）
+			String objectName = "qrcode/" + inviteCode + ".png";
+			InputStream inputStream = java.nio.file.Files.newInputStream(tempFile.toPath());
+			fileTemplate.putObject("local", objectName, inputStream, "image/png");
+
+			inviteCodePath = objectName;
+			log.info("二维码生成并上传成功，邀请码：{}，路径：{}", inviteCode, objectName);
+		} catch (Exception e) {
+			log.error("二维码生成或上传失败，邀请码：{}", inviteCode, e);
+			// 二维码生成失败不影响用户创建，继续执行
+		}
+
+		// 插入user_partner表
+		UserPartner userPartner = new UserPartner();
+		userPartner.setBaseUserId(baseUser.getId());
+		userPartner.setPartnerName(dto.getPartnerName());
+		userPartner.setInviteCode(inviteCode);
+		userPartner.setInviteCodePath(inviteCodePath);
+		userPartner.setCardNumber(dto.getCardNumber());
+		userPartner.setCommissionRate(dto.getCommissionRate());
+		userPartner.setParentId(dto.getParentId() != null ? dto.getParentId() : 0L);
+		userPartnerMapper.insert(userPartner);
+
+		log.info("合伙人用户创建成功，用户ID：{}，用户名：{}，合伙人姓名：{}，邀请码：{}",
+			baseUser.getId(), dto.getUsername(), dto.getPartnerName(), inviteCode);
+
+		// 构建并返回UserPartnerListVO
+		UserPartnerListVO vo = new UserPartnerListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(maskPhone(baseUser.getPhone()));
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setPartnerName(userPartner.getPartnerName());
+		vo.setInviteCode(userPartner.getInviteCode());
+		vo.setCommissionRate(userPartner.getCommissionRate());
+		vo.setParentId(userPartner.getParentId());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		// 获取上级合伙人名称
+		if (userPartner.getParentId() != null && userPartner.getParentId() > 0) {
+			UserPartner parentPartner = userPartnerMapper.selectOne(
+				Wrappers.lambdaQuery(UserPartner.class).eq(UserPartner::getBaseUserId, userPartner.getParentId())
+			);
+			if (parentPartner != null) {
+				vo.setParentName(parentPartner.getPartnerName());
+			}
+		}
+
+		return vo;
+	}
+
+	/**
+	 * 生成随机邀请码
+	 */
+	private String generateRandomCode(int length) {
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < length; i++) {
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		return sb.toString();
 	}
 
 	private void validatePageParams(Integer page, Integer size) {

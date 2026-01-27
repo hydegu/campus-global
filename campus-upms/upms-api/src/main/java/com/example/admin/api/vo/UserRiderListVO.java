@@ -22,6 +22,12 @@ public class UserRiderListVO extends AbstractUserVO implements Serializable {
 	@Schema(description = "手机号（已脱敏）", example = "138****8000")
 	private String phone;
 
+	@Schema(description = "昵称", example = "小李")
+	private String nickname;
+
+	@Schema(description = "邮箱", example = "rider@example.com")
+	private String email;
+
 	@Schema(description = "头像URL", example = "http://example.com/avatar.jpg")
 	private String avatar;
 
@@ -30,6 +36,9 @@ public class UserRiderListVO extends AbstractUserVO implements Serializable {
 
 	@Schema(description = "真实姓名", example = "李四")
 	private String realName;
+
+	@Schema(description = "身份证号（已脱敏）", example = "110***********1234")
+	private String idCard;
 
 	@Schema(description = "账户余额/元", example = "500")
 	private BigDecimal balance;
