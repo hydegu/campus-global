@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>example</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>campus-service</artifactId>
+    <packaging>pom</packaging>
+
+    <description>服务（作用的意思，不是微服务的“服务”）聚合模块</description>
+
+    <modules>
+        <module>service-api</module>
+        <module>service-biz</module>
+    </modules>
+</project>

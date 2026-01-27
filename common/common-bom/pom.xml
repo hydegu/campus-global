@@ -97,6 +97,16 @@
                 <version>${revision}</version>
             </dependency>
             <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>merchant-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>service-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.version}</version>

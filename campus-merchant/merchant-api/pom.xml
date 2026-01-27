@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>campus-merchant</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>merchant-api</artifactId>
+    <packaging>jar</packaging>
+
+    <description>商家模块-api</description>
+
+    <dependencies>
+        <!-- upms-biz -->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>upms-biz</artifactId>
+        </dependency>
+        <!-- upms-api -->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>upms-api</artifactId>
+        </dependency>
+        <!--core 工具类-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-core</artifactId>
+        </dependency>
+        <!--feign 注解依赖-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-feign</artifactId>
+        </dependency>
+        <!--mybatis 依赖-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-mybatis</artifactId>
+        </dependency>
+    </dependencies>
+</project>

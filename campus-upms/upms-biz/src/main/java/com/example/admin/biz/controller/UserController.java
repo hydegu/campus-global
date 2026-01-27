@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.admin.api.dto.ResetPasswordDTO;
 import com.example.admin.api.dto.UserInfo;
 import com.example.admin.api.dto.UserQueryDTO;
-import com.example.admin.api.vo.UserAppListVO;
-import com.example.admin.api.vo.UserMchListVO;
-import com.example.admin.api.vo.UserPartnerListVO;
-import com.example.admin.api.vo.UserRiderListVO;
+import com.example.admin.api.vo.*;
 import com.example.admin.biz.service.UserService;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
@@ -76,9 +73,9 @@ public class UserController {
 
 	@GetMapping("/sys-user/list")
 	@Operation(summary = "分页查询系统用户列表", description = "根据查询条件分页查询系统用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	public Result<Page<com.example.admin.api.vo.UserSysListVO>> listSysUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
+	public Result<Page<UserSysListVO>> listSysUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
 		queryDTO.setUserType(1);
-		Page<com.example.admin.api.vo.UserSysListVO> page = userService.listSysUsers(queryDTO);
+		Page<UserSysListVO> page = userService.listSysUsers(queryDTO);
 		return Result.ok(page);
 	}
 
