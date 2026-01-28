@@ -11,6 +11,7 @@ import com.example.common.security.util.SecurityUtils;
 import com.example.order.api.dto.ErrandAcceptDTO;
 import com.example.order.api.dto.ErrandCreateDTO;
 import com.example.order.api.dto.ErrandDeliverDTO;
+import com.example.order.api.dto.ErrandPayDTO;
 import com.example.order.api.dto.ErrandPickupDTO;
 import com.example.order.api.dto.ErrandQueryDTO;
 import com.example.order.api.entity.OrderErrand;
@@ -251,12 +252,12 @@ public class ErrandServiceImpl implements ErrandService {
 			throw new BusinessException("PERMISSION_DENIED", "无权操作该订单");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.DELIVERED.getCode());
+		orderMain.setOrderStatus(OrderStatusEnum.COMPLETED.getCode());
 		orderMain.setActualDeliveryTime(LocalDateTime.now());
 
 		orderMainMapper.updateById(orderMain);
 
-		log.info("服务人员送达成功，订单ID：{}，服务人员ID：{}", deliverDTO.getOrderId(), staffId);
+		log.info("服务人员送达成功，订单完成，订单ID：{}，服务人员ID：{}", deliverDTO.getOrderId(), staffId);
 	}
 
 	@Override
@@ -287,6 +288,54 @@ public class ErrandServiceImpl implements ErrandService {
 		orderMainMapper.updateById(orderMain);
 
 		log.info("服务订单取消成功，订单ID：{}，取消类型：{}", orderId, cancelType);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void payErrand(ErrandPayDTO payDTO) {
+		if (payDTO == null || payDTO.getOrderId() == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(payDTO.getOrderId());
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.SERVICE.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		if (!PayStatusEnum.UNPAID.getCode().equals(orderMain.getPayStatus())) {
+			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许支付");
+		}
+
+		// TODO: 调用finance服务记录支付流水到finance_transaction表（交易类型：订单支付）
+		// transaction_type = 2 (消费)
+		// amount = -orderMain.getActualAmount()
+		// related_type = 1 (订单)
+		// related_id = orderMain.getId()
+
+		// TODO: 从订单实体读取estimatedProviderIncome、estimatedPartnerIncome、estimatedPlatformIncome
+		// BigDecimal providerIncome = orderMain.getEstimatedProviderIncome();
+		// BigDecimal partnerIncome = orderMain.getEstimatedPartnerIncome();
+		// BigDecimal platformIncome = orderMain.getEstimatedPlatformIncome();
+
+		// TODO: 将各方收益记录到statistics_transaction_log统计表
+		// transaction_type = 3 (商家/合伙人分佣)
+		// 记录服务提供方收益、合伙人收益、平台收益
+
+		// 更新订单支付状态
+		orderMain.setPayStatus(PayStatusEnum.PAID.getCode());
+		orderMain.setPayMethod(payDTO.getPayMethod());
+		orderMain.setPayTime(LocalDateTime.now());
+		orderMain.setPayChannelNo(payDTO.getPayChannelNo());
+		// 注意：跑腿订单的支付是独立的，不改变订单状态
+
+		orderMainMapper.updateById(orderMain);
+
+		log.info("服务订单支付成功，订单ID：{}，支付方式：{}，支付流水号：{}",
+				payDTO.getOrderId(), payDTO.getPayMethod(), payDTO.getPayChannelNo());
 	}
 
 	@Override

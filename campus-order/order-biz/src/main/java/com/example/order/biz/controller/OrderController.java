@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import com.example.order.api.dto.OrderAcceptDTO;
+import com.example.order.api.dto.OrderConfirmDTO;
 import com.example.order.api.dto.OrderCountQueryDTO;
 import com.example.order.api.dto.OrderCreateDTO;
 import com.example.order.api.dto.OrderDeliverDTO;
@@ -57,6 +58,13 @@ public class OrderController {
 	@Operation(summary = "骑手送达", description = "骑手送达，更新订单状态为已送达")
 	public Result<Void> deliverOrder(@Valid @RequestBody OrderDeliverDTO deliverDTO) {
 		orderService.deliverOrder(deliverDTO);
+		return Result.ok();
+	}
+
+	@PostMapping("/confirm")
+	@Operation(summary = "确认收货", description = "用户确认收货，更新订单状态为已完成")
+	public Result<Void> confirmOrder(@Valid @RequestBody OrderConfirmDTO confirmDTO) {
+		orderService.confirmOrder(confirmDTO);
 		return Result.ok();
 	}
 

@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.security.util.SecurityUtils;
 import com.example.order.api.dto.OrderAcceptDTO;
+import com.example.order.api.dto.OrderConfirmDTO;
 import com.example.order.api.dto.OrderCountQueryDTO;
 import com.example.order.api.dto.OrderCreateDTO;
 import com.example.order.api.dto.OrderDeliverDTO;
+import com.example.order.api.dto.OrderPayDTO;
 import com.example.order.api.dto.OrderPickupDTO;
 import com.example.order.api.dto.OrderQueryDTO;
 import com.example.order.api.entity.OrderDelivery;
@@ -246,6 +248,82 @@ public class OrderServiceImpl implements OrderService {
 		orderMainMapper.updateById(orderMain);
 
 		log.info("订单取消成功，订单ID：{}，取消类型：{}", orderId, cancelType);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void payOrder(OrderPayDTO payDTO) {
+		if (payDTO == null || payDTO.getOrderId() == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(payDTO.getOrderId());
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.TAKEOUT.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		if (!PayStatusEnum.UNPAID.getCode().equals(orderMain.getPayStatus())) {
+			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许支付");
+		}
+
+		// TODO: 调用finance服务记录支付流水到finance_transaction表（交易类型：订单支付）
+		// transaction_type = 2 (消费)
+		// amount = -orderMain.getActualAmount()
+		// related_type = 1 (订单)
+		// related_id = orderMain.getId()
+
+		// TODO: 从订单实体读取estimatedProviderIncome、estimatedPartnerIncome、estimatedPlatformIncome
+		// BigDecimal providerIncome = orderMain.getEstimatedProviderIncome();
+		// BigDecimal partnerIncome = orderMain.getEstimatedPartnerIncome();
+		// BigDecimal platformIncome = orderMain.getEstimatedPlatformIncome();
+
+		// TODO: 将各方收益记录到statistics_transaction_log统计表
+		// transaction_type = 3 (商家/合伙人分佣)
+		// 记录服务提供方收益、合伙人收益、平台收益
+
+		// 更新订单支付状态
+		orderMain.setPayStatus(PayStatusEnum.PAID.getCode());
+		orderMain.setPayMethod(payDTO.getPayMethod());
+		orderMain.setPayTime(LocalDateTime.now());
+		orderMain.setPayChannelNo(payDTO.getPayChannelNo());
+		orderMain.setOrderStatus(OrderStatusEnum.WAIT_ACCEPT.getCode());
+
+		orderMainMapper.updateById(orderMain);
+
+		log.info("订单支付成功，订单ID：{}，支付方式：{}，支付流水号：{}",
+				payDTO.getOrderId(), payDTO.getPayMethod(), payDTO.getPayChannelNo());
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void confirmOrder(OrderConfirmDTO confirmDTO) {
+		if (confirmDTO == null || confirmDTO.getOrderId() == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		OrderMain orderMain = orderMainMapper.selectById(confirmDTO.getOrderId());
+		if (orderMain == null) {
+			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		}
+
+		if (!OrderTypeEnum.TAKEOUT.getCode().equals(orderMain.getOrderType())) {
+			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+		}
+
+		if (!OrderStatusEnum.DELIVERED.getCode().equals(orderMain.getOrderStatus())) {
+			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许确认收货");
+		}
+
+		// 更新订单状态为已完成
+		orderMain.setOrderStatus(OrderStatusEnum.COMPLETED.getCode());
+
+		orderMainMapper.updateById(orderMain);
+
+		log.info("外卖订单确认收货成功，订单ID：{}", confirmDTO.getOrderId());
 	}
 
 	@Override
