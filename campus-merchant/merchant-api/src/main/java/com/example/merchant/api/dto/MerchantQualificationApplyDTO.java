@@ -28,9 +28,6 @@ public class MerchantQualificationApplyDTO {
     @Schema(description = "联系人姓名", example = "麻花腾")
     private String contactName;
 
-    @Schema(description = "身份证号", example = "220193200409161421")
-    private String idCard;
-
     @Schema(description = "商户logo", example = "www.example.com/upload/logo/mch1/123.jpg")
     private String logo;
 
@@ -46,11 +43,6 @@ public class MerchantQualificationApplyDTO {
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "打款账户不能为空")
     private String payoutAccount;
-
-    @Schema(description = "邮箱", format = "email", example = "ops@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "邮箱不能为空")
-    @Email(message = "邮箱格式不正确")
-    private String email;
 
     @Schema(description = "营业执照类型：1=企业执照，2=个体户执照",
             example = "ENTERPRISE", requiredMode = Schema.RequiredMode.REQUIRED)

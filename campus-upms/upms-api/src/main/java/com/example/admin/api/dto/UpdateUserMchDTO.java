@@ -1,13 +1,16 @@
 package com.example.admin.api.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
+@Accessors(chain = true)
 @Schema(description = "编辑商家用户DTO")
 public class UpdateUserMchDTO implements Serializable {
 
@@ -70,4 +73,7 @@ public class UpdateUserMchDTO implements Serializable {
 
 	@Schema(description = "分佣比例(%)", example = "15.00")
 	private BigDecimal commissionRate;
+
+	@Schema(description = "最低起送金额(元)", example = "20.00")
+	private BigDecimal minimumOrderAmount;
 }

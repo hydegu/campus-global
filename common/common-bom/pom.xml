@@ -34,6 +34,7 @@
         <fastjson.version>1.2.83_noneautotype</fastjson.version>
         <mybatis-plus.version>3.5.15</mybatis-plus.version>
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+        <zxing.version>3.5.3</zxing.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -204,6 +205,12 @@
                 <version>${hutool.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- zxing 二维码生成 -->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

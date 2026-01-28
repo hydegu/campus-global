@@ -11,6 +11,7 @@
   <properties>
     <gateway.version>4.3.2</gateway.version>
     <dynamic-ds.version>4.5.0</dynamic-ds.version>
+    <zxing.version>3.5.3</zxing.version>
     <hutool.version>5.8.42</hutool.version>
     <configuration.version>1.10</configuration.version>
     <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
@@ -32,7 +33,6 @@
     <maven.compiler.target>17</maven.compiler.target>
     <swagger.core.version>2.2.39</swagger.core.version>
     <mysql.version>9.2.0</mysql.version>
-    <swagger.fox.version>3.0.0</swagger.fox.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -99,6 +99,16 @@
       <dependency>
         <groupId>com.example</groupId>
         <artifactId>order-biz</artifactId>
+        <version>0.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>merchant-api</artifactId>
+        <version>0.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>service-api</artifactId>
         <version>0.0.1</version>
       </dependency>
       <dependency>
@@ -179,6 +189,11 @@
         <version>${hutool.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.zxing</groupId>
+        <artifactId>core</artifactId>
+        <version>${zxing.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

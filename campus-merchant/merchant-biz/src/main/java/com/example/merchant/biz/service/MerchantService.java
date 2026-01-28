@@ -8,5 +8,5 @@ import com.example.merchant.api.dto.MerchantQualificationApplyDTO;
  */
 public interface MerchantService {
 
-    public Result<Void> applyForMchVerification(MerchantQualificationApplyDTO dto);
+    public Result<Void> applyForMchVerification(Long id,MerchantQualificationApplyDTO dto);
 }

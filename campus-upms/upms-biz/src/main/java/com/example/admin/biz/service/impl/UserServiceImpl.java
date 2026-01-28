@@ -732,6 +732,9 @@ public class UserServiceImpl implements UserService {
 			if (dto.getPartnerId() != null) {
 				userMch.setPartnerId(dto.getPartnerId());
 			}
+			if (dto.getMinimumOrderAmount() != null) {
+				userMch.setMinimumOrderAmount(dto.getMinimumOrderAmount());
+			}
 			userMchMapper.updateById(userMch);
 		}
 	}
@@ -1003,7 +1006,7 @@ public class UserServiceImpl implements UserService {
 		baseUser.setEmail(dto.getEmail());
 		baseUser.setNickname(dto.getNickname());
 		baseUser.setAvatar(dto.getAvatar());
-		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 0); //商家创建时暂时不启用
 		baseUser.setUserType(UserType.MERCHANT.getCode());
 		baseUserMapper.insert(baseUser);
 
@@ -1209,7 +1212,7 @@ public class UserServiceImpl implements UserService {
 		baseUser.setEmail(dto.getEmail());
 		baseUser.setNickname(dto.getNickname());
 		baseUser.setAvatar(dto.getAvatar());
-		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+		baseUser.setStatus(dto.getStatus() != null ? dto.getStatus() : 0); //合伙人创建时暂时不启用
 		baseUser.setUserType(UserType.PARTNER.getCode());
 		baseUserMapper.insert(baseUser);
 
@@ -1318,4 +1321,272 @@ public class UserServiceImpl implements UserService {
 			throw new BusinessException("INVALID_PASSWORD_LENGTH", "密码长度必须在8-20位之间");
 		}
 	}
-}
+
+	@Override
+	public UserAppListVO getAppUserDetail(Long id) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		if (!UserType.APP.getCode().equals(baseUser.getUserType())) {
+			throw new BusinessException("INVALID_USER_TYPE", "用户类型不匹配");
+		}
+
+		UserAppListVO vo = new UserAppListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(baseUser.getPhone());
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		Map<Long, UserApp> userAppMap = batchQueryUserApp(Collections.singletonList(id));
+		Map<Long, SysSchool> schoolMap = batchQuerySchools(userAppMap.values());
+		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+
+		fillAppUserDetail(vo, baseUser.getId(), userAppMap, schoolMap);
+		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
+
+		return vo;
+	}
+
+	@Override
+	public UserMchListVO getMchUserDetail(Long id) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		if (!UserType.MERCHANT.getCode().equals(baseUser.getUserType())) {
+			throw new BusinessException("INVALID_USER_TYPE", "用户类型不匹配");
+		}
+
+		UserMchListVO vo = new UserMchListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(baseUser.getPhone());
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		Map<Long, UserMch> userMchMap = batchQueryUserMch(Collections.singletonList(id));
+		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+
+		fillMchUserDetail(vo, baseUser.getId(), userMchMap);
+		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
+
+		return vo;
+	}
+
+	@Override
+	public UserRiderListVO getRiderUserDetail(Long id) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		if (!UserType.RIDER.getCode().equals(baseUser.getUserType())) {
+			throw new BusinessException("INVALID_USER_TYPE", "用户类型不匹配");
+		}
+
+		UserRiderListVO vo = new UserRiderListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(baseUser.getPhone());
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		Map<Long, UserRider> userRiderMap = batchQueryUserRider(Collections.singletonList(id));
+		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+
+		fillRiderUserDetail(vo, baseUser.getId(), userRiderMap);
+		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
+
+		return vo;
+	}
+
+	@Override
+	public UserSysListVO getSysUserDetail(Long id) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		if (!UserType.SYSTEM.getCode().equals(baseUser.getUserType())) {
+			throw new BusinessException("INVALID_USER_TYPE", "用户类型不匹配");
+		}
+
+		UserSysListVO vo = new UserSysListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(baseUser.getPhone());
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setCreateTime(baseUser.getCreateAt());
+		vo.setLastLoginAt(baseUser.getLastLoginAt());
+
+		Map<Long, UserSys> userSysMap = batchQueryUserSys(Collections.singletonList(id));
+		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+
+		fillSysUserDetail(vo, baseUser.getId(), userSysMap);
+		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
+
+		return vo;
+	}
+
+	@Override
+	public UserPartnerListVO getPartnerUserDetail(Long id) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		if (!UserType.PARTNER.getCode().equals(baseUser.getUserType())) {
+			throw new BusinessException("INVALID_USER_TYPE", "用户类型不匹配");
+		}
+
+		UserPartnerListVO vo = new UserPartnerListVO();
+		vo.setId(baseUser.getId());
+		vo.setUsername(baseUser.getUsername());
+		vo.setPhone(baseUser.getPhone());
+		vo.setAvatar(baseUser.getAvatar());
+		vo.setNickname(baseUser.getNickname());
+		vo.setEmail(baseUser.getEmail());
+		vo.setStatus(baseUser.getStatus());
+		vo.setUserType(baseUser.getUserType());
+		vo.setCreateTime(baseUser.getCreateAt());
+
+		Map<Long, UserPartner> userPartnerMap = batchQueryUserPartner(Collections.singletonList(id));
+		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+
+		fillPartnerUserDetail(vo, baseUser.getId(), userPartnerMap);
+
+				fillRoleInfo(vo, baseUser.getId(), userRoleMap);
+
+		
+
+				return vo;
+
+			}
+
+		
+
+			@Override
+
+			public MchInfoDTO getMchInfoByBaseUserId(Long baseUserId) {
+
+				if (baseUserId == null) {
+
+					throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+
+				}
+
+		
+
+				LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
+
+				wrapper.eq(UserMch::getBaseUserId, baseUserId);
+
+				UserMch userMch = userMchMapper.selectOne(wrapper);
+
+		
+
+				if (userMch == null) {
+
+					return null;
+
+				}
+
+		
+
+				MchInfoDTO dto = new MchInfoDTO();
+
+				dto.setMchId(userMch.getId());
+
+				dto.setMchName(userMch.getMchName());
+
+				dto.setLogo(userMch.getLogo());
+
+				dto.setIsOpen(userMch.getIsOpen());
+
+				return dto;
+
+			}
+
+		
+
+			@Override
+
+			public List<MchInfoDTO> batchGetMchInfo(List<Long> baseUserIds) {
+
+				if (baseUserIds == null || baseUserIds.isEmpty()) {
+
+					return Collections.emptyList();
+
+				}
+
+		
+
+				LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
+
+				wrapper.in(UserMch::getBaseUserId, baseUserIds);
+
+				List<UserMch> userMchList = userMchMapper.selectList(wrapper);
+
+		
+
+				return userMchList.stream().map(userMch -> {
+
+					MchInfoDTO dto = new MchInfoDTO();
+
+					dto.setMchId(userMch.getId());
+
+					dto.setMchName(userMch.getMchName());
+
+					dto.setLogo(userMch.getLogo());
+
+					dto.setIsOpen(userMch.getIsOpen());
+
+					return dto;
+
+				}).collect(Collectors.toList());
+
+			}
+
+		
+
+		}

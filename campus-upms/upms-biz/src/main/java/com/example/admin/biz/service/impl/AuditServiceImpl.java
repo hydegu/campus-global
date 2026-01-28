@@ -634,7 +634,6 @@ public class AuditServiceImpl implements AuditService {
 		AuditRecord auditRecord = new AuditRecord();
 		auditRecord.setBizType(dto.getBizType());
 		auditRecord.setApplicantId(dto.getApplicantId());
-		auditRecord.setRemark(dto.getRemark());
 		auditRecord.setStatus(AuditStatus.PENDING.getCode());
 		auditRecord.setAuditNo(generateAuditNo(dto.getBizType()));
 		auditRecord.setCreateAt(java.time.LocalDateTime.now());
