@@ -40,6 +40,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}/info")
+	@Inner
 	@Operation(summary = "通过用户ID查询用户信息", description = "通过用户ID查询用户详细信息，包括角色信息")
 	public Result<UserInfo> getUserInfoById(@PathVariable Long id) {
 		UserInfo userInfo = userService.getUserInfoById(id);

@@ -39,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
@@ -1229,7 +1230,7 @@ public class UserServiceImpl implements UserService {
 
 			// 上传到OSS（bucket: local, 路径: qrcode/邀请码.png）
 			String objectName = "qrcode/" + inviteCode + ".png";
-			InputStream inputStream = java.nio.file.Files.newInputStream(tempFile.toPath());
+			InputStream inputStream = Files.newInputStream(tempFile.toPath());
 			fileTemplate.putObject("local", objectName, inputStream, "image/png");
 
 			inviteCodePath = objectName;

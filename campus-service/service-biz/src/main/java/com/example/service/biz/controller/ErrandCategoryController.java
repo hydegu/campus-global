@@ -2,6 +2,7 @@ package com.example.service.biz.controller;
 
 import com.example.common.core.util.Result;
 import com.example.common.mybatis.utils.PageResult;
+import com.example.common.security.annotation.Inner;
 import com.example.service.api.dto.*;
 import com.example.service.api.vo.ErrandCategoryVO;
 import com.example.service.biz.service.ErrandCategoryService;
@@ -35,6 +36,7 @@ public class ErrandCategoryController {
     }
 
     @GetMapping("/{id}")
+    @Inner
     @Operation(summary = "查询服务分类详情", description = "通过分类ID查询服务分类详细信息，包括分类名称、父级分类、层级、排序、状态、分佣配置等信息。")
     public Result<ErrandCategoryVO> getCategoryDetail(@PathVariable Long id) {
         ErrandCategoryVO vo = errandCategoryService.getCategoryDetail(id);

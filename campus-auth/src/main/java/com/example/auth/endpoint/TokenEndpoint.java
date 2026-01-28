@@ -16,6 +16,7 @@ import com.example.common.core.constant.SecurityConstants;
 import com.example.common.core.util.RedisUtils;
 import com.example.common.core.util.Result;
 import com.example.common.core.util.SpringContextHolder;
+import com.example.common.security.annotation.Inner;
 import com.example.common.security.util.OAuth2EndpointUtils;
 import com.example.common.security.util.OAuth2ErrorCodesExpand;
 import com.example.common.security.util.OAuthClientException;
@@ -166,6 +167,7 @@ public class TokenEndpoint {
 	 * @return 删除结果
 	 */
 	@DeleteMapping("/token/remove/{token}")
+	@Inner
 	@Operation(summary = "删除令牌", description = "删除令牌")
 	public Result<Boolean> removeToken(@PathVariable("token") String token) {
 		OAuth2Authorization authorization = authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN);

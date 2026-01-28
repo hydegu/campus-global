@@ -3,6 +3,7 @@ package com.example.admin.biz.controller;
 import com.example.admin.api.entity.Address;
 import com.example.admin.biz.service.AddressService;
 import com.example.common.core.util.Result;
+import com.example.common.security.annotation.Inner;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +22,7 @@ public class AddressController {
 	private final AddressService addressService;
 
 	@GetMapping("/coordinate/{addressId}")
+	@Inner
 	@Operation(summary = "获取地址经纬度", description = "根据地址ID获取地址的经纬度坐标")
 	public Result<String> getAddressCoordinate(
 			@Parameter(description = "地址ID", required = true) @PathVariable Long addressId) {
@@ -29,6 +31,7 @@ public class AddressController {
 	}
 
 	@GetMapping("/merchant/{merchantId}")
+	@Inner
 	@Operation(summary = "获取商家地址经纬度", description = "根据商家ID获取商家地址的经纬度坐标")
 	public Result<String> getMerchantAddressCoordinate(
 			@Parameter(description = "商家ID", required = true) @PathVariable Long merchantId) {

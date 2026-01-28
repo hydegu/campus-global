@@ -7,6 +7,7 @@ import com.example.admin.api.vo.AuditRecordVO;
 import com.example.admin.biz.service.AuditService;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
+import com.example.common.security.annotation.Inner;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,6 +29,7 @@ public class AuditRecordController {
 	private final AuditService auditService;
 
 	@PostMapping
+	@Inner
 	@Operation(summary = "创建审核记录", description = "创建新的审核记录，需要提供业务类型和申请人ID。系统会自动生成审核编号，默认状态为待审核。需要权限：audit:record:add")
 	public Result<Long> createAuditRecord(@Valid @RequestBody CreateAuditRecordDTO dto) {
 		Long auditRecordId = auditService.createAuditRecord(dto);
