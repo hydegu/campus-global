@@ -88,17 +88,7 @@
       </dependency>
       <dependency>
         <groupId>com.example</groupId>
-        <artifactId>upms-biz</artifactId>
-        <version>0.0.1</version>
-      </dependency>
-      <dependency>
-        <groupId>com.example</groupId>
         <artifactId>order-api</artifactId>
-        <version>0.0.1</version>
-      </dependency>
-      <dependency>
-        <groupId>com.example</groupId>
-        <artifactId>order-biz</artifactId>
         <version>0.0.1</version>
       </dependency>
       <dependency>

@@ -12,6 +12,21 @@
 
     <description>订单管理api模块</description>
     <dependencies>
+        <!-- 服务api -->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>service-api</artifactId>
+        </dependency>
+        <!--upms api 依赖（用于Feign调用获取地址信息）-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>upms-api</artifactId>
+        </dependency>
+        <!--merchant api 依赖（用于Feign调用获取商家信息）-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>merchant-api</artifactId>
+        </dependency>
         <!--core 工具类-->
         <dependency>
             <groupId>com.example</groupId>

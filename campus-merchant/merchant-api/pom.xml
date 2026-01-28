@@ -13,11 +13,6 @@
     <description>商家模块-api</description>
 
     <dependencies>
-        <!-- upms-biz -->
-        <dependency>
-            <groupId>com.example</groupId>
-            <artifactId>upms-biz</artifactId>
-        </dependency>
         <!-- upms-api -->
         <dependency>
             <groupId>com.example</groupId>

@@ -24,4 +24,11 @@ public interface ErrandService {
 	ErrandDetailVO getErrandDetail(Long orderId);
 
 	Page<ErrandListVO> listErrands(ErrandQueryDTO queryDTO);
+
+	/**
+	 * 检查服务分类是否有关联的订单
+	 * @param serviceTypeId 服务分类ID
+	 * @return true-有关联订单，false-无关联订单
+	 */
+	boolean hasOrdersByServiceTypeId(Long serviceTypeId);
 }

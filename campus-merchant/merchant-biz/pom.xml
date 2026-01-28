@@ -18,6 +18,16 @@
             <groupId>com.example</groupId>
             <artifactId>merchant-api</artifactId>
         </dependency>
+        <!-- order-api依赖（用于配送费计算DTO和VO）-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>order-api</artifactId>
+        </dependency>
+        <!-- upms-api依赖（用于Feign调用获取地址信息）-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>upms-api</artifactId>
+        </dependency>
         <!--文件管理-->
         <dependency>
             <groupId>com.example</groupId>

@@ -11,17 +11,6 @@
     <packaging>jar</packaging>
     <description>订单管理业务(biz)模块</description>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.example</groupId>
-                <artifactId>common-bom</artifactId>
-                <version>${revision}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!--order api、model 模块-->

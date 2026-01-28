@@ -85,4 +85,13 @@ public class ErrandController {
 		ErrandDetailVO detail = errandService.getErrandDetail(id);
 		return Result.success(detail);
 	}
+
+	@GetMapping("/check-service-type/{serviceTypeId}")
+	@Operation(summary = "检查服务分类是否有关联订单", description = "检查服务分类是否有关联的订单")
+	public Result<Boolean> hasOrdersByServiceTypeId(
+			@Parameter(description = "服务分类ID", required = true) @PathVariable Long serviceTypeId) {
+		log.info("检查服务分类是否有关联订单请求，服务分类ID：{}", serviceTypeId);
+		boolean hasOrders = errandService.hasOrdersByServiceTypeId(serviceTypeId);
+		return Result.success(hasOrders);
+	}
 }

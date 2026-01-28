@@ -45,7 +45,7 @@ CREATE TABLE `order_errand`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `order_id` bigint UNSIGNED NOT NULL COMMENT '订单主表ID',
   `service_fee` decimal(10, 2) NOT NULL COMMENT '服务费',
-  `service_type_id` tinyint NOT NULL COMMENT '服务分类id',
+  `service_type_id` bigint UNSIGNED NOT NULL COMMENT '服务分类id',
   `pickup_address_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '取货地址id',
   `delivery_address_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '送货地址id',
   `item_description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '物品描述',

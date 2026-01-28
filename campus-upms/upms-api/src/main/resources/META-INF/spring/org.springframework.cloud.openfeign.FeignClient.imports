@@ -2,3 +2,4 @@ com.example.admin.api.feign.RemoteClientDetailsService
 com.example.admin.api.feign.RemoteDictService
 com.example.admin.api.feign.RemoteTokenService
 com.example.admin.api.feign.RemoteUserService
+com.example.admin.api.feign.RemoteAddressService

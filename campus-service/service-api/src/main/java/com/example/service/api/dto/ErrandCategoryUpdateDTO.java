@@ -16,6 +16,9 @@ public class ErrandCategoryUpdateDTO {
     @NotNull(message = "主键ID不能为空")
     private Long id;
 
+    @Schema(description = "父级ID（0为顶级分类）", example = "0")
+    private Long parentId;
+
     @Schema(description = "分类名称", example = "跑腿代购")
     @NotBlank(message = "分类名称不能为空")
     private String categoryName;

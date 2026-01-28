@@ -1,5 +1,6 @@
 package com.example.order.biz.service.impl;
 
+import com.example.admin.api.feign.RemoteAddressService;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.core.util.Result;
 import com.example.order.api.dto.DeliveryCalculateDTO;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 
 	private final RemoteMerchantService remoteMerchantService;
+	private final RemoteAddressService remoteAddressService;
 	private final AmapService amapService;
 
 	@Override
@@ -69,38 +71,40 @@ public class DeliveryFeeServiceImpl implements DeliveryFeeService {
 	}
 
 	private String getMerchantAddress(Long merchantId) {
-		//TODO: 从缓存中获取商家地址
-		return null;
-//		try {
-//			Result<String> result =
-//					remoteMerchantService.getMerchantAddress(merchantId);
-//			if (result != null && result.getData() != null) {
-//				return result.getData();
-//			}
-//		} catch (Exception e) {
-//			log.warn("获取商家地址失败，merchantId：{}", merchantId, e);
-//		}
-//		return "116.397128,39.916527";
+		if (merchantId == null) {
+			return null;
+		}
+		try {
+			Result<String> result = remoteAddressService.getMerchantAddressCoordinate(merchantId);
+			if (result != null && result.getData() != null) {
+				return result.getData();
+			}
+		} catch (Exception e) {
+			log.warn("获取商家地址失败，merchantId：{}，使用默认值", merchantId, e);
+		}
+		// 降级处理：返回默认值（天安门坐标）
+		return "116.397128,39.916527";
 	}
 
 	private String getDeliveryAddress(Long deliveryAddressId) {
-		//TODO: 从缓存中获取收货地址
-		return null;
-//		try {
-//			com.example.common.core.util.Result<String> result =
-//					remoteMerchantService.getDeliveryAddress(deliveryAddressId);
-//			if (result != null && result.getData() != null) {
-//				return result.getData();
-//			}
-//		} catch (Exception e) {
-//			log.warn("获取收货地址失败，deliveryAddressId：{}", deliveryAddressId, e);
-//		}
-//		return "116.407526,39.904030";
+		if (deliveryAddressId == null) {
+			return null;
+		}
+		try {
+			Result<String> result = remoteAddressService.getAddressCoordinate(deliveryAddressId);
+			if (result != null && result.getData() != null) {
+				return result.getData();
+			}
+		} catch (Exception e) {
+			log.warn("获取收货地址失败，deliveryAddressId：{}，使用默认值", deliveryAddressId, e);
+		}
+		// 降级处理：返回默认值（北京火车站坐标）
+		return "116.407526,39.904030";
 	}
 
 	private BigDecimal calculateFeeByConfig(DeliveryCalculateDTO calculateDTO, BigDecimal distance) {
 		try {
-			com.example.common.core.util.Result<DeliveryCalculateVO> result = 
+			Result<DeliveryCalculateVO> result =
 					remoteMerchantService.calculateDeliveryFee(calculateDTO);
 			if (result != null && result.getData() != null) {
 				return result.getData().getDeliveryFee();

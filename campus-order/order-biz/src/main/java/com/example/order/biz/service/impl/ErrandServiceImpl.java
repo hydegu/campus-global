@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.example.admin.api.dto.UserInfo;
 import com.example.common.core.exception.BusinessException;
+import com.example.common.core.util.Result;
 import com.example.common.security.util.SecurityUtils;
 import com.example.order.api.dto.ErrandAcceptDTO;
 import com.example.order.api.dto.ErrandCreateDTO;
@@ -16,6 +18,7 @@ import com.example.order.api.entity.OrderMain;
 import com.example.order.api.enums.OrderStatusEnum;
 import com.example.order.api.enums.OrderTypeEnum;
 import com.example.order.api.enums.PayStatusEnum;
+import com.example.order.api.feign.RemoteErrandCategoryService;
 import com.example.order.api.feign.RemoteUserService;
 import com.example.order.api.vo.ErrandDetailVO;
 import com.example.order.api.vo.ErrandListVO;
@@ -23,6 +26,7 @@ import com.example.order.biz.mapper.OrderErrandMapper;
 import com.example.order.biz.mapper.OrderMainMapper;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.ErrandService;
+import com.example.service.api.vo.ErrandCategoryVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -42,6 +46,7 @@ public class ErrandServiceImpl implements ErrandService {
 	private final OrderMainMapper orderMainMapper;
 	private final OrderErrandMapper orderErrandMapper;
 	private final RemoteUserService remoteUserService;
+	private final RemoteErrandCategoryService remoteErrandCategoryService;
 	private final AmapService amapService;
 
 	@Override
@@ -431,7 +436,7 @@ public class ErrandServiceImpl implements ErrandService {
 			return "未知用户";
 		}
 		try {
-			com.example.common.core.util.Result<com.example.admin.api.dto.UserInfo> result = 
+			Result<UserInfo> result =
 					remoteUserService.getUserInfoById(userId);
 			if (result != null && result.getData() != null) {
 				return result.getData().getNickname();
@@ -447,7 +452,7 @@ public class ErrandServiceImpl implements ErrandService {
 			return null;
 		}
 		try {
-			com.example.common.core.util.Result<com.example.admin.api.dto.UserInfo> result = 
+			Result<UserInfo> result =
 					remoteUserService.getUserInfoById(userId);
 			if (result != null && result.getData() != null) {
 				return result.getData().getPhone();
@@ -465,10 +470,28 @@ public class ErrandServiceImpl implements ErrandService {
 		return getUserName(serviceProviderId);
 	}
 
-	private String getServiceTypeName(Integer serviceTypeId) {
+	private String getServiceTypeName(Long serviceTypeId) {
 		if (serviceTypeId == null) {
 			return "未知服务分类";
 		}
+		// 通过 Feign 调用 service 模块获取分类详情
+		Result<ErrandCategoryVO> result =
+				remoteErrandCategoryService.getCategoryDetail(serviceTypeId);
+		if (result != null && result.getData() != null) {
+			return result.getData().getCategoryName();
+		}
+		// 降级处理：返回 ID 拼接的名称
 		return "服务分类" + serviceTypeId;
+	}
+
+	@Override
+	public boolean hasOrdersByServiceTypeId(Long serviceTypeId) {
+		if (serviceTypeId == null) {
+			return false;
+		}
+		LambdaQueryWrapper<OrderErrand> wrapper = Wrappers.lambdaQuery();
+		wrapper.eq(OrderErrand::getServiceTypeId, serviceTypeId);
+		Long count = orderErrandMapper.selectCount(wrapper);
+		return count != null && count > 0;
 	}
 }

@@ -16,7 +16,7 @@ public class ErrandCreateDTO implements Serializable {
 
 	@NotNull(message = "服务分类ID不能为空")
 	@Schema(description = "服务分类ID", example = "1")
-	private Integer serviceTypeId;
+	private Long serviceTypeId;
 
 	@NotNull(message = "取货地址ID不能为空")
 	@Schema(description = "取货地址ID", example = "2001")

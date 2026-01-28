@@ -25,7 +25,7 @@ public class OrderErrand implements Serializable {
 	private BigDecimal serviceFee;
 
 	@Schema(description = "服务分类id", example = "1")
-	private Integer serviceTypeId;
+	private Long serviceTypeId;
 
 	@Schema(description = "取货地址id", example = "2001")
 	private String pickupAddressId;
