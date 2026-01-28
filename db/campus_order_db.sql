@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 19/01/2026 11:26:32
+ Date: 28/01/2026 14:51:59
 */
 
 SET NAMES utf8mb4;
@@ -35,7 +35,20 @@ CREATE TABLE `order_delivery`  (
   UNIQUE INDEX `uk_order_id`(`order_id` ASC) USING BTREE,
   INDEX `idx_merchant`(`merchant_id` ASC) USING BTREE,
   INDEX `idx_rider`(`rider_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '外卖订单扩展表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '外卖订单扩展表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of order_delivery
+-- ----------------------------
+INSERT INTO `order_delivery` VALUES (1, 1, 2001, 5001, 50.00, 8.50, NULL, '2026-01-19 12:00:00', '2026-01-19 12:00:00');
+INSERT INTO `order_delivery` VALUES (2, 2, 2002, 5002, 66.00, 12.00, NULL, '2026-01-19 12:00:00', '2026-01-19 12:05:00');
+INSERT INTO `order_delivery` VALUES (3, 3, 2003, 5003, 38.00, 7.00, 3001, '2026-01-19 12:00:00', '2026-01-19 12:20:00');
+INSERT INTO `order_delivery` VALUES (4, 4, 2004, 5004, 108.50, 20.00, 3002, '2026-01-19 12:00:00', '2026-01-19 12:35:00');
+INSERT INTO `order_delivery` VALUES (5, 5, 2005, 5005, 27.00, 5.00, 3003, '2026-01-19 11:45:00', '2026-01-19 12:18:00');
+INSERT INTO `order_delivery` VALUES (6, 6, 2006, 5006, 47.00, 9.00, 3004, '2026-01-19 11:35:00', '2026-01-19 12:15:00');
+INSERT INTO `order_delivery` VALUES (7, 7, 2003, 5007, 35.00, 7.00, NULL, '2026-01-19 10:50:00', '2026-01-19 10:55:00');
+INSERT INTO `order_delivery` VALUES (8, 14, 2006, 5008, 99999999.99, 99999999.99, NULL, '2026-01-19 12:00:00', '2026-01-19 12:00:00');
+INSERT INTO `order_delivery` VALUES (9, 15, 2007, 5009, 0.01, 0.00, 4003, '2026-01-19 12:00:00', '2026-01-19 12:10:00');
 
 -- ----------------------------
 -- Table structure for order_errand
@@ -45,7 +58,7 @@ CREATE TABLE `order_errand`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `order_id` bigint UNSIGNED NOT NULL COMMENT '订单主表ID',
   `service_fee` decimal(10, 2) NOT NULL COMMENT '服务费',
-  `service_type_id` bigint UNSIGNED NOT NULL COMMENT '服务分类id',
+  `service_type_id` bigint NOT NULL COMMENT '服务分类id',
   `pickup_address_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '取货地址id',
   `delivery_address_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '送货地址id',
   `item_description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '物品描述',
@@ -61,7 +74,14 @@ CREATE TABLE `order_errand`  (
   UNIQUE INDEX `uk_order_id`(`order_id` ASC) USING BTREE,
   INDEX `idx_staff`(`staff_id` ASC) USING BTREE,
   INDEX `idx_service_type`(`service_type_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '跑腿订单扩展表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '跑腿订单扩展表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of order_errand
+-- ----------------------------
+INSERT INTO `order_errand` VALUES (1, 11, 15.00, 1, '取件地址A', '送件地址B', '帮我取个快递，大概3公斤', 3.00, 30.00, 20.00, 15.00, 9000.0000, NULL, '2026-01-19 12:00:00', '2026-01-19 12:00:00');
+INSERT INTO `order_errand` VALUES (2, 12, 20.00, 2, '药店地址C', '宿舍地址D', '帮我买点感冒药', 0.50, 10.00, 8.00, 5.00, 400.0000, 4001, '2026-01-19 11:35:00', '2026-01-19 12:00:00');
+INSERT INTO `order_errand` VALUES (3, 13, 18.00, 3, '打印店E', '教学楼F', '帮我打印一份资料，双面打印', 0.20, 21.00, 29.70, 0.10, 62.4400, 4002, '2026-01-19 11:15:00', '2026-01-19 11:55:00');
 
 -- ----------------------------
 -- Table structure for order_main
@@ -81,7 +101,7 @@ CREATE TABLE `order_main`  (
   `pay_time` datetime NULL DEFAULT NULL COMMENT '支付时间',
   `pay_channel_no` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '第三方支付流水号',
   `order_status` tinyint NOT NULL DEFAULT 1 COMMENT '订单状态:1-待支付 2-待接单 3-待取货 4-配送中 5-已送达 6-已取消 7-已完成 8-售后中',
-  `cancel_type` tinyint NULL DEFAULT NULL COMMENT '取消类型:1-用户取消 2-商家取消 3-超时取消',
+  `cancel_type` tinyint NULL DEFAULT NULL COMMENT '取消类型:1-用户取消 2-商家取消 3-骑手取消 4-超时取消',
   `cancel_time` datetime NULL DEFAULT NULL COMMENT '取消时间',
   `service_provider_type` tinyint NULL DEFAULT NULL COMMENT '服务提供方类型:1-商家 2-服务人员',
   `service_provider_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '服务提供方ID',
@@ -106,7 +126,31 @@ CREATE TABLE `order_main`  (
   INDEX `idx_pay_status`(`pay_status` ASC, `pay_time` DESC) USING BTREE,
   INDEX `idx_school_partner`(`school_id` ASC, `partner_id` ASC) USING BTREE,
   INDEX `idx_delete_at`(`delete_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '订单主表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '订单主表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of order_main
+-- ----------------------------
+INSERT INTO `order_main` VALUES (1, '20260119120001ABCDEF', 1, 1001, '张三', '13800138001', 58.50, 58.50, 0, NULL, NULL, NULL, 1, NULL, NULL, 1, 2001, '美味快餐店', 101, 201, 45.00, 8.50, 5.00, 0, '不要辣', '2026-01-19 12:10:00', '2026-01-19 12:30:00', NULL, 2.50, '2026-01-19 12:00:00', '2026-01-19 12:00:00', NULL);
+INSERT INTO `order_main` VALUES (2, '20260119120002GHIJKL', 1, 1002, '李四', '13800138002', 78.00, 78.00, 1, 2, '2026-01-19 12:05:00', 'WX202601191200001', 2, NULL, NULL, 1, 2002, '川菜馆', 101, 201, 60.00, 12.00, 6.00, 0, '多放辣椒', '2026-01-19 12:10:00', '2026-01-19 12:35:00', NULL, 3.20, '2026-01-19 12:00:00', '2026-01-19 12:05:00', NULL);
+INSERT INTO `order_main` VALUES (3, '20260119120003MNOPQR', 1, 1003, '王五', '13800138003', 45.00, 45.00, 1, 2, '2026-01-19 12:10:00', 'WX202601191200002', 3, NULL, NULL, 2, 3001, '骑手-赵六', 101, 201, 35.00, 7.00, 3.00, 1, '快点送', '2026-01-19 12:15:00', '2026-01-19 12:40:00', NULL, 1.80, '2026-01-19 12:00:00', '2026-01-19 12:20:00', NULL);
+INSERT INTO `order_main` VALUES (4, '20260119120004STUVWX', 1, 1004, '赵六', '13800138004', 128.50, 128.50, 1, 1, '2026-01-19 12:15:00', 'ONLINE202601191200001', 4, NULL, NULL, 2, 3002, '骑手-孙七', 101, 201, 100.00, 20.00, 8.50, 2, '不要放香菜', '2026-01-19 12:20:00', '2026-01-19 12:50:00', NULL, 4.50, '2026-01-19 12:00:00', '2026-01-19 12:35:00', NULL);
+INSERT INTO `order_main` VALUES (5, '20260119120005YZABCD', 1, 1005, '孙七', '13800138005', 32.00, 32.00, 1, 2, '2026-01-19 11:50:00', 'WX202601191200003', 5, NULL, NULL, 2, 3003, '骑手-周八', 101, 201, 25.00, 5.00, 2.00, 3, '谢谢', '2026-01-19 11:55:00', '2026-01-19 12:20:00', '2026-01-19 12:18:00', 1.20, '2026-01-19 11:45:00', '2026-01-19 12:18:00', NULL);
+INSERT INTO `order_main` VALUES (6, '20260119110006EFGHIJ', 1, 1006, '周八', '13800138006', 56.00, 56.00, 1, 1, '2026-01-19 11:40:00', 'ONLINE202601191100001', 7, NULL, NULL, 2, 3004, '骑手-吴九', 101, 201, 43.00, 9.00, 4.00, 4, '很好吃', '2026-01-19 11:45:00', '2026-01-19 12:15:00', '2026-01-19 12:14:00', 2.00, '2026-01-19 11:35:00', '2026-01-19 12:15:00', NULL);
+INSERT INTO `order_main` VALUES (7, '20260119105007KLMNOP', 1, 1007, '吴九', '13800138007', 42.00, 42.00, 0, NULL, NULL, NULL, 6, 1, '2026-01-19 10:55:00', 1, 2003, '奶茶店', 101, 201, 32.00, 7.00, 3.00, 1, '不想要了', '2026-01-19 10:50:00', '2026-01-19 11:15:00', NULL, 1.50, '2026-01-19 10:50:00', '2026-01-19 10:55:00', NULL);
+INSERT INTO `order_main` VALUES (8, '20260119105008QRSTUV', 1, 1008, '郑十', '13800138008', 65.00, 65.00, 1, 2, '2026-01-19 10:45:00', 'WX202601191050001', 6, 2, '2026-01-19 10:50:00', 1, 2004, '烧烤店', 101, 201, 50.00, 10.00, 5.00, 1, '食材不足', '2026-01-19 10:50:00', '2026-01-19 11:20:00', NULL, 2.80, '2026-01-19 10:40:00', '2026-01-19 10:50:00', NULL);
+INSERT INTO `order_main` VALUES (9, '20260119100009WXYZAB', 1, 1009, '陈十一', '13800138009', 38.00, 38.00, 1, 1, '2026-01-19 10:00:00', 'ONLINE202601191000001', 6, 3, '2026-01-19 10:30:00', 1, 2005, '面馆', 101, 201, 29.00, 6.00, 3.00, 1, '超时未接单', '2026-01-19 10:05:00', '2026-01-19 10:35:00', NULL, 1.60, '2026-01-19 10:00:00', '2026-01-19 10:30:00', NULL);
+INSERT INTO `order_main` VALUES (10, '20260119090010CDEFGH', 1, 1010, '林十二', '13800138010', 88.00, 88.00, 2, 2, '2026-01-19 09:10:00', 'WX202601190900001', 8, NULL, NULL, 2, 3005, '骑手-黄十三', 101, 201, 68.00, 14.00, 6.00, 3, '申请退款', '2026-01-19 09:15:00', '2026-01-19 09:45:00', '2026-01-19 09:42:00', 3.20, '2026-01-19 09:00:00', '2026-01-19 09:50:00', NULL);
+INSERT INTO `order_main` VALUES (11, '20260119120011IJKLMN', 2, 1011, '黄十三', '13800138011', 15.00, 15.00, 1, 2, '2026-01-19 12:00:00', 'WX202601191200004', 2, NULL, NULL, 2, NULL, NULL, 101, 201, 12.00, 2.00, 1.00, 0, '帮我取快递', '2026-01-19 12:05:00', '2026-01-19 12:30:00', NULL, 1.50, '2026-01-19 12:00:00', '2026-01-19 12:00:00', NULL);
+INSERT INTO `order_main` VALUES (12, '20260119115012OPQRST', 2, 1012, '杨十四', '13800138012', 20.00, 20.00, 1, 1, '2026-01-19 11:40:00', 'ONLINE202601191150001', 4, NULL, NULL, 2, 4001, '服务人员-朱十五', 101, 201, 16.00, 3.00, 1.00, 1, '帮我买药', '2026-01-19 11:45:00', '2026-01-19 12:20:00', NULL, 2.00, '2026-01-19 11:35:00', '2026-01-19 12:00:00', NULL);
+INSERT INTO `order_main` VALUES (13, '20260119110013UVWXYZ', 2, 1013, '朱十五', '13800138013', 18.00, 18.00, 1, 2, '2026-01-19 11:20:00', 'WX202601191100002', 7, NULL, NULL, 2, 4002, '服务人员-秦十六', 101, 201, 14.00, 3.00, 1.00, 2, '帮我打印', '2026-01-19 11:25:00', '2026-01-19 11:55:00', '2026-01-19 11:53:00', 1.80, '2026-01-19 11:15:00', '2026-01-19 11:55:00', NULL);
+INSERT INTO `order_main` VALUES (14, '20260119120014MAXVAL', 1, 1014, '秦十六', '13800138014', 99999999.99, 99999999.99, 1, 1, '2026-01-19 12:00:00', 'ONLINE202601191200002', 1, NULL, NULL, 1, 2006, '豪华餐厅', 101, 201, 79999999.99, 14999999.99, 4999999.99, 0, '最大金额测试', '2026-01-19 12:05:00', '2026-01-19 12:35:00', NULL, 10.00, '2026-01-19 12:00:00', '2026-01-19 12:00:00', NULL);
+INSERT INTO `order_main` VALUES (15, '20260119120015MINVAL', 2, 1015, '许十七', '13800138015', 0.01, 0.01, 1, 2, '2026-01-19 12:00:00', 'WX202601191200005', 7, NULL, NULL, 2, 4003, '服务人员-何十八', 101, 201, 0.01, 0.00, 0.00, 1, '最小金额测试', '2026-01-19 12:05:00', '2026-01-19 12:10:00', '2026-01-19 12:08:00', 0.10, '2026-01-19 12:00:00', '2026-01-19 12:10:00', NULL);
+INSERT INTO `order_main` VALUES (17, '20260119120017NULLTEST', 1, 1017, '吕十九', '13800138017', 48.00, 48.00, 1, 1, '2026-01-19 12:00:00', 'ONLINE202601191200003', 1, NULL, NULL, 1, 2007, '快餐店', NULL, NULL, 37.00, 7.00, 4.00, 0, '空值测试', NULL, NULL, NULL, NULL, '2026-01-19 12:00:00', '2026-01-19 12:00:00', NULL);
+INSERT INTO `order_main` VALUES (18, '20260119110018DELETED', 1, 1018, '施二十', '13800138018', 35.00, 35.00, 1, 2, '2026-01-19 11:30:00', 'WX202601191100003', 6, 1, '2026-01-19 11:35:00', 1, 2008, '小吃店', 101, 201, 27.00, 5.00, 3.00, 1, '软删除测试', '2026-01-19 11:35:00', '2026-01-19 12:05:00', NULL, 1.50, '2026-01-19 11:30:00', '2026-01-19 11:35:00', '2026-01-19 11:35:00');
+INSERT INTO `order_main` VALUES (19, '20260119120019OTHER', 3, 1019, '张二十一', '13800138019', 100.00, 100.00, 1, 3, '2026-01-19 12:00:00', 'OFFLINE202601191200001', 7, NULL, NULL, 2, 4004, '服务人员-王二十二', 101, 201, 80.00, 15.00, 5.00, 2, '线下支付测试', '2026-01-19 12:05:00', '2026-01-19 12:35:00', '2026-01-19 12:33:00', 3.50, '2026-01-19 12:00:00', '2026-01-19 12:35:00', NULL);
+INSERT INTO `order_main` VALUES (20, '20260119100020PARTIAL', 1, 1020, '王二十二', '13800138020', 100.00, 100.00, 2, 2, '2026-01-19 10:00:00', 'WX202601191000002', 7, NULL, NULL, 2, 3007, '骑手-李二十三', 101, 201, 78.00, 15.00, 7.00, 3, '部分退款测试', '2026-01-19 10:05:00', '2026-01-19 10:35:00', '2026-01-19 10:32:00', 3.80, '2026-01-19 10:00:00', '2026-01-19 10:35:00', NULL);
+INSERT INTO `order_main` VALUES (21, '20260119090021FULLREF', 1, 1021, '李二十三', '13800138021', 68.00, 68.00, 3, 2, '2026-01-19 09:00:00', 'WX202601190900002', 6, 1, '2026-01-19 09:30:00', 1, 2009, '火锅店', 101, 201, 53.00, 10.00, 5.00, 1, '全额退款测试', '2026-01-19 09:05:00', '2026-01-19 09:35:00', NULL, 2.60, '2026-01-19 09:00:00', '2026-01-19 09:30:00', NULL);
 
 -- ----------------------------
 -- Table structure for undo_log
@@ -123,5 +167,9 @@ CREATE TABLE `undo_log`  (
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of undo_log
+-- ----------------------------
 
 SET FOREIGN_KEY_CHECKS = 1;

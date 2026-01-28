@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 27/01/2026 18:09:48
+ Date: 28/01/2026 14:52:13
 */
 
 SET NAMES utf8mb4;
@@ -179,6 +179,23 @@ CREATE TABLE `mch_spec`  (
 
 -- ----------------------------
 -- Records of mch_spec
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for mch_user_category
+-- ----------------------------
+DROP TABLE IF EXISTS `mch_user_category`;
+CREATE TABLE `mch_user_category`  (
+  `mch_user_id` bigint NOT NULL COMMENT '关联商家用户id',
+  `mch_category_id` bigint NOT NULL COMMENT '关联分类表id',
+  `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `delete_at` datetime NULL DEFAULT NULL,
+  `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`mch_user_id`, `mch_category_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '商家用户-商品分类关联表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of mch_user_category
 -- ----------------------------
 
 -- ----------------------------

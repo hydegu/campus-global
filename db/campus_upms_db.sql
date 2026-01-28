@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 17/01/2026 16:45:09
+ Date: 28/01/2026 14:54:47
 */
 
 SET NAMES utf8mb4;
@@ -39,6 +39,15 @@ CREATE TABLE `address`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of address
+-- ----------------------------
+INSERT INTO `address` VALUES (1, '北京市', '北京市', '海淀区', '中关村大街1号', '13800138001', '张三', '2026-01-17 02:24:01', 39.980000, 116.310000, '2026-01-17 02:24:01', NULL);
+INSERT INTO `address` VALUES (2, '北京市', '北京市', '朝阳区', '建国路88号', '13800138002', '李四', '2026-01-17 02:24:01', 39.920000, 116.460000, '2026-01-17 02:24:01', NULL);
+INSERT INTO `address` VALUES (3, '上海市', '上海市', '浦东新区', '世纪大道100号', '13800138003', '王五', '2026-01-17 02:24:01', 31.230000, 121.470000, '2026-01-17 02:24:01', NULL);
+INSERT INTO `address` VALUES (4, '上海市', '上海市', '黄浦区', '南京东路200号', '13800138004', '赵六', '2026-01-17 02:24:01', 31.230000, 121.480000, '2026-01-17 02:24:01', NULL);
+INSERT INTO `address` VALUES (5, '广东省', '深圳市', '南山区', '科技园南区', '13800138005', '钱七', '2026-01-17 02:24:01', 22.540000, 113.950000, '2026-01-17 02:24:01', NULL);
+
+-- ----------------------------
 -- Table structure for app_user_address
 -- ----------------------------
 DROP TABLE IF EXISTS `app_user_address`;
@@ -47,6 +56,18 @@ CREATE TABLE `app_user_address`  (
   `address_id` bigint NOT NULL COMMENT '地址id',
   PRIMARY KEY (`user_id`, `address_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of app_user_address
+-- ----------------------------
+INSERT INTO `app_user_address` VALUES (2001, 1);
+INSERT INTO `app_user_address` VALUES (2001, 2);
+INSERT INTO `app_user_address` VALUES (2002, 2);
+INSERT INTO `app_user_address` VALUES (2002, 3);
+INSERT INTO `app_user_address` VALUES (2003, 1);
+INSERT INTO `app_user_address` VALUES (2004, 3);
+INSERT INTO `app_user_address` VALUES (2004, 4);
+INSERT INTO `app_user_address` VALUES (2005, 4);
 
 -- ----------------------------
 -- Table structure for audit_record
@@ -67,7 +88,24 @@ CREATE TABLE `audit_record`  (
   UNIQUE INDEX `uk_audit_no`(`audit_no` ASC) USING BTREE,
   INDEX `idx_applicant`(`applicant_id` ASC, `status` ASC) USING BTREE,
   INDEX `idx_delete`(`delete_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4004 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2015710533714206722 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of audit_record
+-- ----------------------------
+INSERT INTO `audit_record` VALUES (1001, 'AUD202501170001', 'RIDER_APPLY', 3001, '申请成为骑手', 1, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (1002, 'AUD202501170002', 'RIDER_APPLY', 3002, '申请成为骑手', 1, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (1003, 'AUD202501170003', 'RIDER_APPLY', 3003, '申请成为骑手', 0, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (2001, 'AUD202501170004', 'STAFF_APPLY', 5001, '申请成为合伙人', 1, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (2002, 'AUD202501170005', 'STAFF_APPLY', 5002, '申请成为合伙人', 1, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (2003, 'AUD202501170006', 'STAFF_APPLY', 5003, '申请成为合伙人', 0, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (3001, 'AUD202501170007', 'MERCHANT_SETTLE', 4001, '商家入驻申请', 1, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (3002, 'AUD202501170008', 'MERCHANT_SETTLE', 4002, '商家入驻申请', 1, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (3003, 'AUD202501170009', 'MERCHANT_SETTLE', 4003, '商家入驻申请', 0, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (4001, 'AUD202501170010', 'STAFF_APPLY', 2001, '申请成为服务人员', 1, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (4002, 'AUD202501170011', 'STAFF_APPLY', 2002, '申请成为服务人员', 2, 1003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (4003, 'AUD202501170012', 'STAFF_APPLY', 2003, '申请成为服务人员', 0, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `audit_record` VALUES (2015710533714206721, 'AUD1769417815924_633', 'ACTIVITY_PUBLISH', 1001, '活动申请', 1, NULL, '2026-01-26 16:56:56', '2026-01-27 11:12:56', NULL);
 
 -- ----------------------------
 -- Table structure for base_user
@@ -96,6 +134,33 @@ CREATE TABLE `base_user`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 9005 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of base_user
+-- ----------------------------
+INSERT INTO `base_user` VALUES (1001, 'admin', '超级管理员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/admin.jpg', '13800138001', 'admin@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:29', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (1002, 'sysadmin', '系统管理员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/sysadmin.jpg', '13800138002', 'sysadmin@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:32', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (1003, 'auditor', '审核员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/auditor.jpg', '13800138003', 'auditor@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:36', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (1004, 'operator', '运营人员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/operator.jpg', '13800138004', 'operator@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:39', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (1005, 'testuser', '测试用户', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/testuser.jpg', '13800138005', 'testuser@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:41', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2001, 'student1', '学生张小明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student1.jpg', '13900139001', 'student1@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:43', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2002, 'student2', '学生李小红', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student2.jpg', '13900139002', 'student2@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:45', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2003, 'student3', '学生王小刚', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/student3.jpg', '13900139003', 'student3@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:47', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2004, 'student4', '学生赵小美', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student4.jpg', '13900139004', 'student4@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:50', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2005, 'student5', '学生陈小龙', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student5.jpg', '13900139005', 'student5@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:51', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (3001, 'rider1', '骑手刘大伟', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/rider1.jpg', '13700137001', 'rider1@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:54', NULL, '2026-01-17 02:23:06', '127.0.0.1');
+INSERT INTO `base_user` VALUES (3002, 'rider2', '骑手孙小芳', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/rider2.jpg', '13700137002', 'rider2@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:56', NULL, '2026-01-17 02:23:06', '127.0.0.1');
+INSERT INTO `base_user` VALUES (3003, 'rider3', '骑手周小军', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/rider3.jpg', '13700137003', 'rider3@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:58', NULL, '2026-01-17 02:23:06', '127.0.0.1');
+INSERT INTO `base_user` VALUES (4001, 'mch1', '校园便利店', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/mch1.jpg', '13600136001', 'mch1@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:00', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (4002, 'mch2', '美味餐厅', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/mch2.jpg', '13600136002', 'mch2@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:03', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (4003, 'mch3', '水果超市', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/mch3.jpg', '13600136003', 'mch3@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:05', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (5001, 'partner1', '合伙人吴大明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/partner1.jpg', '13500135001', 'partner1@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:07', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (5002, 'partner2', '合伙人郑小红', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/partner2.jpg', '13500135002', 'partner2@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:09', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (5003, 'partner3', '合伙人王小华', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/partner3.jpg', '13500135003', 'partner3@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:12', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (9001, 'blocked_user', '被拉黑用户', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/blocked.jpg', '13900139999', 'blocked@campus.com', 2, '2026-01-17 02:24:02', '2026-01-17 02:39:15', NULL, '2026-01-17 02:24:02', '127.0.0.1');
+INSERT INTO `base_user` VALUES (9002, 'pending_rider', '待审核骑手', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/pending_rider.jpg', '13700137999', 'pending_rider@campus.com', 4, '2026-01-17 02:24:02', '2026-01-17 02:39:18', NULL, '2026-01-17 02:24:02', '127.0.0.1');
+INSERT INTO `base_user` VALUES (9003, 'pending_mch', '待审核商家', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/pending_mch.jpg', '13600136999', 'pending_mch@campus.com', 3, '2026-01-17 02:24:02', '2026-01-17 02:39:20', NULL, '2026-01-17 02:24:02', '127.0.0.1');
+INSERT INTO `base_user` VALUES (9004, 'pending_partner', '待审核合伙人', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/pending_partner.jpg', '13500135999', 'pending_partner@campus.com', 3, '2026-01-17 02:24:02', '2026-01-17 02:39:23', NULL, '2026-01-17 02:24:02', '127.0.0.1');
+
+-- ----------------------------
 -- Table structure for role
 -- ----------------------------
 DROP TABLE IF EXISTS `role`;
@@ -115,6 +180,15 @@ CREATE TABLE `role`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of role
+-- ----------------------------
+INSERT INTO `role` VALUES (1, '超级管理员', 'super_admin', 1, 1, '2026-01-17 02:21:29', '2026-01-17 02:21:29', NULL);
+INSERT INTO `role` VALUES (2, '系统管理员', 'admin', 2, 1, '2026-01-17 02:21:29', '2026-01-17 02:21:29', NULL);
+INSERT INTO `role` VALUES (3, '审核员', 'auditor', 3, 1, '2026-01-17 02:21:29', '2026-01-17 02:21:29', NULL);
+INSERT INTO `role` VALUES (4, '运营人员', 'operator', 4, 1, '2026-01-17 02:21:29', '2026-01-17 02:21:29', NULL);
+INSERT INTO `role` VALUES (5, '测试角色', 'test_role', 5, 0, '2026-01-17 02:21:29', '2026-01-17 02:21:29', NULL);
+
+-- ----------------------------
 -- Table structure for role_menu
 -- ----------------------------
 DROP TABLE IF EXISTS `role_menu`;
@@ -123,6 +197,86 @@ CREATE TABLE `role_menu`  (
   `menu_id` bigint NOT NULL COMMENT '菜单ID',
   PRIMARY KEY (`role_id`, `menu_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of role_menu
+-- ----------------------------
+INSERT INTO `role_menu` VALUES (1, 1);
+INSERT INTO `role_menu` VALUES (1, 2);
+INSERT INTO `role_menu` VALUES (1, 3);
+INSERT INTO `role_menu` VALUES (1, 4);
+INSERT INTO `role_menu` VALUES (1, 5);
+INSERT INTO `role_menu` VALUES (1, 6);
+INSERT INTO `role_menu` VALUES (1, 7);
+INSERT INTO `role_menu` VALUES (1, 11);
+INSERT INTO `role_menu` VALUES (1, 12);
+INSERT INTO `role_menu` VALUES (1, 13);
+INSERT INTO `role_menu` VALUES (1, 14);
+INSERT INTO `role_menu` VALUES (1, 15);
+INSERT INTO `role_menu` VALUES (1, 21);
+INSERT INTO `role_menu` VALUES (1, 22);
+INSERT INTO `role_menu` VALUES (1, 23);
+INSERT INTO `role_menu` VALUES (1, 24);
+INSERT INTO `role_menu` VALUES (1, 31);
+INSERT INTO `role_menu` VALUES (1, 32);
+INSERT INTO `role_menu` VALUES (1, 33);
+INSERT INTO `role_menu` VALUES (1, 34);
+INSERT INTO `role_menu` VALUES (1, 41);
+INSERT INTO `role_menu` VALUES (1, 42);
+INSERT INTO `role_menu` VALUES (1, 43);
+INSERT INTO `role_menu` VALUES (1, 44);
+INSERT INTO `role_menu` VALUES (1, 51);
+INSERT INTO `role_menu` VALUES (1, 52);
+INSERT INTO `role_menu` VALUES (1, 53);
+INSERT INTO `role_menu` VALUES (1, 54);
+INSERT INTO `role_menu` VALUES (1, 61);
+INSERT INTO `role_menu` VALUES (1, 62);
+INSERT INTO `role_menu` VALUES (1, 63);
+INSERT INTO `role_menu` VALUES (1, 64);
+INSERT INTO `role_menu` VALUES (1, 71);
+INSERT INTO `role_menu` VALUES (2, 1);
+INSERT INTO `role_menu` VALUES (2, 2);
+INSERT INTO `role_menu` VALUES (2, 3);
+INSERT INTO `role_menu` VALUES (2, 4);
+INSERT INTO `role_menu` VALUES (2, 5);
+INSERT INTO `role_menu` VALUES (2, 11);
+INSERT INTO `role_menu` VALUES (2, 12);
+INSERT INTO `role_menu` VALUES (2, 13);
+INSERT INTO `role_menu` VALUES (2, 14);
+INSERT INTO `role_menu` VALUES (2, 15);
+INSERT INTO `role_menu` VALUES (2, 21);
+INSERT INTO `role_menu` VALUES (2, 22);
+INSERT INTO `role_menu` VALUES (2, 23);
+INSERT INTO `role_menu` VALUES (2, 31);
+INSERT INTO `role_menu` VALUES (2, 32);
+INSERT INTO `role_menu` VALUES (2, 33);
+INSERT INTO `role_menu` VALUES (2, 41);
+INSERT INTO `role_menu` VALUES (2, 42);
+INSERT INTO `role_menu` VALUES (2, 43);
+INSERT INTO `role_menu` VALUES (2, 51);
+INSERT INTO `role_menu` VALUES (2, 52);
+INSERT INTO `role_menu` VALUES (2, 53);
+INSERT INTO `role_menu` VALUES (3, 1);
+INSERT INTO `role_menu` VALUES (3, 6);
+INSERT INTO `role_menu` VALUES (3, 11);
+INSERT INTO `role_menu` VALUES (3, 12);
+INSERT INTO `role_menu` VALUES (3, 13);
+INSERT INTO `role_menu` VALUES (3, 14);
+INSERT INTO `role_menu` VALUES (3, 15);
+INSERT INTO `role_menu` VALUES (3, 61);
+INSERT INTO `role_menu` VALUES (3, 62);
+INSERT INTO `role_menu` VALUES (3, 63);
+INSERT INTO `role_menu` VALUES (3, 64);
+INSERT INTO `role_menu` VALUES (4, 1);
+INSERT INTO `role_menu` VALUES (4, 2);
+INSERT INTO `role_menu` VALUES (4, 5);
+INSERT INTO `role_menu` VALUES (4, 11);
+INSERT INTO `role_menu` VALUES (4, 12);
+INSERT INTO `role_menu` VALUES (4, 13);
+INSERT INTO `role_menu` VALUES (4, 14);
+INSERT INTO `role_menu` VALUES (4, 15);
+INSERT INTO `role_menu` VALUES (4, 21);
+INSERT INTO `role_menu` VALUES (4, 51);
 
 -- ----------------------------
 -- Table structure for school_partner
@@ -140,6 +294,15 @@ CREATE TABLE `school_partner`  (
   INDEX `idx_partner`(`partner_id` ASC) USING BTREE COMMENT '合伙人查询索引',
   INDEX `idx_created`(`created_at` ASC) USING BTREE COMMENT '创建时间索引'
 ) ENGINE = InnoDB AUTO_INCREMENT = 102 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '组织-合伙人关联表（支持多对多）' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of school_partner
+-- ----------------------------
+INSERT INTO `school_partner` VALUES (1, 1001, 5001, '2026-01-17 02:24:01', '2026-01-17 02:24:01');
+INSERT INTO `school_partner` VALUES (2, 1002, 5001, '2026-01-17 02:24:01', '2026-01-17 02:24:01');
+INSERT INTO `school_partner` VALUES (3, 1003, 5002, '2026-01-17 02:24:01', '2026-01-17 02:24:01');
+INSERT INTO `school_partner` VALUES (4, 1004, 5002, '2026-01-17 02:24:01', '2026-01-17 02:24:01');
+INSERT INTO `school_partner` VALUES (5, 1005, 5003, '2026-01-17 02:24:01', '2026-01-17 02:24:01');
 
 -- ----------------------------
 -- Table structure for sys_dict
@@ -162,6 +325,31 @@ CREATE TABLE `sys_dict`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 504 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of sys_dict
+-- ----------------------------
+INSERT INTO `sys_dict` VALUES (1, NULL, '审核状态字典', 'AUDIT_STATUS', '审核状态', 1, 1, 1, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (2, NULL, '用户状态字典', 'USER_STATUS', '用户状态', 2, 1, 1, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (3, NULL, '菜单类型字典', 'MENU_TYPE', '菜单类型', 3, 1, 1, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (4, NULL, '审核业务类型字典', 'BIZ_TYPE', '业务类型', 4, 1, 1, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (5, NULL, '性别字典', 'GENDER', '性别', 5, 1, 1, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (101, 1, '审核状态-待审核', 'PENDING', '待审核', 1, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (102, 1, '审核状态-审核通过', 'APPROVED', '审核通过', 2, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (103, 1, '审核状态-审核拒绝', 'REJECTED', '审核拒绝', 3, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (201, 2, '用户状态-正常', 'NORMAL', '正常', 1, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (202, 2, '用户状态-拉黑', 'BLOCKED', '拉黑', 2, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (301, 3, '菜单类型-目录', 'DIRECTORY', '目录', 1, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (302, 3, '菜单类型-菜单', 'MENU', '菜单', 2, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (303, 3, '菜单类型-按钮', 'BUTTON', '按钮', 3, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (401, 4, '业务类型-商家入驻', 'MERCHANT_SETTLE', '商家入驻', 1, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (402, 4, '业务类型-提现', 'WITHDRAW', '提现', 2, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (403, 4, '业务类型-商品上架', 'GOODS', '商品上架', 3, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (404, 4, '业务类型-服务人员申请', 'STAFF_APPLY', '服务人员', 4, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (405, 4, '业务类型-骑手申请', 'RIDER_APPLY', '骑手', 5, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (501, 5, '性别-未知', 'UNKNOWN', '未知', 1, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (502, 5, '性别-男', 'MALE', '男', 2, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+INSERT INTO `sys_dict` VALUES (503, 5, '性别-女', 'FEMALE', '女', 3, 1, 2, '2026-01-17 02:20:48', '2026-01-17 02:20:48', NULL);
+
+-- ----------------------------
 -- Table structure for sys_file
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_file`;
@@ -177,6 +365,15 @@ CREATE TABLE `sys_file`  (
   `delete_at` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '文件管理表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sys_file
+-- ----------------------------
+INSERT INTO `sys_file` VALUES (1, 'avatar_admin.jpg', 'campus-avatar', 'admin.jpg', 'image/jpeg', 102400, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `sys_file` VALUES (2, 'license_mch1.jpg', 'campus-license', 'mch1_license.jpg', 'image/jpeg', 204800, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `sys_file` VALUES (3, 'logo_mch1.jpg', 'campus-logo', 'mch1_logo.jpg', 'image/jpeg', 153600, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `sys_file` VALUES (4, 'qrcode_partner1.jpg', 'campus-qrcode', 'partner1_qrcode.jpg', 'image/jpeg', 51200, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `sys_file` VALUES (5, 'document_contract.pdf', 'campus-doc', 'contract.pdf', 'application/pdf', 512000, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -203,6 +400,44 @@ CREATE TABLE `sys_menu`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 73 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of sys_menu
+-- ----------------------------
+INSERT INTO `sys_menu` VALUES (1, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user/index', '/system/user', 1, '2026-01-17 04:54:42', '2026-01-17 07:14:18', NULL);
+INSERT INTO `sys_menu` VALUES (2, 0, 0, 'el-icon-s-custom', '角色管理', 2, NULL, 1, NULL, '/system/role', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (3, 0, 0, 'el-icon-menu', '菜单管理', 3, NULL, 1, NULL, '/system/menu', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (4, 0, 0, 'el-icon-notebook', '字典管理', 4, NULL, 1, NULL, '/system/dict', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (5, 0, 0, 'el-icon-school', '学校管理', 5, NULL, 1, NULL, '/system/school', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (6, 0, 0, 'el-icon-s-check', '审核管理', 6, NULL, 1, NULL, '/system/audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (7, 0, 0, 'el-icon-setting', '系统管理', 7, NULL, 1, NULL, '/system/config', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (11, 1, 1, NULL, '系统用户', 1, 'system:user:list', 1, '/system/user/index', 'sys-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (12, 1, 1, NULL, '普通用户', 2, 'system:appuser:list', 1, '/system/appuser/index', 'app-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (13, 1, 1, NULL, '骑手用户', 3, 'system:rider:list', 1, '/system/rider/index', 'rider-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (14, 1, 1, NULL, '商家用户', 4, 'system:mch:list', 1, '/system/mch/index', 'mch-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (15, 1, 1, NULL, '合伙人用户', 5, 'system:partner:list', 1, '/system/partner/index', 'partner-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (21, 2, 1, NULL, '角色列表', 1, 'system:role:list', 1, '/system/role/index', 'role-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (22, 2, 2, NULL, '角色新增', 2, 'system:role:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (23, 2, 2, NULL, '角色编辑', 3, 'system:role:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (24, 2, 2, NULL, '角色删除', 4, 'system:role:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (31, 3, 1, NULL, '菜单列表', 1, 'system:menu:list', 1, '/system/menu/index', 'menu-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (32, 3, 2, NULL, '菜单新增', 2, 'system:menu:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (33, 3, 2, NULL, '菜单编辑', 3, 'system:menu:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (34, 3, 2, NULL, '菜单删除', 4, 'system:menu:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (41, 4, 1, NULL, '字典列表', 1, 'system:dict:list', 1, '/system/dict/index', 'dict-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (42, 4, 2, NULL, '字典新增', 2, 'system:dict:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (43, 4, 2, NULL, '字典编辑', 3, 'system:dict:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (44, 4, 2, NULL, '字典删除', 4, 'system:dict:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (51, 5, 1, NULL, '学校列表', 1, 'system:school:list', 1, '/system/school/index', 'school-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (52, 5, 2, NULL, '学校新增', 2, 'system:school:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (53, 5, 2, NULL, '学校编辑', 3, 'system:school:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (54, 5, 2, NULL, '学校删除', 4, 'system:school:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (61, 6, 1, NULL, '骑手审核', 1, 'system:rider:audit', 1, '/system/audit/rider', 'rider-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (62, 6, 1, NULL, '合伙人审核', 2, 'system:partner:audit', 1, '/system/audit/partner', 'partner-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (63, 6, 1, NULL, '商家入驻审核', 3, 'system:mch:audit', 1, '/system/audit/mch', 'mch-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (64, 6, 1, NULL, '服务人员审核', 4, 'system:staff:audit', 1, '/system/audit/staff', 'staff-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (71, 7, 1, NULL, '客户端管理', 1, 'system:client:list', 1, '/system/client/index', 'client-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (72, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user/index', '/system/user', 1, '2026-01-17 15:11:42', '2026-01-17 15:30:26', '2026-01-17 07:30:28');
+
+-- ----------------------------
 -- Table structure for sys_oauth_client_details
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_oauth_client_details`;
@@ -223,6 +458,13 @@ CREATE TABLE `sys_oauth_client_details`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '终端信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of sys_oauth_client_details
+-- ----------------------------
+INSERT INTO `sys_oauth_client_details` VALUES (1, 'campus', 'campus', 'server,read,write', 'password,refresh_token', NULL, 43200, 2592000, '2026-01-16 02:46:01', '2026-01-16 02:46:01', NULL);
+INSERT INTO `sys_oauth_client_details` VALUES (2, 'app', 'app', 'all', 'password,refresh_token', 'http://127.0.0.1:8080/callback', 7200, 2592000, '2026-01-17 02:21:48', '2026-01-17 02:36:22', NULL);
+INSERT INTO `sys_oauth_client_details` VALUES (3, 'miniapp', 'miniapp', 'all', 'password,refresh_token', 'http://127.0.0.1:8080/callback', 7200, 2592000, '2026-01-17 02:21:48', '2026-01-17 02:28:34', NULL);
+
+-- ----------------------------
 -- Table structure for sys_school
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_school`;
@@ -239,6 +481,15 @@ CREATE TABLE `sys_school`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 10025 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '学校表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of sys_school
+-- ----------------------------
+INSERT INTO `sys_school` VALUES (1001, '111', 1, 0, '2026-01-17 02:24:01', '2026-01-17 15:41:26', '2026-01-17 07:41:28');
+INSERT INTO `sys_school` VALUES (1002, '清华大学', 2, 1, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `sys_school` VALUES (1003, '复旦大学', 3, 1, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `sys_school` VALUES (1004, '上海交通大学', 4, 1, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `sys_school` VALUES (1005, '深圳大学', 5, 0, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+
+-- ----------------------------
 -- Table structure for undo_log
 -- ----------------------------
 DROP TABLE IF EXISTS `undo_log`;
@@ -253,6 +504,10 @@ CREATE TABLE `undo_log`  (
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of undo_log
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for user_app
@@ -278,7 +533,17 @@ CREATE TABLE `user_app`  (
   UNIQUE INDEX `idx_openid`(`openid` ASC) USING BTREE,
   INDEX `idx_delete_time`(`delete_time` ASC) USING BTREE,
   INDEX `idx_audit_id`(`audit_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 902 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1002 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_app
+-- ----------------------------
+INSERT INTO `user_app` VALUES (101, 2001, 1, 'o1234567890abcdef1234567890ab', '2021001', 100.00, 500.00, 1001, NULL, '张小明', '110101200001011234', '2026-01-17 02:23:06', '2026-01-17 02:23:06', NULL);
+INSERT INTO `user_app` VALUES (102, 2002, 2, 'o1234567890abcdef1234567890ac', '2021002', 200.50, 800.00, 1001, NULL, '李小红', '110101200001021235', '2026-01-17 02:23:06', '2026-01-17 02:23:06', NULL);
+INSERT INTO `user_app` VALUES (103, 2003, 1, 'o1234567890abcdef1234567890ad', '2021003', 50.00, 300.00, 1001, NULL, '王小刚', '110101200001031236', '2026-01-17 02:23:06', '2026-01-17 02:23:06', NULL);
+INSERT INTO `user_app` VALUES (104, 2004, 2, 'o1234567890abcdef1234567890ae', '2021004', 150.00, 600.00, 1002, NULL, '赵小美', '110101200001041237', '2026-01-17 02:23:06', '2026-01-17 02:23:06', NULL);
+INSERT INTO `user_app` VALUES (901, 9001, 1, 'o1234567890abcdef1234567890zz', '2099999', 0.00, 0.00, 1001, NULL, '被拉黑用户', '110101200001019999', '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
+INSERT INTO `user_app` VALUES (1001, 2005, 1, 'o1234567890abcdef1234567890af', '2021005', 80.00, 400.00, 1002, NULL, '陈小龙', '110101200001051238', '2026-01-17 02:23:06', '2026-01-27 06:50:37', NULL);
 
 -- ----------------------------
 -- Table structure for user_mch
@@ -311,6 +576,14 @@ CREATE TABLE `user_mch`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 902 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of user_mch
+-- ----------------------------
+INSERT INTO `user_mch` VALUES (301, 4001, '校园便利店', 1, 'https://example.com/logo/mch1.jpg', '张老板', 'https://example.com/license/mch1.jpg', 5001, '110101198001011234', 10.00, '6222021234567890126', 2001, '08:00:00', '22:00:00', 1, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_mch` VALUES (302, 4002, '美味餐厅', 2, 'https://example.com/logo/mch2.jpg', '李大厨', 'https://example.com/license/mch2.jpg', 5001, '110101198002021235', 20.00, '6222021234567890127', 2002, '10:00:00', '21:00:00', 1, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_mch` VALUES (303, 4003, '水果超市', 3, 'https://example.com/logo/mch3.jpg', '王经理', 'https://example.com/license/mch3.jpg', 5002, '110101198003031236', 15.00, '6222021234567890128', 2003, '09:00:00', '20:00:00', 0, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_mch` VALUES (901, 9003, '待审核商家', 5, 'https://example.com/logo/pending_mch.jpg', '待审核联系人', 'https://example.com/license/pending_mch.jpg', 5001, '110101198001019999', 10.00, '6222021234567890998', 3003, '08:00:00', '22:00:00', 0, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
+
+-- ----------------------------
 -- Table structure for user_partner
 -- ----------------------------
 DROP TABLE IF EXISTS `user_partner`;
@@ -332,6 +605,14 @@ CREATE TABLE `user_partner`  (
   INDEX `idx_deleted`(`delete_at` ASC, `id` ASC) USING BTREE,
   CONSTRAINT `chk_partner_rate` CHECK ((`commission_rate` >= 0) and (`commission_rate` <= 100))
 ) ENGINE = InnoDB AUTO_INCREMENT = 20012 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '合伙人表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_partner
+-- ----------------------------
+INSERT INTO `user_partner` VALUES (401, 5001, '吴大明', 'INVITE001', 'https://example.com/qrcode/partner1.jpg', '6222021234567890129', 5.00, 0, 3001, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_partner` VALUES (402, 5002, '郑小红', 'INVITE002', 'https://example.com/qrcode/partner2.jpg', '6222021234567890130', 6.00, 401, 3002, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_partner` VALUES (403, 5003, '王小华', 'INVITE003', 'https://example.com/qrcode/partner3.jpg', '6222021234567890131', 4.50, 401, 3003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_partner` VALUES (901, 9004, '待审核合伙人', 'INVITE999', 'https://example.com/qrcode/pending_partner.jpg', '6222021234567890997', 5.00, 0, 2003, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
 
 -- ----------------------------
 -- Table structure for user_rider
@@ -364,6 +645,14 @@ CREATE TABLE `user_rider`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 902 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Records of user_rider
+-- ----------------------------
+INSERT INTO `user_rider` VALUES (201, 3001, NULL, NULL, NULL, '刘大伟', '110101199001011234', NULL, NULL, NULL, 1001, NULL, NULL, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL, '6222021234567890123');
+INSERT INTO `user_rider` VALUES (202, 3002, NULL, NULL, NULL, '孙小芳', '110101199002021235', NULL, NULL, NULL, 1002, NULL, NULL, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL, '6222021234567890124');
+INSERT INTO `user_rider` VALUES (203, 3003, NULL, NULL, NULL, '周小军', '110101199003031236', NULL, NULL, NULL, 1003, NULL, NULL, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL, '6222021234567890125');
+INSERT INTO `user_rider` VALUES (901, 9002, NULL, NULL, NULL, '待审核骑手', '110101199901019999', NULL, NULL, NULL, 1003, NULL, NULL, NULL, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL, '6222021234567890999');
+
+-- ----------------------------
 -- Table structure for user_role
 -- ----------------------------
 DROP TABLE IF EXISTS `user_role`;
@@ -374,6 +663,15 @@ CREATE TABLE `user_role`  (
   UNIQUE INDEX `uk_user_role`(`user_id` ASC, `role_id` ASC) USING BTREE,
   INDEX `idx_role`(`role_id` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色关联表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_role
+-- ----------------------------
+INSERT INTO `user_role` VALUES (1001, 1);
+INSERT INTO `user_role` VALUES (1002, 2);
+INSERT INTO `user_role` VALUES (1003, 3);
+INSERT INTO `user_role` VALUES (1004, 4);
+INSERT INTO `user_role` VALUES (1005, 5);
 
 -- ----------------------------
 -- Table structure for user_sys
@@ -387,5 +685,14 @@ CREATE TABLE `user_sys`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `base_user_id`(`base_user_id` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_sys
+-- ----------------------------
+INSERT INTO `user_sys` VALUES (1, 1001, '张三', 1);
+INSERT INTO `user_sys` VALUES (2, 1002, '李四', 1);
+INSERT INTO `user_sys` VALUES (3, 1003, '王五', 2);
+INSERT INTO `user_sys` VALUES (4, 1004, '赵六', 1);
+INSERT INTO `user_sys` VALUES (5, 1005, '测试员', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
