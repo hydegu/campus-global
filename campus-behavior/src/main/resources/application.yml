@@ -1,0 +1,36 @@
+server:
+  port: 8081
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 200MB
+      file-size-threshold: 2MB
+
+# 文件上传配置
+file:
+  # 文件访问URL前缀
+  url-prefix: http://localhost:8081/files
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  type-aliases-package: com.example.behavior.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleteAt
+      logic-delete-value: now()
+      logic-not-delete-value: null
+
+# 日志配置
+logging:
+  level:
+    com.example.behavior: debug
+    com.example.behavior.mapper: debug

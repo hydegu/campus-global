@@ -28,6 +28,11 @@
             <groupId>com.example</groupId>
             <artifactId>common-security</artifactId>
         </dependency>
+        <!--orm 模块-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-mybatis</artifactId>
+        </dependency>
         <!--接口文档-->
         <dependency>
             <groupId>com.example</groupId>
