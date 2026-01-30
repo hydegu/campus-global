@@ -1,3 +1,4 @@
 com.example.order.api.feign.RemoteUserService
 com.example.order.api.feign.RemoteMerchantService
 com.example.order.api.feign.RemoteErrandCategoryService
+com.example.order.api.feign.RemoteFinanceService

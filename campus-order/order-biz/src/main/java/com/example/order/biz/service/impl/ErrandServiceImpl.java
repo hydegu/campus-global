@@ -21,6 +21,12 @@ import com.example.order.api.enums.OrderTypeEnum;
 import com.example.order.api.enums.PayStatusEnum;
 import com.example.order.api.feign.RemoteErrandCategoryService;
 import com.example.order.api.feign.RemoteUserService;
+import com.example.common.core.constant.CommonConstants;
+import com.example.common.core.util.Result;
+import com.example.finance.api.dto.FinanceTransactionAddDTO;
+import com.example.finance.api.enums.RelatedTypeEnum;
+import com.example.finance.api.enums.TransactionTypeEnum;
+import com.example.order.api.feign.RemoteFinanceService;
 import com.example.order.api.vo.ErrandDetailVO;
 import com.example.order.api.vo.ErrandListVO;
 import com.example.order.biz.mapper.OrderErrandMapper;
@@ -47,6 +53,7 @@ public class ErrandServiceImpl implements ErrandService {
 	private final OrderMainMapper orderMainMapper;
 	private final OrderErrandMapper orderErrandMapper;
 	private final RemoteUserService remoteUserService;
+	private final RemoteFinanceService remoteFinanceService;
 	private final RemoteErrandCategoryService remoteErrandCategoryService;
 	private final AmapService amapService;
 
@@ -310,20 +317,67 @@ public class ErrandServiceImpl implements ErrandService {
 			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许支付");
 		}
 
-		// TODO: 调用finance服务记录支付流水到finance_transaction表（交易类型：订单支付）
-		// transaction_type = 2 (消费)
-		// amount = -orderMain.getActualAmount()
-		// related_type = 1 (订单)
-		// related_id = orderMain.getId()
-
-		// TODO: 从订单实体读取estimatedProviderIncome、estimatedPartnerIncome、estimatedPlatformIncome
-		// BigDecimal providerIncome = orderMain.getEstimatedProviderIncome();
-		// BigDecimal partnerIncome = orderMain.getEstimatedPartnerIncome();
-		// BigDecimal platformIncome = orderMain.getEstimatedPlatformIncome();
-
-		// TODO: 将各方收益记录到statistics_transaction_log统计表
-		// transaction_type = 3 (商家/合伙人分佣)
-		// 记录服务提供方收益、合伙人收益、平台收益
+		// ========== 记录用户消费流水 ==========
+		FinanceTransactionAddDTO userTransaction = new FinanceTransactionAddDTO();
+		userTransaction.setTransactionNo(generateTransactionNo());
+		userTransaction.setUserId(orderMain.getUserId());
+		userTransaction.setTransactionType(TransactionTypeEnum.CONSUMPTION.getCode());
+		userTransaction.setAmount(orderMain.getActualAmount().negate()); // 消费为负数
+		userTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
+		userTransaction.setRelatedId(orderMain.getId());
+		userTransaction.setRemark("跑腿订单支付：" + orderMain.getOrderNo());
+		
+		Result<Long> userResult = remoteFinanceService.createTransaction(userTransaction);
+		if (userResult.getCode() != CommonConstants.SUCCESS) {
+			throw new BusinessException("FINANCE_ERROR", "记录用户消费流水失败");
+		}
+		
+		// ========== 记录各方收益流水 ==========
+		BigDecimal providerIncome = orderMain.getEstimatedProviderIncome();
+		BigDecimal partnerIncome = orderMain.getEstimatedPartnerIncome();
+		BigDecimal platformIncome = orderMain.getEstimatedPlatformIncome();
+		
+		// 服务提供方收入
+		if (providerIncome != null && providerIncome.compareTo(BigDecimal.ZERO) > 0) {
+			FinanceTransactionAddDTO providerTransaction = new FinanceTransactionAddDTO();
+			providerTransaction.setTransactionNo(generateTransactionNo());
+			providerTransaction.setUserId(orderMain.getServiceProviderId());
+			providerTransaction.setTransactionType(TransactionTypeEnum.PAYMENT.getCode());
+			providerTransaction.setAmount(providerIncome); // 收入为正数
+			providerTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
+			providerTransaction.setRelatedId(orderMain.getId());
+			providerTransaction.setRemark("跑腿订单服务人员收入：" + orderMain.getOrderNo());
+			
+			remoteFinanceService.createTransaction(providerTransaction);
+		}
+		
+		// 合伙人收入
+		if (partnerIncome != null && partnerIncome.compareTo(BigDecimal.ZERO) > 0) {
+			FinanceTransactionAddDTO partnerTransaction = new FinanceTransactionAddDTO();
+			partnerTransaction.setTransactionNo(generateTransactionNo());
+			partnerTransaction.setUserId(orderMain.getPartnerId());
+			partnerTransaction.setTransactionType(TransactionTypeEnum.PAYMENT.getCode());
+			partnerTransaction.setAmount(partnerIncome);
+			partnerTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
+			partnerTransaction.setRelatedId(orderMain.getId());
+			partnerTransaction.setRemark("跑腿订单合伙人收入：" + orderMain.getOrderNo());
+			
+			remoteFinanceService.createTransaction(partnerTransaction);
+		}
+		
+		// 平台收入
+		if (platformIncome != null && platformIncome.compareTo(BigDecimal.ZERO) > 0) {
+			FinanceTransactionAddDTO platformTransaction = new FinanceTransactionAddDTO();
+			platformTransaction.setTransactionNo(generateTransactionNo());
+			platformTransaction.setUserId(0L); // 平台ID设为0
+			platformTransaction.setTransactionType(TransactionTypeEnum.PAYMENT.getCode());
+			platformTransaction.setAmount(platformIncome);
+			platformTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
+			platformTransaction.setRelatedId(orderMain.getId());
+			platformTransaction.setRemark("跑腿订单平台收入：" + orderMain.getOrderNo());
+			
+			remoteFinanceService.createTransaction(platformTransaction);
+		}
 
 		// 更新订单支付状态
 		orderMain.setPayStatus(PayStatusEnum.PAID.getCode());
@@ -529,7 +583,7 @@ public class ErrandServiceImpl implements ErrandService {
 		if (result != null && result.getData() != null) {
 			return result.getData().getCategoryName();
 		}
-		// 降级处理：返回 ID 拼接的名称
+		// 降级处理：返回ID拼接的名称
 		return "服务分类" + serviceTypeId;
 	}
 
@@ -542,5 +596,14 @@ public class ErrandServiceImpl implements ErrandService {
 		wrapper.eq(OrderErrand::getServiceTypeId, serviceTypeId);
 		Long count = orderErrandMapper.selectCount(wrapper);
 		return count != null && count > 0;
+	}
+
+	/**
+	 * 生成流水号
+	 * 格式：FT + yyyyMMddHHmmss + 8位随机大写字符
+	 */
+	private String generateTransactionNo() {
+		return "FT" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+			   + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 	}
 }

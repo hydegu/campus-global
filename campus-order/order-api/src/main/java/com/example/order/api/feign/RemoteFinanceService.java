@@ -1,6 +1,6 @@
-package com.example.finance.api.feign;
+package com.example.order.api.feign;
 
-import com.example.common.core.constant.ServiceNameConstants;
+import com.example.common.core.constant.CommonConstants;
 import com.example.common.core.util.Result;
 import com.example.common.feign.annotation.NoToken;
 import com.example.finance.api.dto.FinanceTransactionAddDTO;
@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Map;
+
 /**
- * 远程财务服务接口：提供财务流水、统计等功能
+ * 远程财务服务接口：订单服务调用财务服务
  */
-@FeignClient(contextId = "remoteFinanceService", value = ServiceNameConstants.FINANCE_SERVICE)
+@FeignClient(contextId = "remoteFinanceService", value = "campus-finance")
 public interface RemoteFinanceService {
 
     /**
@@ -37,7 +39,7 @@ public interface RemoteFinanceService {
      */
     @NoToken
     @GetMapping("/api/finance/transaction/list")
-    Result<?> listByUser(@SpringQueryMap FinanceTransactionQueryDTO queryDTO);
+    Result<?> listByQuery(@SpringQueryMap FinanceTransactionQueryDTO queryDTO);
 
     /**
      * 获取统计数据
