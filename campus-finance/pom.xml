@@ -4,25 +4,15 @@
     <parent>
         <groupId>com.example</groupId>
         <artifactId>example</artifactId>
-        <version>0.0.1</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>campus-finance</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>campus-finance</name>
-    <url>http://maven.apache.org</url>
+    <description>财务聚合模块</description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>finance-api</module>
+    </modules>
 </project>
