@@ -25,4 +25,36 @@
         related_id,remark,create_at,update_at,delete_at,
         user_name,user_phone
     </sql>
+
+    <!-- 根据交易类型和时间范围统计金额总和 -->
+    <select id="sumAmountByTypeAndTime" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM finance_transaction
+        WHERE transaction_type = #{transactionType}
+          AND create_at >= #{startTime}
+          AND create_at <= #{endTime}
+          AND delete_at IS NULL
+    </select>
+
+    <!-- 根据关联业务类型和时间范围统计记录数 -->
+    <select id="countByRelatedTypeAndTime" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM finance_transaction
+        WHERE related_type = #{relatedType}
+          AND create_at >= #{startTime}
+          AND create_at <= #{endTime}
+          AND delete_at IS NULL
+    </select>
+
+    <!-- 查询最近N个月的月度流水数据 -->
+    <select id="queryMonthlyTurnover" resultType="com.example.finance.api.pojo.MonthlyTurnoverItem">
+        SELECT
+            DATE_FORMAT(create_at, '%Y-%m') AS month,
+            COALESCE(SUM(amount), 0) AS turnover
+        FROM finance_transaction
+        WHERE create_at >= DATE_SUB(NOW(), INTERVAL #{months} MONTH)
+          AND delete_at IS NULL
+        GROUP BY DATE_FORMAT(create_at, '%Y-%m')
+        ORDER BY month DESC
+    </select>
 </mapper>

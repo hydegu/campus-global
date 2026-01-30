@@ -8,10 +8,8 @@ import com.example.finance.api.entity.PaymentAccount;
 import com.example.finance.api.vo.PaymentAccountVO;
 
 /**
-* @author 22417
-* @description 针对表【payment_account(账户表)】的数据库操作Service
-* @createDate 2026-01-30 11:38:51
-*/
+ * 平台账户服务
+ */
 public interface PaymentAccountService extends IService<PaymentAccount> {
 
     /**
@@ -37,4 +35,19 @@ public interface PaymentAccountService extends IService<PaymentAccount> {
      * @param status 状态：0-禁用 1-启用
      */
     void updateStatus(Long accountId, Integer status);
+
+    /**
+     * 获取账户详情
+     *
+     * @param accountId 账户ID
+     * @return 账户详情VO
+     */
+    PaymentAccountVO getDetail(Long accountId);
+
+    /**
+     * 更新账户最后支付时间
+     *
+     * @param accountId 账户ID
+     */
+    void updateLastPaymentTime(Long accountId);
 }
