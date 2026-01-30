@@ -1,0 +1,40 @@
+package com.example.finance.biz.service;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.finance.api.dto.PaymentAccountAddDTO;
+import com.example.finance.api.dto.PaymentAccountQueryDTO;
+import com.example.finance.api.entity.PaymentAccount;
+import com.example.finance.api.vo.PaymentAccountVO;
+
+/**
+* @author 22417
+* @description 针对表【payment_account(账户表)】的数据库操作Service
+* @createDate 2026-01-30 11:38:51
+*/
+public interface PaymentAccountService extends IService<PaymentAccount> {
+
+    /**
+     * 添加平台账户
+     *
+     * @param addDTO 添加账户请求
+     * @return 账户ID
+     */
+    Long addAccount(PaymentAccountAddDTO addDTO);
+
+    /**
+     * 按条件查询账户
+     *
+     * @param queryDTO 查询条件
+     * @return 账户分页列表
+     */
+    Page<PaymentAccountVO> listByQuery(PaymentAccountQueryDTO queryDTO);
+
+    /**
+     * 更新账户状态
+     *
+     * @param accountId 账户ID
+     * @param status 状态：0-禁用 1-启用
+     */
+    void updateStatus(Long accountId, Integer status);
+}

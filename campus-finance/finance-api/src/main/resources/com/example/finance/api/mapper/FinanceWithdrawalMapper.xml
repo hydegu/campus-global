@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.finance.biz.mapper.FinanceWithdrawalMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.finance.api.entity.FinanceWithdrawal">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <id property="auditId" column="audit_id" jdbcType="BIGINT"/>
+            <result property="withdrawalNo" column="withdrawal_no" jdbcType="VARCHAR"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+            <result property="userPhone" column="user_phone" jdbcType="VARCHAR"/>
+            <result property="amount" column="amount" jdbcType="DECIMAL"/>
+            <result property="withdrawType" column="withdraw_type" jdbcType="TINYINT"/>
+            <result property="withdrawAccount" column="withdraw_account" jdbcType="VARCHAR"/>
+            <result property="withdrawName" column="withdraw_name" jdbcType="VARCHAR"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="payOperatorId" column="pay_operator_id" jdbcType="BIGINT"/>
+            <result property="payTime" column="pay_time" jdbcType="TIMESTAMP"/>
+            <result property="payRemark" column="pay_remark" jdbcType="VARCHAR"/>
+            <result property="outBillNo" column="out_bill_no" jdbcType="VARCHAR"/>
+            <result property="transferBillNo" column="transfer_bill_no" jdbcType="VARCHAR"/>
+            <result property="state" column="state" jdbcType="VARCHAR"/>
+            <result property="transactionId" column="transaction_id" jdbcType="BIGINT"/>
+            <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+            <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,audit_id,withdrawal_no,user_id,user_name,user_phone,
+        amount,withdraw_type,withdraw_account,withdraw_name,status,
+        pay_operator_id,pay_time,pay_remark,out_bill_no,transfer_bill_no,
+        state,transaction_id,create_at,update_at
+    </sql>
+</mapper>

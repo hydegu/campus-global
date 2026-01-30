@@ -16,5 +16,10 @@ public interface ServiceNameConstants {
 	 */
 	String UPMS_SERVICE = "upms-biz";
 
+	/**
+	 * 财务模块
+	 */
+	String FINANCE_SERVICE = "finance-biz";
+
 
 }

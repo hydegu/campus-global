@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.finance.biz.mapper.PaymentAccountMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.finance.api.entity.PaymentAccount">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="accountName" column="account_name" jdbcType="VARCHAR"/>
+            <result property="accountCode" column="account_code" jdbcType="VARCHAR"/>
+            <result property="contactPhone" column="contact_phone" jdbcType="VARCHAR"/>
+            <result property="contactEmail" column="contact_email" jdbcType="VARCHAR"/>
+            <result property="bankAccountNumber" column="bank_account_number" jdbcType="VARCHAR"/>
+            <result property="bankAccountName" column="bank_account_name" jdbcType="VARCHAR"/>
+            <result property="bankName" column="bank_name" jdbcType="VARCHAR"/>
+            <result property="bankBranch" column="bank_branch" jdbcType="VARCHAR"/>
+            <result property="lastPaymentTime" column="last_payment_time" jdbcType="TIMESTAMP"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="remark" column="remark" jdbcType="VARCHAR"/>
+            <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+            <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+            <result property="deleteAt" column="delete_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,account_name,account_code,contact_phone,contact_email,bank_account_number,
+        bank_account_name,bank_name,bank_branch,last_payment_time,status,
+        remark,create_at,update_at,delete_at
+    </sql>
+</mapper>
