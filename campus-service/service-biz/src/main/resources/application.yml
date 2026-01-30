@@ -1,5 +1,5 @@
 server:
-  port: 4700
+  port: 4600
 
 spring:
   profiles:
@@ -21,8 +21,3 @@ spring:
     import:
       - nacos:application-@profiles.active@.yml
       - nacos:${spring.application.name}-@profiles.active@.yml
-
-# 文件上传配置
-file:
-  # 文件访问URL前缀
-  url-prefix: http://localhost:8081/files

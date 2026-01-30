@@ -44,3 +44,6 @@ build/
 ### else ###
 common-core.iml
 .trae
+.iflow
+bmad
+docs
