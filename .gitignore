@@ -48,3 +48,4 @@ common-core.iml
 bmad
 docs
 .env
+seata-config/application.yml
