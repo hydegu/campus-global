@@ -35,6 +35,12 @@ public class UpdateUserPartnerDTO implements Serializable {
 	@Schema(description = "上级合伙人ID", example = "1")
 	private Long parentId;
 
+	@Schema(description = "余额", example = "100.00")
+	private BigDecimal balance;
+
+	@Schema(description = "累计总收入", example = "1000.00")
+	private BigDecimal totalAmount;
+
 	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
 	private List<Long> roleIds;
 }

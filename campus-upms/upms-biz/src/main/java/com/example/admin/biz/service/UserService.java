@@ -98,4 +98,10 @@ public interface UserService {
 	 * @return 商家信息列表
 	 */
 	List<MchInfoDTO> batchGetMchInfo(List<Long> baseUserIds);
+
+	/**
+	 * 更新用户余额或累计总收入（支持商家/骑手/合伙人）
+	 * @param dto 用户余额更新DTO
+	 */
+	void updateUserBalance(MerchantBalanceUpdateDTO dto);
 }

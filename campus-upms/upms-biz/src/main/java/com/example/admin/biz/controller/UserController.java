@@ -234,4 +234,12 @@ public class UserController {
 		List<MchInfoDTO> mchInfoList = userService.batchGetMchInfo(baseUserIds);
 		return Result.ok(mchInfoList);
 	}
+
+	@PostMapping("/api/user/balance/update")
+	@Inner
+	@Operation(summary = "更新用户余额或累计总收入", description = "更新用户（商家/骑手/合伙人）的余额或累计总收入，供内部服务调用")
+	public Result<Void> updateUserBalance(@Valid @RequestBody MerchantBalanceUpdateDTO dto) {
+		userService.updateUserBalance(dto);
+		return Result.ok();
+	}
 }

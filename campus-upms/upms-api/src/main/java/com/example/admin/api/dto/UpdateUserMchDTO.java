@@ -77,6 +77,12 @@ public class UpdateUserMchDTO implements Serializable {
 	@Schema(description = "最低起送金额(元)", example = "20.00")
 	private BigDecimal minimumOrderAmount;
 
+	@Schema(description = "余额", example = "100.00")
+	private BigDecimal balance;
+
+	@Schema(description = "累计总收入", example = "1000.00")
+	private BigDecimal totalAmount;
+
 	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
 	private List<Long> roleIds;
 }

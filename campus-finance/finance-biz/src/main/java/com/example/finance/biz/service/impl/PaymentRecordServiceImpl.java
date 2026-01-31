@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.exception.BusinessException;
+import com.example.common.security.util.SecurityUtils;
 import com.example.finance.api.dto.FinanceTransactionAddDTO;
 import com.example.finance.api.dto.PaymentRecordCreateDTO;
 import com.example.finance.api.dto.PaymentRecordQueryDTO;
@@ -17,6 +19,7 @@ import com.example.finance.api.enums.TransactionTypeEnum;
 import com.example.finance.api.vo.PaymentAccountVO;
 import com.example.finance.api.vo.PaymentRecordVO;
 import com.example.finance.biz.mapper.PaymentRecordMapper;
+import com.example.admin.api.dto.MerchantBalanceUpdateDTO;
 import com.example.finance.biz.service.FinanceTransactionService;
 import com.example.finance.biz.service.PaymentAccountService;
 import com.example.finance.biz.service.PaymentRecordService;
@@ -44,6 +47,7 @@ public class PaymentRecordServiceImpl extends ServiceImpl<PaymentRecordMapper, P
 
     private final PaymentAccountService paymentAccountService;
     private final FinanceTransactionService financeTransactionService;
+    private final RemoteUserService remoteUserService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -74,7 +78,7 @@ public class PaymentRecordServiceImpl extends ServiceImpl<PaymentRecordMapper, P
         record.setBankName(createDTO.getBankName());
         record.setBankBranch(createDTO.getBankBranch());
         record.setPaymentAmount(createDTO.getPaymentAmount());
-        record.setStatus(PaymentStatusEnum.PENDING_CONFIRM.getCode());
+        record.setStatus(PaymentStatusEnum.PENDING_PAYMENT.getCode());
         record.setRemark(createDTO.getRemark());
         record.setCreatedAt(LocalDateTime.now());
         record.setUpdatedAt(LocalDateTime.now());
@@ -87,7 +91,7 @@ public class PaymentRecordServiceImpl extends ServiceImpl<PaymentRecordMapper, P
         transactionDTO.setTransactionNo(generateTransactionNo());
         transactionDTO.setUserId(createDTO.getTargetId());
         transactionDTO.setTransactionType(TransactionTypeEnum.PAYMENT.getCode());
-        transactionDTO.setAmount(createDTO.getPaymentAmount()); // 打款为收入，正数
+        transactionDTO.setAmount(createDTO.getPaymentAmount().negate()); // 打款为支出，负数
         transactionDTO.setRelatedType(RelatedTypeEnum.PAYMENT.getCode());
         transactionDTO.setRelatedId(record.getId());
         transactionDTO.setRemark("系统打款：" + paymentNo);
@@ -121,12 +125,33 @@ public class PaymentRecordServiceImpl extends ServiceImpl<PaymentRecordMapper, P
             record.setStatus(PaymentStatusEnum.PAID.getCode());
             record.setPaySerialNo(paySerialNo);
             record.setPayTime(LocalDateTime.now());
-            record.setPayOperatorId(1001L); // TODO: 从SecurityContext获取当前用户ID
+            record.setPayOperatorId(SecurityUtils.getCurrentUserId());
             record.setUpdatedAt(LocalDateTime.now());
             baseMapper.updateById(record);
 
             // 6. 更新账户最后支付时间
             paymentAccountService.updateLastPaymentTime(record.getPayerAccountId());
+
+            // 7. 更新用户余额和累计总收入（支持商家/骑手/合伙人）
+            if (TargetTypeEnum.MERCHANT.getCode().equals(record.getTargetType()) ||
+                TargetTypeEnum.RIDER.getCode().equals(record.getTargetType()) ||
+                TargetTypeEnum.PARTNER.getCode().equals(record.getTargetType())) {
+                // 7.1 扣除余额
+                MerchantBalanceUpdateDTO balanceUpdateDTO = new MerchantBalanceUpdateDTO();
+                balanceUpdateDTO.setUserId(record.getTargetId());
+                balanceUpdateDTO.setUserType(record.getTargetType());
+                balanceUpdateDTO.setAmount(record.getPaymentAmount().negate());
+                balanceUpdateDTO.setUpdateType(1);
+                remoteUserService.updateUserBalance(balanceUpdateDTO);
+
+                // 7.2 增加累计总收入
+                MerchantBalanceUpdateDTO totalAmountUpdateDTO = new MerchantBalanceUpdateDTO();
+                totalAmountUpdateDTO.setUserId(record.getTargetId());
+                totalAmountUpdateDTO.setUserType(record.getTargetType());
+                totalAmountUpdateDTO.setAmount(record.getPaymentAmount());
+                totalAmountUpdateDTO.setUpdateType(2);
+                remoteUserService.updateUserBalance(totalAmountUpdateDTO);
+            }
 
             log.info("打款成功，打款单号：{}，第三方流水号：{}", record.getPaymentNo(), paySerialNo);
 

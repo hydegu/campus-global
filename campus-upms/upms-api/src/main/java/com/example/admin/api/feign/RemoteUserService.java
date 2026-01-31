@@ -1,6 +1,7 @@
 
 package com.example.admin.api.feign;
 
+import com.example.admin.api.dto.MerchantBalanceUpdateDTO;
 import com.example.admin.api.dto.UserDTO;
 import com.example.admin.api.dto.UserInfo;
 import com.example.common.core.constant.ServiceNameConstants;
@@ -10,6 +11,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * 远程用户服务接口：提供用户信息查询功能
@@ -34,5 +37,14 @@ public interface RemoteUserService {
 	@NoToken
 	@GetMapping("/api/user/{id}/info")
 	Result<UserInfo> getUserInfoById(@PathVariable("id") Long id);
+
+	/**
+	 * 更新用户余额或累计总收入（支持商家/骑手/合伙人）
+	 * @param dto 用户余额更新DTO
+	 * @return 操作结果
+	 */
+	@NoToken
+	@PostMapping("/api/user/balance/update")
+	Result<Void> updateUserBalance(@RequestBody MerchantBalanceUpdateDTO dto);
 
 }

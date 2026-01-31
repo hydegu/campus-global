@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -71,6 +72,12 @@ public class CreateRiderUserDTO implements Serializable {
 	@Schema(description = "紧急联系人电话", example = "13900139000")
 	@Pattern(regexp = "^1[3-9]\\d{9}$", message = "紧急联系人电话格式不正确")
 	private String emergencyContactPhone;
+
+	@Schema(description = "余额", example = "0.00")
+	private BigDecimal balance;
+
+	@Schema(description = "累计总收入", example = "0.00")
+	private BigDecimal totalAmount;
 
 	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
 	private List<Long> roleIds;

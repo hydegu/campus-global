@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
 import com.example.finance.api.dto.PaymentAccountAddDTO;
 import com.example.finance.api.dto.PaymentAccountQueryDTO;
+import com.example.finance.api.dto.PaymentAccountUpdateDTO;
 import com.example.finance.api.entity.PaymentAccount;
 import com.example.finance.api.vo.PaymentAccountVO;
 import com.example.finance.biz.mapper.PaymentAccountMapper;
@@ -147,6 +148,76 @@ public class PaymentAccountServiceImpl extends ServiceImpl<PaymentAccountMapper,
         }
 
         return buildAccountVO(account);
+    }
+
+    /**
+     * 更新账户信息
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateAccount(Long accountId, PaymentAccountUpdateDTO updateDTO) {
+        // 1. 参数校验
+        if (accountId == null) {
+            throw new BusinessException("INVALID_PARAM", "账户ID不能为空");
+        }
+        if (updateDTO == null) {
+            throw new BusinessException("INVALID_PARAM", "更新参数不能为空");
+        }
+
+        // 2. 查询账户是否存在
+        PaymentAccount account = baseMapper.selectById(accountId);
+        if (account == null || account.getDeleteAt() != null) {
+            throw new BusinessException("ACCOUNT_NOT_FOUND", "账户不存在");
+        }
+
+        // 3. 验证账户状态（禁用状态的账户不允许更新）
+        if (account.getStatus() == 0) {
+            throw new BusinessException("ACCOUNT_DISABLED", "账户已禁用，无法更新信息");
+        }
+
+        // 4. 更新字段（只更新非空字段）
+        boolean needUpdate = false;
+        if (updateDTO.getAccountName() != null) {
+            account.setAccountName(updateDTO.getAccountName());
+            needUpdate = true;
+        }
+        if (updateDTO.getContactPhone() != null) {
+            account.setContactPhone(updateDTO.getContactPhone());
+            needUpdate = true;
+        }
+        if (updateDTO.getContactEmail() != null) {
+            account.setContactEmail(updateDTO.getContactEmail());
+            needUpdate = true;
+        }
+        if (updateDTO.getBankAccountNumber() != null) {
+            account.setBankAccountNumber(updateDTO.getBankAccountNumber());
+            needUpdate = true;
+        }
+        if (updateDTO.getBankAccountName() != null) {
+            account.setBankAccountName(updateDTO.getBankAccountName());
+            needUpdate = true;
+        }
+        if (updateDTO.getBankName() != null) {
+            account.setBankName(updateDTO.getBankName());
+            needUpdate = true;
+        }
+        if (updateDTO.getBankBranch() != null) {
+            account.setBankBranch(updateDTO.getBankBranch());
+            needUpdate = true;
+        }
+        if (updateDTO.getRemark() != null) {
+            account.setRemark(updateDTO.getRemark());
+            needUpdate = true;
+        }
+
+        // 5. 如果有字段需要更新，执行更新
+        if (needUpdate) {
+            account.setUpdateAt(LocalDateTime.now());
+            baseMapper.updateById(account);
+            log.info("更新平台账户信息成功，账户ID：{}，账户编码：{}", accountId, account.getAccountCode());
+        } else {
+            log.info("更新平台账户信息，但无字段需要更新，账户ID：{}", accountId);
+        }
     }
 
     /**

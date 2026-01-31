@@ -11,11 +11,6 @@ import lombok.Getter;
 public enum PaymentStatusEnum {
 
     /**
-     * 待确认
-     */
-    PENDING_CONFIRM(0, "待确认"),
-
-    /**
      * 待打款
      */
     PENDING_PAYMENT(1, "待打款"),

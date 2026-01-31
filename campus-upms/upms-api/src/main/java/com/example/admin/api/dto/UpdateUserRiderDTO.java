@@ -62,6 +62,12 @@ public class UpdateUserRiderDTO implements Serializable {
 	@Schema(description = "分佣比例(%)", example = "20.00")
 	private BigDecimal commissionRate;
 
+	@Schema(description = "余额", example = "100.00")
+	private BigDecimal balance;
+
+	@Schema(description = "累计总收入", example = "1000.00")
+	private BigDecimal totalAmount;
+
 	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
 	private List<Long> roleIds;
 }

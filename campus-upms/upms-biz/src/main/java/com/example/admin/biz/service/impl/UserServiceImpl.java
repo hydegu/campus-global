@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.admin.api.dto.*;
 import com.example.admin.api.entity.*;
+import com.example.admin.api.enums.MerchantBalanceUpdateTypeEnum;
 import com.example.admin.biz.mapper.BaseUserMapper;
 import com.example.admin.biz.mapper.RoleMapper;
 import com.example.admin.biz.mapper.SysSchoolMapper;
@@ -525,7 +526,7 @@ public class UserServiceImpl implements UserService {
 			vo.setGender(Gender.getText(userRider.getGender()));
 			vo.setRealName(userRider.getRealName());
 			vo.setBalance(userRider.getBalance());
-			vo.setCommissionTotal(userRider.getCommissionTotal());
+			vo.setCommissionTotal(userRider.getTotalAmount());
 			vo.setEmergencyContactName(userRider.getEmergencyContactName());
 			vo.setEmergencyContactPhone(maskPhone(userRider.getEmergencyContactPhone()));
 		}
@@ -911,6 +912,12 @@ public class UserServiceImpl implements UserService {
 			if (dto.getMinimumOrderAmount() != null) {
 				userMch.setMinimumOrderAmount(dto.getMinimumOrderAmount());
 			}
+			if (dto.getBalance() != null) {
+				userMch.setBalance(dto.getBalance());
+			}
+			if (dto.getTotalAmount() != null) {
+				userMch.setTotalAmount(dto.getTotalAmount());
+			}
 			userMchMapper.updateById(userMch);
 		}
 	}
@@ -959,6 +966,12 @@ public class UserServiceImpl implements UserService {
 			}
 			if (StringUtils.hasText(dto.getIdCardBackUrl())) {
 				userRider.setIdCardBack(dto.getIdCardBackUrl());
+			}
+			if (dto.getBalance() != null) {
+				userRider.setBalance(dto.getBalance());
+			}
+			if (dto.getTotalAmount() != null) {
+				userRider.setTotalAmount(dto.getTotalAmount());
 			}
 			userRiderMapper.updateById(userRider);
 		}
@@ -1031,6 +1044,12 @@ public class UserServiceImpl implements UserService {
 			}
 			if (dto.getParentId() != null) {
 				userPartner.setParentId(dto.getParentId());
+			}
+			if (dto.getBalance() != null) {
+				userPartner.setBalance(dto.getBalance());
+			}
+			if (dto.getTotalAmount() != null) {
+				userPartner.setTotalAmount(dto.getTotalAmount());
 			}
 			userPartnerMapper.updateById(userPartner);
 		}
@@ -1209,6 +1228,8 @@ public class UserServiceImpl implements UserService {
 		userMch.setMinimumOrderAmount(dto.getMinimumOrderAmount() != null ? dto.getMinimumOrderAmount() : BigDecimal.ZERO);
 		userMch.setCardNumber(dto.getCardNumber());
 		userMch.setIsOpen(0);
+		userMch.setBalance(dto.getBalance() != null ? dto.getBalance() : BigDecimal.ZERO);
+		userMch.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
 		userMchMapper.insert(userMch);
 
 		log.info("商家用户创建成功，用户ID：{}，用户名：{}，商户名：{}", baseUser.getId(), dto.getUsername(), dto.getMchName());
@@ -1243,7 +1264,7 @@ public class UserServiceImpl implements UserService {
 		// 获取合伙人名称
 		if (userMch.getPartnerId() != null) {
 			UserPartner partner = userPartnerMapper.selectOne(
-				Wrappers.lambdaQuery(UserPartner.class).eq(UserPartner::getBaseUserId, userMch.getPartnerId())
+					Wrappers.lambdaQuery(UserPartner.class).eq(UserPartner::getBaseUserId, userMch.getPartnerId())
 			);
 			if (partner != null) {
 				vo.setPartnerName(partner.getPartnerName());
@@ -1296,8 +1317,8 @@ public class UserServiceImpl implements UserService {
 		userRider.setCardNumber(dto.getCardNumber());
 		userRider.setEmergencyContactName(dto.getEmergencyContactName());
 		userRider.setEmergencyContactPhone(dto.getEmergencyContactPhone());
-		userRider.setBalance(BigDecimal.ZERO);
-		userRider.setCommissionTotal(BigDecimal.ZERO);
+		userRider.setBalance(dto.getBalance() != null ? dto.getBalance() : BigDecimal.ZERO);
+		userRider.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
 		userRiderMapper.insert(userRider);
 
 		log.info("骑手用户创建成功，用户ID：{}，用户名：{}，真实姓名：{}", baseUser.getId(), dto.getUsername(), dto.getRealName());
@@ -1329,7 +1350,7 @@ public class UserServiceImpl implements UserService {
 		vo.setEmergencyContactName(userRider.getEmergencyContactName());
 		vo.setEmergencyContactPhone(userRider.getEmergencyContactPhone());
 		vo.setBalance(userRider.getBalance());
-		vo.setCommissionTotal(userRider.getCommissionTotal());
+		vo.setCommissionTotal(userRider.getTotalAmount());
 		vo.setCreateTime(baseUser.getCreateAt());
 
 		return vo;
@@ -1468,10 +1489,12 @@ public class UserServiceImpl implements UserService {
 		userPartner.setCardNumber(dto.getCardNumber());
 		userPartner.setCommissionRate(dto.getCommissionRate());
 		userPartner.setParentId(dto.getParentId() != null ? dto.getParentId() : 0L);
+		userPartner.setBalance(dto.getBalance() != null ? dto.getBalance() : BigDecimal.ZERO);
+		userPartner.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
 		userPartnerMapper.insert(userPartner);
 
 		log.info("合伙人用户创建成功，用户ID：{}，用户名：{}，合伙人姓名：{}，邀请码：{}",
-			baseUser.getId(), dto.getUsername(), dto.getPartnerName(), inviteCode);
+				baseUser.getId(), dto.getUsername(), dto.getPartnerName(), inviteCode);
 
 		// 创建用户角色关联
 		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
@@ -1503,7 +1526,7 @@ public class UserServiceImpl implements UserService {
 		// 获取上级合伙人名称
 		if (userPartner.getParentId() != null && userPartner.getParentId() > 0) {
 			UserPartner parentPartner = userPartnerMapper.selectOne(
-				Wrappers.lambdaQuery(UserPartner.class).eq(UserPartner::getBaseUserId, userPartner.getParentId())
+					Wrappers.lambdaQuery(UserPartner.class).eq(UserPartner::getBaseUserId, userPartner.getParentId())
 			);
 			if (parentPartner != null) {
 				vo.setParentName(parentPartner.getPartnerName());
@@ -1726,98 +1749,162 @@ public class UserServiceImpl implements UserService {
 
 		fillPartnerUserDetail(vo, baseUser.getId(), userPartnerMap);
 
-				fillRoleInfo(vo, baseUser.getId(), userRoleMap);
-
-		
-
-				return vo;
-
-			}
-
-		
-
-			@Override
-
-			public MchInfoDTO getMchInfoByBaseUserId(Long baseUserId) {
-
-				if (baseUserId == null) {
-
-					throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
-
-				}
-
-		
-
-				LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
-
-				wrapper.eq(UserMch::getBaseUserId, baseUserId);
-
-				UserMch userMch = userMchMapper.selectOne(wrapper);
-
-		
-
-				if (userMch == null) {
-
-					return null;
-
-				}
-
-		
-
-				MchInfoDTO dto = new MchInfoDTO();
-
-				dto.setMchId(userMch.getId());
-
-				dto.setMchName(userMch.getMchName());
-
-				dto.setLogo(userMch.getLogo());
-
-				dto.setIsOpen(userMch.getIsOpen());
-
-				return dto;
-
-			}
+		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
 
 
+		return vo;
 
-			@Override
+	}
 
-			public List<MchInfoDTO> batchGetMchInfo(List<Long> baseUserIds) {
+	@Override
+	public MchInfoDTO getMchInfoByBaseUserId(Long baseUserId) {
 
-				if (baseUserIds == null || baseUserIds.isEmpty()) {
+		if (baseUserId == null) {
 
-					return Collections.emptyList();
-
-				}
-
-
-
-				LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
-
-				wrapper.in(UserMch::getBaseUserId, baseUserIds);
-
-				List<UserMch> userMchList = userMchMapper.selectList(wrapper);
-
-
-
-				return userMchList.stream().map(userMch -> {
-
-					MchInfoDTO dto = new MchInfoDTO();
-
-					dto.setMchId(userMch.getId());
-
-					dto.setMchName(userMch.getMchName());
-
-					dto.setLogo(userMch.getLogo());
-
-					dto.setIsOpen(userMch.getIsOpen());
-
-					return dto;
-
-				}).collect(Collectors.toList());
-
-			}
-
-		
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
 
 		}
+
+
+		LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
+
+		wrapper.eq(UserMch::getBaseUserId, baseUserId);
+
+		UserMch userMch = userMchMapper.selectOne(wrapper);
+
+
+		if (userMch == null) {
+
+			return null;
+
+		}
+
+
+		MchInfoDTO dto = new MchInfoDTO();
+
+		dto.setMchId(userMch.getId());
+
+		dto.setMchName(userMch.getMchName());
+
+		dto.setLogo(userMch.getLogo());
+
+		dto.setIsOpen(userMch.getIsOpen());
+
+		return dto;
+
+	}
+
+	@Override
+	public List<MchInfoDTO> batchGetMchInfo(List<Long> baseUserIds) {
+
+		if (baseUserIds == null || baseUserIds.isEmpty()) {
+
+			return Collections.emptyList();
+
+		}
+
+
+		LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
+
+		wrapper.in(UserMch::getBaseUserId, baseUserIds);
+
+		List<UserMch> userMchList = userMchMapper.selectList(wrapper);
+
+
+		return userMchList.stream().map(userMch -> {
+
+			MchInfoDTO dto = new MchInfoDTO();
+
+			dto.setMchId(userMch.getId());
+
+			dto.setMchName(userMch.getMchName());
+
+			dto.setLogo(userMch.getLogo());
+
+			dto.setIsOpen(userMch.getIsOpen());
+
+			return dto;
+
+		}).collect(Collectors.toList());
+
+	}
+
+	@Override
+	public void updateUserBalance(MerchantBalanceUpdateDTO dto) {
+		// 根据用户类型判断更新哪个实体
+		if (dto.getUserType() == 1) {
+			// 商家
+			LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
+			wrapper.eq(UserMch::getId, dto.getUserId());
+			UserMch userMch = userMchMapper.selectOne(wrapper);
+
+			if (userMch == null) {
+				throw new BusinessException("MCH_NOT_FOUND", "商家不存在");
+			}
+
+			MerchantBalanceUpdateTypeEnum updateTypeEnum = MerchantBalanceUpdateTypeEnum.getByCode(dto.getUpdateType());
+			if (updateTypeEnum == null) {
+				throw new BusinessException("INVALID_UPDATE_TYPE", "无效的更新类型");
+			}
+
+			if (MerchantBalanceUpdateTypeEnum.BALANCE.equals(updateTypeEnum)) {
+				userMch.setBalance(userMch.getBalance().add(dto.getAmount()));
+			} else if (MerchantBalanceUpdateTypeEnum.TOTAL_AMOUNT.equals(updateTypeEnum)) {
+				userMch.setTotalAmount(userMch.getTotalAmount().add(dto.getAmount()));
+			}
+
+			userMchMapper.updateById(userMch);
+			log.info("商家余额更新成功，商家ID：{}，更新类型：{}，金额：{}", dto.getUserId(), updateTypeEnum.getDesc(), dto.getAmount());
+
+		} else if (dto.getUserType() == 2) {
+			// 骑手
+			LambdaQueryWrapper<UserRider> wrapper = Wrappers.lambdaQuery();
+			wrapper.eq(UserRider::getId, dto.getUserId());
+			UserRider userRider = userRiderMapper.selectOne(wrapper);
+
+			if (userRider == null) {
+				throw new BusinessException("RIDER_NOT_FOUND", "骑手不存在");
+			}
+
+			MerchantBalanceUpdateTypeEnum updateTypeEnum = MerchantBalanceUpdateTypeEnum.getByCode(dto.getUpdateType());
+			if (updateTypeEnum == null) {
+				throw new BusinessException("INVALID_UPDATE_TYPE", "无效的更新类型");
+			}
+
+			if (MerchantBalanceUpdateTypeEnum.BALANCE.equals(updateTypeEnum)) {
+				userRider.setBalance(userRider.getBalance().add(dto.getAmount()));
+			} else if (MerchantBalanceUpdateTypeEnum.TOTAL_AMOUNT.equals(updateTypeEnum)) {
+				userRider.setTotalAmount(userRider.getTotalAmount().add(dto.getAmount()));
+			}
+
+			userRiderMapper.updateById(userRider);
+			log.info("骑手余额更新成功，骑手ID：{}，更新类型：{}，金额：{}", dto.getUserId(), updateTypeEnum.getDesc(), dto.getAmount());
+
+		} else if (dto.getUserType() == 3) {
+			// 合伙人
+			LambdaQueryWrapper<UserPartner> wrapper = Wrappers.lambdaQuery();
+			wrapper.eq(UserPartner::getId, dto.getUserId());
+			UserPartner userPartner = userPartnerMapper.selectOne(wrapper);
+
+			if (userPartner == null) {
+				throw new BusinessException("PARTNER_NOT_FOUND", "合伙人不存在");
+			}
+
+			MerchantBalanceUpdateTypeEnum updateTypeEnum = MerchantBalanceUpdateTypeEnum.getByCode(dto.getUpdateType());
+			if (updateTypeEnum == null) {
+				throw new BusinessException("INVALID_UPDATE_TYPE", "无效的更新类型");
+			}
+
+			if (MerchantBalanceUpdateTypeEnum.BALANCE.equals(updateTypeEnum)) {
+				userPartner.setBalance(userPartner.getBalance().add(dto.getAmount()));
+			} else if (MerchantBalanceUpdateTypeEnum.TOTAL_AMOUNT.equals(updateTypeEnum)) {
+				userPartner.setTotalAmount(userPartner.getTotalAmount().add(dto.getAmount()));
+			}
+
+			userPartnerMapper.updateById(userPartner);
+			log.info("合伙人余额更新成功，合伙人ID：{}，更新类型：{}，金额：{}", dto.getUserId(), updateTypeEnum.getDesc(), dto.getAmount());
+		} else {
+			throw new BusinessException("INVALID_USER_TYPE", "无效的用户类型");
+		}
+	}
+}

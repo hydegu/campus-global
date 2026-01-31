@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.security.util.SecurityUtils;
 import com.example.order.api.dto.OrderAcceptDTO;
@@ -19,7 +20,7 @@ import com.example.order.api.entity.OrderMain;
 import com.example.order.api.enums.OrderStatusEnum;
 import com.example.order.api.enums.OrderTypeEnum;
 import com.example.order.api.enums.PayStatusEnum;
-import com.example.order.api.feign.RemoteUserService;
+import com.example.admin.api.dto.MerchantBalanceUpdateDTO;
 import com.example.common.core.constant.CommonConstants;
 import com.example.common.core.util.Result;
 import com.example.finance.api.dto.FinanceTransactionAddDTO;
@@ -296,21 +297,57 @@ public class OrderServiceImpl implements OrderService {
 		BigDecimal providerIncome = orderMain.getEstimatedProviderIncome();
 		BigDecimal partnerIncome = orderMain.getEstimatedPartnerIncome();
 		BigDecimal platformIncome = orderMain.getEstimatedPlatformIncome();
-		
-		// 服务提供方收入
+
+		// 查询外卖订单配送信息，获取骑手ID和配送费
+		OrderDelivery orderDelivery = orderDeliveryMapper.selectOne(
+				Wrappers.lambdaQuery(OrderDelivery.class).eq(OrderDelivery::getOrderId, orderMain.getId())
+		);
+
+		// 骑手配送费收入
+		if (orderDelivery != null && orderDelivery.getRiderId() != null && orderDelivery.getDeliveryFee() != null
+				&& orderDelivery.getDeliveryFee().compareTo(BigDecimal.ZERO) > 0) {
+			FinanceTransactionAddDTO riderTransaction = new FinanceTransactionAddDTO();
+			riderTransaction.setTransactionNo(generateTransactionNo());
+			riderTransaction.setUserId(orderDelivery.getRiderId());
+			riderTransaction.setTransactionType(TransactionTypeEnum.PAYMENT.getCode());
+			riderTransaction.setAmount(orderDelivery.getDeliveryFee());
+			riderTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
+			riderTransaction.setRelatedId(orderMain.getId());
+			riderTransaction.setRemark("外卖订单骑手配送费：" + orderMain.getOrderNo());
+
+			remoteFinanceService.createTransaction(riderTransaction);
+
+			// 更新骑手余额
+			MerchantBalanceUpdateDTO riderBalanceDTO = new MerchantBalanceUpdateDTO();
+			riderBalanceDTO.setUserId(orderDelivery.getRiderId());
+			riderBalanceDTO.setUserType(2);
+			riderBalanceDTO.setAmount(orderDelivery.getDeliveryFee());
+			riderBalanceDTO.setUpdateType(1);
+			remoteUserService.updateUserBalance(riderBalanceDTO);
+		}
+
+		// 服务提供方收入（商家）
 		if (providerIncome != null && providerIncome.compareTo(BigDecimal.ZERO) > 0) {
 			FinanceTransactionAddDTO providerTransaction = new FinanceTransactionAddDTO();
 			providerTransaction.setTransactionNo(generateTransactionNo());
 			providerTransaction.setUserId(orderMain.getServiceProviderId());
 			providerTransaction.setTransactionType(TransactionTypeEnum.PAYMENT.getCode());
-			providerTransaction.setAmount(providerIncome); // 收入为正数
+			providerTransaction.setAmount(providerIncome);
 			providerTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
 			providerTransaction.setRelatedId(orderMain.getId());
 			providerTransaction.setRemark("外卖订单商家收入：" + orderMain.getOrderNo());
-			
+
 			remoteFinanceService.createTransaction(providerTransaction);
+
+			// 更新商家余额
+			MerchantBalanceUpdateDTO balanceUpdateDTO = new MerchantBalanceUpdateDTO();
+			balanceUpdateDTO.setUserId(orderMain.getServiceProviderId());
+			balanceUpdateDTO.setUserType(1);
+			balanceUpdateDTO.setAmount(providerIncome);
+			balanceUpdateDTO.setUpdateType(1);
+			remoteUserService.updateUserBalance(balanceUpdateDTO);
 		}
-		
+
 		// 合伙人收入
 		if (partnerIncome != null && partnerIncome.compareTo(BigDecimal.ZERO) > 0) {
 			FinanceTransactionAddDTO partnerTransaction = new FinanceTransactionAddDTO();
@@ -321,8 +358,16 @@ public class OrderServiceImpl implements OrderService {
 			partnerTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
 			partnerTransaction.setRelatedId(orderMain.getId());
 			partnerTransaction.setRemark("外卖订单合伙人收入：" + orderMain.getOrderNo());
-			
+
 			remoteFinanceService.createTransaction(partnerTransaction);
+
+			// 更新合伙人余额
+			MerchantBalanceUpdateDTO partnerBalanceDTO = new MerchantBalanceUpdateDTO();
+			partnerBalanceDTO.setUserId(orderMain.getPartnerId());
+			partnerBalanceDTO.setUserType(3);
+			partnerBalanceDTO.setAmount(partnerIncome);
+			partnerBalanceDTO.setUpdateType(1);
+			remoteUserService.updateUserBalance(partnerBalanceDTO);
 		}
 		
 		// 平台收入

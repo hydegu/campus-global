@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.finance.api.dto.PaymentAccountAddDTO;
 import com.example.finance.api.dto.PaymentAccountQueryDTO;
+import com.example.finance.api.dto.PaymentAccountUpdateDTO;
 import com.example.finance.api.entity.PaymentAccount;
 import com.example.finance.api.vo.PaymentAccountVO;
 
@@ -50,4 +51,12 @@ public interface PaymentAccountService extends IService<PaymentAccount> {
      * @param accountId 账户ID
      */
     void updateLastPaymentTime(Long accountId);
+
+    /**
+     * 更新账户信息
+     *
+     * @param accountId 账户ID
+     * @param updateDTO 更新请求
+     */
+    void updateAccount(Long accountId, PaymentAccountUpdateDTO updateDTO);
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.util.Result;
 import com.example.finance.api.dto.PaymentAccountAddDTO;
 import com.example.finance.api.dto.PaymentAccountQueryDTO;
+import com.example.finance.api.dto.PaymentAccountUpdateDTO;
 import com.example.finance.api.vo.PaymentAccountVO;
 import com.example.finance.biz.service.PaymentAccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,5 +50,25 @@ public class PaymentAccountController {
     public Result<Void> updateAccountStatus(@PathVariable Long id, @RequestParam Integer status) {
         paymentAccountService.updateStatus(id, status);
         return Result.ok();
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "更新账户信息", description = "更新平台账户基本信息（管理端）")
+    @Parameters({
+        @Parameter(name = "id", description = "账户ID", required = true)
+    })
+    public Result<Void> updateAccount(@PathVariable Long id, @Valid @RequestBody PaymentAccountUpdateDTO updateDTO) {
+        paymentAccountService.updateAccount(id, updateDTO);
+        return Result.ok();
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "获取账户详情", description = "根据账户ID获取账户详细信息（管理端）")
+    @Parameters({
+        @Parameter(name = "id", description = "账户ID", required = true)
+    })
+    public Result<PaymentAccountVO> getAccountDetail(@PathVariable Long id) {
+        PaymentAccountVO vo = paymentAccountService.getDetail(id);
+        return Result.ok(vo);
     }
 }

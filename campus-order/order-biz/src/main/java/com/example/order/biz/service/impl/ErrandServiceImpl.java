@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.example.admin.api.dto.MerchantBalanceUpdateDTO;
 import com.example.admin.api.dto.UserInfo;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.core.util.Result;
 import com.example.common.security.util.SecurityUtils;
@@ -20,9 +22,7 @@ import com.example.order.api.enums.OrderStatusEnum;
 import com.example.order.api.enums.OrderTypeEnum;
 import com.example.order.api.enums.PayStatusEnum;
 import com.example.order.api.feign.RemoteErrandCategoryService;
-import com.example.order.api.feign.RemoteUserService;
 import com.example.common.core.constant.CommonConstants;
-import com.example.common.core.util.Result;
 import com.example.finance.api.dto.FinanceTransactionAddDTO;
 import com.example.finance.api.enums.RelatedTypeEnum;
 import com.example.finance.api.enums.TransactionTypeEnum;
@@ -336,21 +336,29 @@ public class ErrandServiceImpl implements ErrandService {
 		BigDecimal providerIncome = orderMain.getEstimatedProviderIncome();
 		BigDecimal partnerIncome = orderMain.getEstimatedPartnerIncome();
 		BigDecimal platformIncome = orderMain.getEstimatedPlatformIncome();
-		
-		// 服务提供方收入
+
+		// 服务提供方收入（服务人员）
 		if (providerIncome != null && providerIncome.compareTo(BigDecimal.ZERO) > 0) {
 			FinanceTransactionAddDTO providerTransaction = new FinanceTransactionAddDTO();
 			providerTransaction.setTransactionNo(generateTransactionNo());
 			providerTransaction.setUserId(orderMain.getServiceProviderId());
 			providerTransaction.setTransactionType(TransactionTypeEnum.PAYMENT.getCode());
-			providerTransaction.setAmount(providerIncome); // 收入为正数
+			providerTransaction.setAmount(providerIncome);
 			providerTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
 			providerTransaction.setRelatedId(orderMain.getId());
 			providerTransaction.setRemark("跑腿订单服务人员收入：" + orderMain.getOrderNo());
-			
+
 			remoteFinanceService.createTransaction(providerTransaction);
+
+			// 更新服务人员余额（骑手）
+			MerchantBalanceUpdateDTO balanceUpdateDTO = new MerchantBalanceUpdateDTO();
+			balanceUpdateDTO.setUserId(orderMain.getServiceProviderId());
+			balanceUpdateDTO.setUserType(2);
+			balanceUpdateDTO.setAmount(providerIncome);
+			balanceUpdateDTO.setUpdateType(1);
+			remoteUserService.updateUserBalance(balanceUpdateDTO);
 		}
-		
+
 		// 合伙人收入
 		if (partnerIncome != null && partnerIncome.compareTo(BigDecimal.ZERO) > 0) {
 			FinanceTransactionAddDTO partnerTransaction = new FinanceTransactionAddDTO();
@@ -361,8 +369,16 @@ public class ErrandServiceImpl implements ErrandService {
 			partnerTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
 			partnerTransaction.setRelatedId(orderMain.getId());
 			partnerTransaction.setRemark("跑腿订单合伙人收入：" + orderMain.getOrderNo());
-			
+
 			remoteFinanceService.createTransaction(partnerTransaction);
+
+			// 更新合伙人余额
+			MerchantBalanceUpdateDTO partnerBalanceDTO = new MerchantBalanceUpdateDTO();
+			partnerBalanceDTO.setUserId(orderMain.getPartnerId());
+			partnerBalanceDTO.setUserType(3);
+			partnerBalanceDTO.setAmount(partnerIncome);
+			partnerBalanceDTO.setUpdateType(1);
+			remoteUserService.updateUserBalance(partnerBalanceDTO);
 		}
 		
 		// 平台收入

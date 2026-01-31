@@ -69,6 +69,12 @@ public class CreateMchUserDTO implements Serializable {
 	@Schema(description = "银行卡号", example = "6222021234567890123")
 	private String cardNumber;
 
+	@Schema(description = "余额", example = "0.00")
+	private BigDecimal balance;
+
+	@Schema(description = "累计总收入", example = "0.00")
+	private BigDecimal totalAmount;
+
 	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
 	private List<Long> roleIds;
 }

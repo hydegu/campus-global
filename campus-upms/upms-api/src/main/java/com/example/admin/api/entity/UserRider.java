@@ -60,12 +60,13 @@ public class UserRider implements Serializable {
 	@Schema(description = "联表审核表id（审核骑手资质）")
 	private Long auditId;
 
+	@TableField("balance")
 	@Schema(description = "余额")
 	private BigDecimal balance;
 
 	@TableField("commission_total")
-	@Schema(description = "累计收益")
-	private BigDecimal commissionTotal;
+	@Schema(description = "累计总收入")
+	private BigDecimal totalAmount;
 
 	@TableField("address_id")
 	@Schema(description = "联表地址id")

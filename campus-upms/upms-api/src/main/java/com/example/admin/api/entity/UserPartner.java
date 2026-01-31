@@ -51,6 +51,14 @@ public class UserPartner implements Serializable {
 	@Schema(description = "关联的审核表id")
 	private Long auditId;
 
+	@TableField("balance")
+	@Schema(description = "余额")
+	private BigDecimal balance;
+
+	@TableField("total_amount")
+	@Schema(description = "累计总收入")
+	private BigDecimal totalAmount;
+
 	@TableField(value = "create_at", fill = FieldFill.INSERT)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(description = "创建时间")

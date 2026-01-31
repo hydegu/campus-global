@@ -38,7 +38,7 @@ public class PaymentRecord implements Serializable {
     private Long targetId;
 
     /**
-     * 打款目标类型
+     * 打款目标类型 1-商家 2-骑手 3-合伙人
      */
     private Integer targetType;
 
