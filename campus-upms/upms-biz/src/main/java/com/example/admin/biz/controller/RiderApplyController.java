@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/rider/apply")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "骑手申请审核", description = "骑手申请记录的查询和审核功能")
 public class RiderApplyController {

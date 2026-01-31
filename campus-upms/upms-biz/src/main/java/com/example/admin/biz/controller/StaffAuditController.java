@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/audit/staff")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "服务人员审核", description = "管理员对服务人员申请进行审核功能")
 public class StaffAuditController {

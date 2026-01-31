@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/delivery")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "配送管理", description = "配送费计算、预计送达时间查询等功能")
 public class DeliveryController {

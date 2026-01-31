@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/school")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "学校管理", description = "学校信息的增删改查功能")
 public class SchoolController {

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "订单管理", description = "外卖订单创建、接单、取货、送达、取消等功能")
 public class OrderController {

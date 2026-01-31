@@ -23,7 +23,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/sys/role")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "角色管理", description = "系统角色的增删改查功能")
 public class RoleController {

@@ -22,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/menu")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "菜单管理", description = "系统菜单的增删改查功能")
 public class SysMenuController {

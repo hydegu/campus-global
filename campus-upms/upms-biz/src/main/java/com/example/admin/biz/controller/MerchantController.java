@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/merchant/settle-in")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "商家入驻管理", description = "商家入驻申请的提交、查询、编辑、删除、审核等功能")
 public class MerchantController {

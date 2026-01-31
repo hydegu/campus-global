@@ -19,7 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/dict")
 @RequiredArgsConstructor
-@StandardApiResponses
 @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
 @Tag(name = "字典管理", description = "系统字典的增删改查功能")
 public class SysDictController {
