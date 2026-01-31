@@ -30,7 +30,6 @@ public class UserController {
 
 	@GetMapping("/info/query")
 	@Inner
-	@Operation(summary = "查询用户信息", description = "通过用户名查询用户详细信息，包括角色信息")
 	public Result<UserInfo> getUserInfo(String username) {
 		UserInfo userInfo = userService.getUserInfo(username);
 		if (userInfo == null) {
@@ -41,7 +40,6 @@ public class UserController {
 
 	@GetMapping("/{id}/info")
 	@Inner
-	@Operation(summary = "通过用户ID查询用户信息", description = "通过用户ID查询用户详细信息，包括角色信息")
 	public Result<UserInfo> getUserInfoById(@PathVariable Long id) {
 		UserInfo userInfo = userService.getUserInfoById(id);
 		if (userInfo == null) {
@@ -196,7 +194,6 @@ public class UserController {
 
 	@GetMapping("/api/mch/{baseUserId}")
 	@Inner
-	@Operation(summary = "根据商家用户ID获取商家信息", description = "根据商家用户ID获取商家信息，包括商家ID、商家名称、logo、营业状态等")
 	public Result<MchInfoDTO> getMchInfoByBaseUserId(@PathVariable Long baseUserId) {
 		MchInfoDTO mchInfo = userService.getMchInfoByBaseUserId(baseUserId);
 		if (mchInfo == null) {
@@ -207,7 +204,6 @@ public class UserController {
 
 	@PostMapping("/api/mch/batch")
 	@Inner
-	@Operation(summary = "批量获取商家信息", description = "根据商家用户ID列表批量获取商家信息")
 	public Result<List<MchInfoDTO>> batchGetMchInfo(@RequestBody List<Long> baseUserIds) {
 		List<MchInfoDTO> mchInfoList = userService.batchGetMchInfo(baseUserIds);
 		return Result.ok(mchInfoList);

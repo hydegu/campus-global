@@ -1,6 +1,7 @@
 package com.example.common.mybatis.utils;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,13 +10,23 @@ import java.util.List;
 /**
  * 分页查询VO，与PageUtil.PageResult保持兼容
  */
+@Schema(description = "分页查询结果")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class PageResult<T> {
+    @Schema(description = "总条数", example = "100")
     private Long total;       // 总条数
+
+    @Schema(description = "当前页", example = "1")
     private Long current;     // 当前页，从1开始
+
+    @Schema(description = "每页条数", example = "10")
     private Long pageSize;    // 每页条数
+
+    @Schema(description = "总页数", example = "10")
     private Long pages;       // 总页数
+
+    @Schema(description = "数据列表")
     private List<T> list;     // 数据列表（兼容原records字段）
 
     public PageResult() {}

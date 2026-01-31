@@ -1548,7 +1548,7 @@ public class UserServiceImpl implements UserService {
 
 			}
 
-		
+
 
 			@Override
 
@@ -1560,7 +1560,7 @@ public class UserServiceImpl implements UserService {
 
 				}
 
-		
+
 
 				LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
 
@@ -1568,7 +1568,7 @@ public class UserServiceImpl implements UserService {
 
 				List<UserMch> userMchList = userMchMapper.selectList(wrapper);
 
-		
+
 
 				return userMchList.stream().map(userMch -> {
 

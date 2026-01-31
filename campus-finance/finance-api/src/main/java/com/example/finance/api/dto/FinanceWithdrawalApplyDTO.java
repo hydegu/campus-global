@@ -34,10 +34,4 @@ public class FinanceWithdrawalApplyDTO implements Serializable {
     @Schema(description = "提现人姓名", requiredMode = Schema.RequiredMode.REQUIRED, example = "张三")
     @NotBlank(message = "提现人姓名不能为空")
     private String withdrawName;
-
-    @Schema(description = "开户银行（银行卡提现时必填）", example = "中国工商银行")
-    private String bankName;
-
-    @Schema(description = "开户支行（银行卡提现时必填）", example = "北京朝阳支行")
-    private String bankBranch;
 }

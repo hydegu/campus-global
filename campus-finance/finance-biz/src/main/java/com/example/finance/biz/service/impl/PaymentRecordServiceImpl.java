@@ -1,6 +1,7 @@
 package com.example.finance.biz.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
@@ -111,11 +112,6 @@ public class PaymentRecordServiceImpl extends ServiceImpl<PaymentRecordMapper, P
         if (!PaymentStatusEnum.PENDING_PAYMENT.getCode().equals(record.getStatus())) {
             throw new BusinessException("INVALID_STATUS", "打款记录状态不允许执行");
         }
-
-        // 3. 更新状态为打款中
-        record.setStatus(PaymentStatusEnum.PAYING.getCode());
-        record.setUpdatedAt(LocalDateTime.now());
-        baseMapper.updateById(record);
 
         // 4. 调用第三方支付接口
         try {
@@ -254,7 +250,6 @@ public class PaymentRecordServiceImpl extends ServiceImpl<PaymentRecordMapper, P
         vo.setPayTime(record.getPayTime());
         vo.setPaySerialNo(record.getPaySerialNo());
         vo.setRemark(record.getRemark());
-        vo.setCreatedAt(record.getCreatedAt());
         return vo;
     }
 }

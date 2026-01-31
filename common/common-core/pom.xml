@@ -13,6 +13,11 @@
     <description>公共工具类核心包</description>
 
     <dependencies>
+        <!--接口文档注解-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+        </dependency>
         <!--hutool-->
         <dependency>
             <groupId>cn.hutool</groupId>

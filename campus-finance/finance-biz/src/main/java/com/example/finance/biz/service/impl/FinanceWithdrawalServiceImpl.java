@@ -1,6 +1,7 @@
 package com.example.finance.biz.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.admin.api.dto.UserInfo;
@@ -76,8 +77,6 @@ public class FinanceWithdrawalServiceImpl extends ServiceImpl<FinanceWithdrawalM
         withdrawal.setWithdrawType(applyDTO.getWithdrawType());
         withdrawal.setWithdrawAccount(applyDTO.getWithdrawAccount());
         withdrawal.setWithdrawName(applyDTO.getWithdrawName());
-        withdrawal.setBankName(applyDTO.getBankName());
-        withdrawal.setBankBranch(applyDTO.getBankBranch());
         withdrawal.setStatus(WithdrawalStatusEnum.PENDING.getCode());
         withdrawal.setAuditId(0L); // 暂时设为0，后续审核时更新
         withdrawal.setCreateAt(LocalDateTime.now());
@@ -221,8 +220,6 @@ public class FinanceWithdrawalServiceImpl extends ServiceImpl<FinanceWithdrawalM
         vo.setWithdrawTypeName(typeEnum != null ? typeEnum.getDesc() : "");
         vo.setWithdrawAccount(withdrawal.getWithdrawAccount());
         vo.setWithdrawName(withdrawal.getWithdrawName());
-        vo.setBankName(withdrawal.getBankName());
-        vo.setBankBranch(withdrawal.getBankBranch());
         vo.setStatus(withdrawal.getStatus());
         WithdrawalStatusEnum statusEnum = WithdrawalStatusEnum.getByCode(withdrawal.getStatus());
         vo.setStatusName(statusEnum != null ? statusEnum.getDesc() : "");

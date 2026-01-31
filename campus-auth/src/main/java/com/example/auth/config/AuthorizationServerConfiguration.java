@@ -4,7 +4,6 @@ import com.example.auth.password.OAuth2ResourceOwnerPasswordAuthenticationConver
 import com.example.auth.password.OAuth2ResourceOwnerPasswordAuthenticationProvider;
 import com.example.auth.support.CustomeOAuth2AccessTokenGenerator;
 import com.example.auth.support.core.CustomeOAuth2TokenCustomizer;
-import com.example.auth.support.core.FormIdentityLoginConfigurer;
 import com.example.auth.support.core.DaoAuthenticationProvider;
 import com.example.auth.support.filter.PasswordDecoderFilter;
 import com.example.auth.support.filter.ValidateCodeFilter;
@@ -76,17 +75,12 @@ public class AuthorizationServerConfiguration {
 				.accessTokenResponseHandler(new AuthenticationSuccessEventHandler()) // 登录成功处理器
 				.errorResponseHandler(new AuthenticationFailureEventHandler());// 登录失败处理器
 		}).clientAuthentication(oAuth2ClientAuthenticationConfigurer -> // 个性化客户端认证
-		oAuth2ClientAuthenticationConfigurer.errorResponseHandler(new AuthenticationFailureEventHandler()))// 处理客户端认证异常
-			.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint// 授权码端点个性化confirm页面
-				.consentPage(SecurityConstants.CUSTOM_CONSENT_PAGE_URI)), Customizer.withDefaults())
+		oAuth2ClientAuthenticationConfigurer.errorResponseHandler(new AuthenticationFailureEventHandler())), Customizer.withDefaults())// 处理客户端认证异常
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated());
 
 		// 设置 Token 存储的策略
 		http.with(authorizationServerConfigurer.authorizationService(authorizationService),// redis存储token的实现
 				Customizer.withDefaults());
-
-		// 设置授权码模式登录页面
-		http.with(new FormIdentityLoginConfigurer(), Customizer.withDefaults());
 
 		DefaultSecurityFilterChain securityFilterChain = http.build();
 
@@ -138,26 +132,5 @@ public class AuthorizationServerConfiguration {
 		http.authenticationProvider(new OAuth2ResourceOwnerPasswordAuthenticationProvider(authenticationManager, authorizationService, tokenGenerator));
 	}
 
-	/**
-	 * 配置 CORS 跨域资源共享
-	 * @return UrlBasedCorsConfigurationSource CORS配置源
-	 */
-	private UrlBasedCorsConfigurationSource corsConfigurationSource() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration corsConfiguration = new CorsConfiguration();
-
-		// 从配置文件读取允许的源模式
-		corsProperties.getAllowedOriginPatterns().forEach(corsConfiguration::addAllowedOriginPattern);
-		// 从配置文件读取允许的请求头
-		corsProperties.getAllowedHeaders().forEach(corsConfiguration::addAllowedHeader);
-		// 从配置文件读取允许的HTTP方法
-		corsProperties.getAllowedMethods().forEach(corsConfiguration::addAllowedMethod);
-		// 从配置文件读取是否允许携带凭证
-		corsConfiguration.setAllowCredentials(corsProperties.getAllowCredentials());
-		// 注册CORS配置到指定路径
-		source.registerCorsConfiguration(corsProperties.getPathPattern(), corsConfiguration);
-
-		return source;
-	}
 
 }

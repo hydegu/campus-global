@@ -16,15 +16,13 @@ import lombok.Data;
 @Data
 public class AppBrowsingHistory implements Serializable {
     /**
-     * 浏览记录ID，自增主键
+     * 浏览记录ID
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
      * 创建日期，用于分区
      */
-    @TableId
     private LocalDate createdDate;
 
     /**

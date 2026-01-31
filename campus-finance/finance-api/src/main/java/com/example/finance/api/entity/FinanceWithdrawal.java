@@ -25,7 +25,6 @@ public class FinanceWithdrawal implements Serializable {
     /**
      * 审核记录ID
      */
-    @TableId
     private Long auditId;
 
     /**

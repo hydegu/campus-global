@@ -40,7 +40,7 @@ public class PaymentRecord implements Serializable {
     /**
      * 打款目标类型
      */
-    private String targetType;
+    private Integer targetType;
 
     /**
      * 账户类型(1:银行卡; 2:微信; 3:支付宝)

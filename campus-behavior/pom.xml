@@ -13,6 +13,21 @@
     <description>行为服务，有记录浏览记录功能，附带文件上传功能</description>
 
     <dependencies>
+        <!--core 工具类-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-core</artifactId>
+        </dependency>
+        <!--feign 注解依赖-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-feign</artifactId>
+        </dependency>
+        <!--mybatis 依赖-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-mybatis</artifactId>
+        </dependency>
         <!--文件管理-->
         <dependency>
             <groupId>com.example</groupId>

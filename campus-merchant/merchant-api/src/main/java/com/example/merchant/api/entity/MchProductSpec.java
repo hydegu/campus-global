@@ -17,13 +17,11 @@ public class MchProductSpec implements Serializable {
     /**
      * 商品id
      */
-    @TableId
     private Long productId;
 
     /**
      * 规格id
      */
-    @TableId
     private Long specId;
 
     @TableField(exist = false)

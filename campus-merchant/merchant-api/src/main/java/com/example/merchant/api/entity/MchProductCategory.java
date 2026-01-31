@@ -17,13 +17,11 @@ public class MchProductCategory implements Serializable {
     /**
      * 商家id
      */
-    @TableId(type = IdType.AUTO)
     private Long productId;
 
     /**
      * 商品分类id
      */
-    @TableId
     private Long categoryId;
 
     @TableField(exist = false)

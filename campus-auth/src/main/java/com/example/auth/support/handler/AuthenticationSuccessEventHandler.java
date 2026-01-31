@@ -57,12 +57,6 @@ public class AuthenticationSuccessEventHandler implements AuthenticationSuccessH
 		}
 		
 		SecurityContextHolder.getContext().setAuthentication(accessTokenAuthentication);
-		String startTimeStr = request.getHeader(CommonConstants.REQUEST_START_TIME);
-		if (StrUtil.isNotBlank(startTimeStr)) {
-			Long startTime = Long.parseLong(startTimeStr);
-			Long endTime = System.currentTimeMillis();
-		}
-
 		// 输出token
 		sendAccessTokenResponse(request, response, authentication);
 	}
