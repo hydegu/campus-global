@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 创建系统用户DTO
@@ -46,4 +47,7 @@ public class CreateSysUserDTO implements Serializable {
 
 	@Schema(description = "性别，0-未知，1-男，2-女", example = "1")
 	private Integer gender;
+
+	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
+	private List<Long> roleIds;
 }

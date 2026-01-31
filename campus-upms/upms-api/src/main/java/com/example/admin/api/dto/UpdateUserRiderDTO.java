@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Schema(description = "编辑骑手用户DTO")
@@ -60,4 +61,7 @@ public class UpdateUserRiderDTO implements Serializable {
 
 	@Schema(description = "分佣比例(%)", example = "20.00")
 	private BigDecimal commissionRate;
+
+	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
+	private List<Long> roleIds;
 }

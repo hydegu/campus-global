@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Schema(description = "编辑合伙人用户DTO")
@@ -33,4 +34,7 @@ public class UpdateUserPartnerDTO implements Serializable {
 
 	@Schema(description = "上级合伙人ID", example = "1")
 	private Long parentId;
+
+	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
+	private List<Long> roleIds;
 }

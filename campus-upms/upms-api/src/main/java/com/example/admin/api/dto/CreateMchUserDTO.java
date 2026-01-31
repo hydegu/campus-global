@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 创建商家用户DTO
@@ -67,4 +68,7 @@ public class CreateMchUserDTO implements Serializable {
 
 	@Schema(description = "银行卡号", example = "6222021234567890123")
 	private String cardNumber;
+
+	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
+	private List<Long> roleIds;
 }

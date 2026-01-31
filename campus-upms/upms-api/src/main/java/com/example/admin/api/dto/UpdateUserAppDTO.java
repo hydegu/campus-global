@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Schema(description = "编辑C端用户DTO")
@@ -38,4 +39,7 @@ public class UpdateUserAppDTO implements Serializable {
 
 	@Schema(description = "学号", example = "20240001")
 	private String stuCode;
+
+	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
+	private List<Long> roleIds;
 }

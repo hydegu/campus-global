@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 创建C端用户DTO
@@ -52,4 +53,7 @@ public class CreateAppUserDTO implements Serializable {
 
 	@Schema(description = "学号", example = "20240001")
 	private String stuCode;
+
+	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
+	private List<Long> roleIds;
 }

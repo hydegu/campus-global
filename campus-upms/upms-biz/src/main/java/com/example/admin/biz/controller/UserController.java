@@ -29,6 +29,7 @@ public class UserController {
 
 	@GetMapping("/info/query")
 	@Inner
+	@Operation(summary = "根据用户名查询用户信息", description = "根据用户名查询用户的基础信息，供内部服务调用")
 	public Result<UserInfo> getUserInfo(String username) {
 		UserInfo userInfo = userService.getUserInfo(username);
 		if (userInfo == null) {
@@ -39,6 +40,7 @@ public class UserController {
 
 	@GetMapping("/{id}/info")
 	@Inner
+	@Operation(summary = "根据用户ID查询用户信息", description = "根据用户ID查询用户的基础信息，供内部服务调用")
 	public Result<UserInfo> getUserInfoById(@PathVariable Long id) {
 		UserInfo userInfo = userService.getUserInfoById(id);
 		if (userInfo == null) {
@@ -95,15 +97,38 @@ public class UserController {
 	}
 
 
-	@PutMapping("/{id}")
-	@Operation(summary = "编辑用户", description = "编辑用户信息，支持联表更新base_user和对应的扩展表，updateDTO格式以userType为准寻找对应的DTO：" +
-			"1.UpdateUserAppDTO C端用户更新DTO" +
-			"2.UpdateUserMchDTO 商家用户更新DTO" +
-			"3.UpdateUserRiderDTO 骑手用户更新DTO" +
-			"4.UpdateUserSysDTO 系统用户更新DTO" +
-			"5.UpdateUserPartnerDTO 合伙人用户更新DTO")
-	public Result<Void> updateUser(@PathVariable Long id, @RequestParam Integer userType, @Valid @RequestBody Object updateDTO) {
-		userService.updateUser(id, userType, updateDTO);
+	@PutMapping("/sys-user/{id}")
+	@Operation(summary = "编辑系统用户", description = "编辑系统用户信息，支持更新用户名、手机号、头像、状态、真实姓名、性别、出生日期、部门、职位、邮箱等信息，支持编辑角色")
+	public Result<Void> updateSysUser(@PathVariable Long id, @Valid @RequestBody UpdateUserSysDTO dto) {
+		userService.updateSysUser(id, dto);
+		return Result.ok();
+	}
+
+	@PutMapping("/app-user/{id}")
+	@Operation(summary = "编辑C端用户", description = "编辑C端用户信息，支持更新用户名、手机号、头像、状态、学校ID、真实姓名、性别、生日、地址、学号等信息，支持编辑角色")
+	public Result<Void> updateAppUser(@PathVariable Long id, @Valid @RequestBody UpdateUserAppDTO dto) {
+		userService.updateAppUser(id, dto);
+		return Result.ok();
+	}
+
+	@PutMapping("/mch-user/{id}")
+	@Operation(summary = "编辑商家用户", description = "编辑商家用户信息，支持更新用户名、手机号、头像、状态、商家名称、营业执照、地址信息、打款账户、经营时间、联系人、经营范围、分佣比例、最低起送金额等信息，支持编辑角色")
+	public Result<Void> updateMchUser(@PathVariable Long id, @Valid @RequestBody UpdateUserMchDTO dto) {
+		userService.updateMchUser(id, dto);
+		return Result.ok();
+	}
+
+	@PutMapping("/rider-user/{id}")
+	@Operation(summary = "编辑骑手用户", description = "编辑骑手用户信息，支持更新用户名、手机号、头像、状态、真实姓名、身份证号、性别、银行卡号、地址信息、紧急联系人、身份证照片、分佣比例等信息，支持编辑角色")
+	public Result<Void> updateRiderUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRiderDTO dto) {
+		userService.updateRiderUser(id, dto);
+		return Result.ok();
+	}
+
+	@PutMapping("/partner-user/{id}")
+	@Operation(summary = "编辑合伙人用户", description = "编辑合伙人用户信息，支持更新用户名、手机号、头像、状态、合伙人姓名、银行卡号、分佣比例、上级合伙人ID等信息，支持编辑角色")
+	public Result<Void> updatePartnerUser(@PathVariable Long id, @Valid @RequestBody UpdateUserPartnerDTO dto) {
+		userService.updatePartnerUser(id, dto);
 		return Result.ok();
 	}
 
@@ -115,35 +140,35 @@ public class UserController {
 	}
 
 	@PostMapping("/app-user/create")
-	@Operation(summary = "创建C端用户", description = "创建新的C端用户，同时插入base_user表和user_app表。需要提供用户名、密码、手机号等必填信息")
+	@Operation(summary = "创建C端用户", description = "创建新的C端用户，同时插入base_user表和user_app表。需要提供用户名、密码、手机号等必填信息，支持分配角色")
 	public Result<UserAppListVO> createAppUser(@Valid @RequestBody CreateAppUserDTO dto) {
 		UserAppListVO result = userService.createAppUser(dto);
 		return Result.ok(result);
 	}
 
 	@PostMapping("/mch-user/create")
-	@Operation(summary = "创建商家用户", description = "创建新的商家用户，同时插入base_user表和user_mch表。需要提供用户名、密码、手机号、商户名等必填信息")
+	@Operation(summary = "创建商家用户", description = "创建新的商家用户，同时插入base_user表和user_mch表。需要提供用户名、密码、手机号、商户名等必填信息，支持分配角色")
 	public Result<UserMchListVO> createMchUser(@Valid @RequestBody CreateMchUserDTO dto) {
 		UserMchListVO result = userService.createMchUser(dto);
 		return Result.ok(result);
 	}
 
 	@PostMapping("/rider-user/create")
-	@Operation(summary = "创建骑手用户", description = "创建新的骑手用户，同时插入base_user表和user_rider表。需要提供用户名、密码、手机号、真实姓名、身份证号等必填信息")
+	@Operation(summary = "创建骑手用户", description = "创建新的骑手用户，同时插入base_user表和user_rider表。需要提供用户名、密码、手机号、真实姓名、身份证号等必填信息，支持分配角色")
 	public Result<UserRiderListVO> createRiderUser(@Valid @RequestBody CreateRiderUserDTO dto) {
 		UserRiderListVO result = userService.createRiderUser(dto);
 		return Result.ok(result);
 	}
 
 	@PostMapping("/sys-user/create")
-	@Operation(summary = "创建系统用户", description = "创建新的系统用户，同时插入base_user表和user_sys表。需要提供用户名、密码、手机号等必填信息")
+	@Operation(summary = "创建系统用户", description = "创建新的系统用户，同时插入base_user表和user_sys表。需要提供用户名、密码、手机号等必填信息，支持分配角色")
 	public Result<UserSysListVO> createSysUser(@Valid @RequestBody CreateSysUserDTO dto) {
 		UserSysListVO result = userService.createSysUser(dto);
 		return Result.ok(result);
 	}
 
 	@PostMapping("/partner-user/create")
-	@Operation(summary = "创建合伙人用户", description = "创建新的合伙人用户，同时插入base_user表和user_partner表。需要提供用户名、密码、手机号、合伙人姓名等必填信息")
+	@Operation(summary = "创建合伙人用户", description = "创建新的合伙人用户，同时插入base_user表和user_partner表。需要提供用户名、密码、手机号、合伙人姓名等必填信息，支持分配角色")
 	public Result<UserPartnerListVO> createPartnerUser(@Valid @RequestBody CreatePartnerUserDTO dto) {
 		UserPartnerListVO result = userService.createPartnerUser(dto);
 		return Result.ok(result);
@@ -193,6 +218,7 @@ public class UserController {
 
 	@GetMapping("/api/mch/{baseUserId}")
 	@Inner
+	@Operation(summary = "根据基础用户ID查询商家信息", description = "根据基础用户ID查询商家的详细信息，供内部服务调用")
 	public Result<MchInfoDTO> getMchInfoByBaseUserId(@PathVariable Long baseUserId) {
 		MchInfoDTO mchInfo = userService.getMchInfoByBaseUserId(baseUserId);
 		if (mchInfo == null) {
@@ -203,6 +229,7 @@ public class UserController {
 
 	@PostMapping("/api/mch/batch")
 	@Inner
+	@Operation(summary = "批量查询商家信息", description = "根据基础用户ID列表批量查询商家的详细信息，供内部服务调用")
 	public Result<List<MchInfoDTO>> batchGetMchInfo(@RequestBody List<Long> baseUserIds) {
 		List<MchInfoDTO> mchInfoList = userService.batchGetMchInfo(baseUserIds);
 		return Result.ok(mchInfoList);

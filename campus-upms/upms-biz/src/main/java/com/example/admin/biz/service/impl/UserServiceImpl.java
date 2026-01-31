@@ -645,6 +645,181 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateSysUser(Long id, UpdateUserSysDTO dto) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+		if (dto == null) {
+			throw new BusinessException("INVALID_PARAM", "更新数据不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		updateSysUser(baseUser, dto);
+
+		// 更新用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			// 删除用户原有的所有角色关联
+			LambdaQueryWrapper<UserRole> roleWrapper = Wrappers.lambdaQuery();
+			roleWrapper.eq(UserRole::getUserId, id);
+			userRoleMapper.delete(roleWrapper);
+
+			// 批量创建新的角色关联
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(id);
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("系统用户角色更新成功，用户ID：{}，角色ID列表：{}", id, dto.getRoleIds());
+		}
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateAppUser(Long id, UpdateUserAppDTO dto) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+		if (dto == null) {
+			throw new BusinessException("INVALID_PARAM", "更新数据不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		updateAppUser(baseUser, dto);
+
+		// 更新用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			// 删除用户原有的所有角色关联
+			LambdaQueryWrapper<UserRole> roleWrapper = Wrappers.lambdaQuery();
+			roleWrapper.eq(UserRole::getUserId, id);
+			userRoleMapper.delete(roleWrapper);
+
+			// 批量创建新的角色关联
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(id);
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("C端用户角色更新成功，用户ID：{}，角色ID列表：{}", id, dto.getRoleIds());
+		}
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateMchUser(Long id, UpdateUserMchDTO dto) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+		if (dto == null) {
+			throw new BusinessException("INVALID_PARAM", "更新数据不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		updateMchUser(baseUser, dto);
+
+		// 更新用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			// 删除用户原有的所有角色关联
+			LambdaQueryWrapper<UserRole> roleWrapper = Wrappers.lambdaQuery();
+			roleWrapper.eq(UserRole::getUserId, id);
+			userRoleMapper.delete(roleWrapper);
+
+			// 批量创建新的角色关联
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(id);
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("商家用户角色更新成功，用户ID：{}，角色ID列表：{}", id, dto.getRoleIds());
+		}
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateRiderUser(Long id, UpdateUserRiderDTO dto) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+		if (dto == null) {
+			throw new BusinessException("INVALID_PARAM", "更新数据不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		updateRiderUser(baseUser, dto);
+
+		// 更新用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			// 删除用户原有的所有角色关联
+			LambdaQueryWrapper<UserRole> roleWrapper = Wrappers.lambdaQuery();
+			roleWrapper.eq(UserRole::getUserId, id);
+			userRoleMapper.delete(roleWrapper);
+
+			// 批量创建新的角色关联
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(id);
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("骑手用户角色更新成功，用户ID：{}，角色ID列表：{}", id, dto.getRoleIds());
+		}
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updatePartnerUser(Long id, UpdateUserPartnerDTO dto) {
+		if (id == null) {
+			throw new BusinessException("INVALID_PARAM", "用户ID不能为空");
+		}
+		if (dto == null) {
+			throw new BusinessException("INVALID_PARAM", "更新数据不能为空");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(id);
+		if (baseUser == null) {
+			throw new BusinessException("USER_NOT_FOUND", "用户不存在");
+		}
+
+		updatePartnerUser(baseUser, dto);
+
+		// 更新用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			// 删除用户原有的所有角色关联
+			LambdaQueryWrapper<UserRole> roleWrapper = Wrappers.lambdaQuery();
+			roleWrapper.eq(UserRole::getUserId, id);
+			userRoleMapper.delete(roleWrapper);
+
+			// 批量创建新的角色关联
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(id);
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("合伙人用户角色更新成功，用户ID：{}，角色ID列表：{}", id, dto.getRoleIds());
+		}
+	}
+
 	private void updateAppUser(BaseUser baseUser, UpdateUserAppDTO dto) {
 		if (StringUtils.hasText(dto.getUsername())) {
 			baseUser.setUsername(dto.getUsername());
@@ -951,6 +1126,17 @@ public class UserServiceImpl implements UserService {
 
 		log.info("C端用户创建成功，用户ID：{}，用户名：{}", baseUser.getId(), dto.getUsername());
 
+		// 创建用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(baseUser.getId());
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("C端用户角色关联创建成功，用户ID：{}，角色ID列表：{}", baseUser.getId(), dto.getRoleIds());
+		}
+
 		// 构建并返回UserAppListVO
 		UserAppListVO vo = new UserAppListVO();
 		vo.setId(baseUser.getId());
@@ -1026,6 +1212,17 @@ public class UserServiceImpl implements UserService {
 		userMchMapper.insert(userMch);
 
 		log.info("商家用户创建成功，用户ID：{}，用户名：{}，商户名：{}", baseUser.getId(), dto.getUsername(), dto.getMchName());
+
+		// 创建用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(baseUser.getId());
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("商家用户角色关联创建成功，用户ID：{}，角色ID列表：{}", baseUser.getId(), dto.getRoleIds());
+		}
 
 		// 构建并返回UserMchListVO
 		UserMchListVO vo = new UserMchListVO();
@@ -1105,6 +1302,17 @@ public class UserServiceImpl implements UserService {
 
 		log.info("骑手用户创建成功，用户ID：{}，用户名：{}，真实姓名：{}", baseUser.getId(), dto.getUsername(), dto.getRealName());
 
+		// 创建用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(baseUser.getId());
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("骑手用户角色关联创建成功，用户ID：{}，角色ID列表：{}", baseUser.getId(), dto.getRoleIds());
+		}
+
 		// 构建并返回UserRiderListVO
 		UserRiderListVO vo = new UserRiderListVO();
 		vo.setId(baseUser.getId());
@@ -1167,6 +1375,17 @@ public class UserServiceImpl implements UserService {
 		userSysMapper.insert(userSys);
 
 		log.info("系统用户创建成功，用户ID：{}，用户名：{}，真实姓名：{}", baseUser.getId(), dto.getUsername(), dto.getRealName());
+
+		// 创建用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(baseUser.getId());
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("系统用户角色关联创建成功，用户ID：{}，角色ID列表：{}", baseUser.getId(), dto.getRoleIds());
+		}
 
 		// 构建并返回UserSysListVO
 		UserSysListVO vo = new UserSysListVO();
@@ -1253,6 +1472,17 @@ public class UserServiceImpl implements UserService {
 
 		log.info("合伙人用户创建成功，用户ID：{}，用户名：{}，合伙人姓名：{}，邀请码：{}",
 			baseUser.getId(), dto.getUsername(), dto.getPartnerName(), inviteCode);
+
+		// 创建用户角色关联
+		if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+			for (Long roleId : dto.getRoleIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(baseUser.getId());
+				userRole.setRoleId(roleId);
+				userRoleMapper.insert(userRole);
+			}
+			log.info("合伙人用户角色关联创建成功，用户ID：{}，角色ID列表：{}", baseUser.getId(), dto.getRoleIds());
+		}
 
 		// 构建并返回UserPartnerListVO
 		UserPartnerListVO vo = new UserPartnerListVO();

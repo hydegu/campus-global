@@ -26,6 +26,16 @@ public interface UserService {
 
 	void updateUser(Long id, Integer userType, Object updateDTO);
 
+	void updateSysUser(Long id, UpdateUserSysDTO dto);
+
+	void updateAppUser(Long id, UpdateUserAppDTO dto);
+
+	void updateMchUser(Long id, UpdateUserMchDTO dto);
+
+	void updateRiderUser(Long id, UpdateUserRiderDTO dto);
+
+	void updatePartnerUser(Long id, UpdateUserPartnerDTO dto);
+
 	void resetUserPassword(Long id, ResetPasswordDTO resetPasswordDTO);
 
 	void deleteUser(Long id);

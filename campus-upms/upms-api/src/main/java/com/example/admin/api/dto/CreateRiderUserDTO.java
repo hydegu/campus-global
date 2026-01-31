@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 创建骑手用户DTO
@@ -70,4 +71,7 @@ public class CreateRiderUserDTO implements Serializable {
 	@Schema(description = "紧急联系人电话", example = "13900139000")
 	@Pattern(regexp = "^1[3-9]\\d{9}$", message = "紧急联系人电话格式不正确")
 	private String emergencyContactPhone;
+
+	@Schema(description = "角色ID列表", example = "[1, 2, 3]")
+	private List<Long> roleIds;
 }
