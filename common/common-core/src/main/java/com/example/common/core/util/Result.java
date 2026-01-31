@@ -2,14 +2,12 @@
 package com.example.common.core.util;
 
 import com.example.common.core.constant.CommonConstants;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldNameConstants;
 
 import java.io.Serializable;
 
-@Schema(description = "统一响应结果")
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,18 +19,18 @@ public class Result<T> implements Serializable {
 
 	@Getter
 	@Setter
-	@Schema(description = "响应码", example = "200")
 	private int code;
 
 	@Getter
 	@Setter
-	@Schema(description = "响应消息", example = "操作成功")
 	private String msg;
 
-	@Getter
 	@Setter
-	@Schema(description = "响应数据")
 	private T data;
+
+	public T getData(){
+		return data;
+	}
 
 	public static <T> Result<T> ok() {
 		return restResult(null, CommonConstants.SUCCESS, null);
