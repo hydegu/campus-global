@@ -1,8 +1,10 @@
 package com.example.finance.api.feign;
 
 import com.example.common.core.util.Result;
-import com.example.common.feign.annotation.Inner;
+import com.example.common.security.annotation.Inner;
+import com.example.finance.api.vo.FinanceWithdrawalVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,4 +25,14 @@ public interface RemoteFinanceWithdrawalService {
     @Inner
     @PutMapping("/api/finance/withdrawal/{id}/status")
     Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status);
+
+    /**
+     * 根据审核记录ID查询提现记录
+     *
+     * @param auditId 审核记录ID
+     * @return Result<FinanceWithdrawalVO>
+     */
+    @Inner
+    @GetMapping("/api/finance/withdrawal/by-audit-id")
+    Result<FinanceWithdrawalVO> getByAuditId(@RequestParam Long auditId);
 }

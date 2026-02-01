@@ -7,22 +7,20 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.admin.api.dto.MchInfoDTO;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.constant.CommonConstants;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.core.util.Result;
 import com.example.common.mybatis.utils.PageResult;
 import com.example.merchant.api.dto.product.*;
-import com.example.merchant.api.dto.spec.SpecAddDTO;
 import com.example.merchant.api.dto.spec.SpecUpdateDTO;
 import com.example.merchant.api.entity.*;
-import com.example.merchant.api.feign.RemoteMchUserService;
 import com.example.merchant.api.vo.ProductVO;
 import com.example.merchant.api.vo.SpecVO;
 import com.example.merchant.biz.mapper.*;
 import com.example.merchant.biz.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +44,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
     private final ProductSpecMapper productSpecMapper;
     private final ProductCategoryMapper productCategoryMapper;
     private final CategoryMapper categoryMapper;
-    private final RemoteMchUserService remoteMchUserService;
+    private final RemoteUserService remoteUserService;
 
     @Override
     public PageResult<ProductVO> listProducts(ProductQueryDTO queryDTO) {
@@ -118,8 +116,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
 
         // 批量查询关联数据
         Map<Long, List<Long>> productCategoryMap = batchQueryProductCategories(Collections.singletonList(id));
-        Set<Long> categoryIds = productCategoryMap.getOrDefault(id, Collections.emptyList()).stream()
-                .collect(Collectors.toSet());
+        Set<Long> categoryIds = new HashSet<>(productCategoryMap.getOrDefault(id, Collections.emptyList()));
         Map<Long, MchCategory> categoryMap = batchQueryCategories(categoryIds);
 
         Map<Long, List<MchSpec>> specMap = batchQuerySpecs(Collections.singletonList(id));
@@ -640,7 +637,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
         if (merchantIds == null || merchantIds.isEmpty()) {
             return Collections.emptyMap();
         }
-        Result<List<MchInfoDTO>> result = remoteMchUserService.batchGetMchInfo(merchantIds);
+        Result<List<MchInfoDTO>> result = remoteUserService.batchGetMchInfo(merchantIds);
         if (result.getCode() != CommonConstants.SUCCESS || result.getData() == null) {
             return Collections.emptyMap();
         }
@@ -721,5 +718,29 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
         vo.setIsDefault(spec.getIsDefault());
         vo.setSortOrder(spec.getSortOrder());
         return vo;
+    }
+
+    @Override
+    public ProductVO getByAuditId(Long auditId) {
+        // 查询商品信息
+        LambdaQueryWrapper<MchProduct> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(MchProduct::getAuditId, auditId);
+        MchProduct product = this.baseMapper.selectOne(wrapper);
+
+        if (product == null) {
+            throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
+        }
+
+        // 批量查询关联数据
+        Map<Long, List<Long>> productCategoryMap = batchQueryProductCategories(Collections.singletonList(product.getId()));
+        Set<Long> categoryIds = new HashSet<>(productCategoryMap.getOrDefault(product.getId(), Collections.emptyList()));
+        Map<Long, MchCategory> categoryMap = batchQueryCategories(categoryIds);
+
+        Map<Long, List<MchSpec>> specMap = batchQuerySpecs(Collections.singletonList(product.getId()));
+
+        Map<Long, MchInfoDTO> mchInfoMap = batchQueryMchInfo(Collections.singletonList(product.getMerchantId()));
+
+        // 构建VO对象
+        return buildProductVO(product, productCategoryMap, categoryMap, specMap, mchInfoMap);
     }
 }

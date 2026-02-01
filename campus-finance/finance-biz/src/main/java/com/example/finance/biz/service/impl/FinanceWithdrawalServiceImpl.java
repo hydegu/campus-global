@@ -178,6 +178,19 @@ public class FinanceWithdrawalServiceImpl extends ServiceImpl<FinanceWithdrawalM
         log.info("提现状态更新成功，提现ID：{}，状态：{}", id, status);
     }
 
+    @Override
+    public FinanceWithdrawalVO getByAuditId(Long auditId) {
+        LambdaQueryWrapper<FinanceWithdrawal> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(FinanceWithdrawal::getAuditId, auditId);
+        FinanceWithdrawal withdrawal = this.baseMapper.selectOne(wrapper);
+
+        if (withdrawal == null) {
+            throw new BusinessException("WITHDRAWAL_NOT_FOUND", "提现记录不存在");
+        }
+
+        return buildWithdrawalVO(withdrawal);
+    }
+
     /**
      * 生成提现单号
      * 格式：WD + yyyyMMddHHmmss + 8位随机大写字符

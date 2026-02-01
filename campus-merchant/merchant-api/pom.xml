@@ -13,6 +13,10 @@
     <description>商家模块-api</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-security</artifactId>
+        </dependency>
         <!-- upms-api -->
         <dependency>
             <groupId>com.example</groupId>

@@ -1,6 +1,7 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.admin.api.dto.AuditDTO;
 import com.example.admin.api.dto.AuditRecordQueryDTO;
 import com.example.admin.api.dto.CreateAuditRecordDTO;
 import com.example.admin.api.vo.AuditRecordVO;
@@ -57,7 +58,7 @@ public class AuditRecordController {
 	public Result<Void> auditByRecordId(
 			@Parameter(description = "审核记录ID", required = true)
 			@PathVariable Long id,
-			@Valid @RequestBody com.example.admin.api.dto.AuditDTO auditDTO) {
+			@Valid @RequestBody AuditDTO auditDTO) {
 		auditService.auditByRecordId(id, auditDTO);
 		return Result.ok();
 	}

@@ -65,4 +65,12 @@ public interface ProductService extends IService<MchProduct> {
      * @param statusDTO 状态变更DTO
      */
     void updateProductShelfStatus(Long id, ProductShelfStatusDTO statusDTO);
+
+    /**
+     * 根据审核记录ID查询商品
+     *
+     * @param auditId 审核记录ID
+     * @return 商品VO
+     */
+    ProductVO getByAuditId(Long auditId);
 }

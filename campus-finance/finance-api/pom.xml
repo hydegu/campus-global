@@ -13,6 +13,11 @@
   <description>财务模块api</description>
 
   <dependencies>
+    <!-- security -->
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>common-security</artifactId>
+    </dependency>
     <!--core 工具类-->
     <dependency>
       <groupId>com.example</groupId>

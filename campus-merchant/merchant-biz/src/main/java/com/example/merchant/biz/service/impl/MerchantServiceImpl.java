@@ -1,17 +1,12 @@
 package com.example.merchant.biz.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
-import com.example.admin.api.dto.AuditDTO;
 import com.example.admin.api.dto.CreateAuditRecordDTO;
-import com.example.admin.api.dto.CreateMchUserDTO;
 import com.example.admin.api.dto.UpdateUserMchDTO;
-import com.example.admin.api.vo.UserMchListVO;
+import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.enums.BizType;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.core.util.Result;
 import com.example.merchant.api.dto.MerchantQualificationApplyDTO;
-import com.example.merchant.api.feign.RemoteMchUserService;
 import com.example.merchant.biz.service.MerchantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MerchantServiceImpl implements MerchantService {
 
-    private final RemoteMchUserService remoteMchUserService;
+    private final RemoteUserService remoteUserService;
 
     @Override
     public Result<Void> applyForMchVerification(Long id,MerchantQualificationApplyDTO dto){
@@ -39,7 +34,7 @@ public class MerchantServiceImpl implements MerchantService {
                  .setMinimumOrderAmount(dto.getMinimumOrderAmount()); // 最低起送金额
 
         // 先修改商家用户
-        Result<Void> updateResult = remoteMchUserService.updateUser(id,3,updateDTO);
+        Result<Void> updateResult = remoteUserService.updateUser(id,3,updateDTO);
 
         if(updateResult.getCode() != 200) throw new BusinessException("FAILD_UPDATE","修改商家失败");
 
@@ -49,7 +44,7 @@ public class MerchantServiceImpl implements MerchantService {
                 .bizType(BizType.MERCHANT_SETTLE.getCode())
                 .applicantId(id)
                 .build();
-        remoteMchUserService.createAuditRecord(createAuditRecordDTO);
+        remoteUserService.createAuditRecord(createAuditRecordDTO);
 
         return Result.ok();
     }

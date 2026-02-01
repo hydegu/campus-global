@@ -48,4 +48,12 @@ public interface FinanceWithdrawalService extends IService<FinanceWithdrawal> {
      * @param status 状态：1-审核通过，2-审核拒绝
      */
     void updateStatus(Long id, Integer status);
+
+    /**
+     * 根据审核记录ID查询提现记录
+     *
+     * @param auditId 审核记录ID
+     * @return 提现记录VO
+     */
+    FinanceWithdrawalVO getByAuditId(Long auditId);
 }

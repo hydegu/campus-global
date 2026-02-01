@@ -36,12 +36,10 @@ import com.example.common.core.enums.AuditStatus;
 import com.example.common.core.enums.UserStatus;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.security.util.SecurityUtils;
-import com.example.finance.api.entity.FinanceWithdrawal;
 import com.example.finance.api.feign.RemoteFinanceWithdrawalService;
-import com.example.finance.api.mapper.FinanceWithdrawalMapper;
-import com.example.merchant.api.entity.MchProduct;
+import com.example.finance.api.vo.FinanceWithdrawalVO;
 import com.example.merchant.api.feign.RemoteProductService;
-import com.example.merchant.api.mapper.MchProductMapper;
+import com.example.merchant.api.vo.ProductVO;
 import com.example.common.core.util.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,8 +66,6 @@ public class AuditServiceImpl implements AuditService {
 	private final SysSchoolMapper sysSchoolMapper;
 	private final RemoteFinanceWithdrawalService remoteFinanceWithdrawalService;
 	private final RemoteProductService remoteProductService;
-	private final FinanceWithdrawalMapper financeWithdrawalMapper;
-	private final MchProductMapper mchProductMapper;
 
 	private static final String BIZ_TYPE_PARTNER = "PARTNER_APPLY";
 	private static final String BIZ_TYPE_MERCHANT = "MERCHANT_SETTLE";
@@ -117,7 +113,7 @@ public class AuditServiceImpl implements AuditService {
 
 		// 6. 根据业务类型执行不同的业务逻辑
 		String bizType = auditRecord.getBizType();
-		Long applicantId = auditRecord.getApplicantId();
+		Long applicantId = auditRecord.getBizId();
 
 		switch (bizType) {
 			case BIZ_TYPE_MERCHANT:
@@ -226,14 +222,17 @@ public class AuditServiceImpl implements AuditService {
 	 * 审核提现申请
 	 */
 	private void auditWithdrawalByRecord(Long auditRecordId, AuditDTO auditDTO) {
-		LambdaQueryWrapper<FinanceWithdrawal> wrapper = Wrappers.lambdaQuery();
-		wrapper.eq(FinanceWithdrawal::getAuditId, auditRecordId);
-		FinanceWithdrawal withdrawal = financeWithdrawalMapper.selectOne(wrapper);
-		if (withdrawal == null) {
+		// 通过 Feign 接口查询提现记录
+		Result<FinanceWithdrawalVO> withdrawalResult = remoteFinanceWithdrawalService.getByAuditId(auditRecordId);
+		if (withdrawalResult.getCode() != 1 || withdrawalResult.getData() == null) {
 			throw new BusinessException("WITHDRAWAL_NOT_FOUND", "提现记录不存在");
 		}
 
-		Result<Void> result = remoteFinanceWithdrawalService.updateStatus(withdrawal.getId(), auditDTO.getAuditStatus());
+		// 更新提现状态
+		Result<Void> result = remoteFinanceWithdrawalService.updateStatus(
+			withdrawalResult.getData().getId(),
+			auditDTO.getAuditStatus()
+		);
 		if (result.getCode() != 1) {
 			throw new BusinessException("AUDIT_FAILED", "提现状态更新失败");
 		}
@@ -243,15 +242,18 @@ public class AuditServiceImpl implements AuditService {
 	 * 审核商品上架
 	 */
 	private void auditGoodsByRecord(Long auditRecordId, AuditDTO auditDTO) {
-		LambdaQueryWrapper<MchProduct> wrapper = Wrappers.lambdaQuery();
-		wrapper.eq(MchProduct::getAuditId, auditRecordId);
-		MchProduct product = mchProductMapper.selectOne(wrapper);
-		if (product == null) {
+		// 通过 Feign 接口查询商品
+		Result<ProductVO> productResult = remoteProductService.getByAuditId(auditRecordId);
+		if (productResult.getCode() != 1 || productResult.getData() == null) {
 			throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
 		}
 
+		// 更新商品上架状态
 		int shelfStatus = auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 1 : 0;
-		Result<Void> result = remoteProductService.updateShelfStatus(product.getId(), shelfStatus);
+		Result<Void> result = remoteProductService.updateShelfStatus(
+			productResult.getData().getId(),
+			shelfStatus
+		);
 		if (result.getCode() != 1) {
 			throw new BusinessException("AUDIT_FAILED", "商品状态更新失败");
 		}
@@ -405,7 +407,7 @@ public class AuditServiceImpl implements AuditService {
 
 		LambdaQueryWrapper<AuditRecord> wrapper = Wrappers.lambdaQuery();
 		wrapper.eq(AuditRecord::getBizType, bizType);
-		wrapper.eq(AuditRecord::getApplicantId, bizId);
+		wrapper.eq(AuditRecord::getBizId, bizId);
 		wrapper.orderByDesc(AuditRecord::getCreateAt);
 		wrapper.last("LIMIT 1");
 		return auditRecordMapper.selectOne(wrapper);
@@ -825,7 +827,7 @@ public class AuditServiceImpl implements AuditService {
 
 		AuditRecord auditRecord = new AuditRecord();
 		auditRecord.setBizType(dto.getBizType());
-		auditRecord.setApplicantId(dto.getApplicantId());
+		auditRecord.setBizId(dto.getApplicantId());
 		auditRecord.setStatus(AuditStatus.PENDING.getCode());
 		auditRecord.setAuditNo(generateAuditNo(dto.getBizType()));
 		auditRecord.setCreateAt(java.time.LocalDateTime.now());
@@ -894,7 +896,7 @@ public class AuditServiceImpl implements AuditService {
 		vo.setId(auditRecord.getId());
 		vo.setAuditNo(auditRecord.getAuditNo());
 		vo.setBizType(auditRecord.getBizType());
-		vo.setApplicantId(auditRecord.getApplicantId());
+		vo.setApplicantId(auditRecord.getBizId());
 		vo.setStatus(auditRecord.getStatus());
 		vo.setAuditorId(auditRecord.getAuditorId());
 		vo.setRemark(auditRecord.getRemark());

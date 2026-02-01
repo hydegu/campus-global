@@ -3,7 +3,6 @@ package com.example.merchant.biz.controller;
 import com.example.common.core.util.Result;
 import com.example.common.security.annotation.Inner;
 import com.example.merchant.api.dto.MerchantQualificationApplyDTO;
-import com.example.merchant.api.feign.RemoteMchUserService;
 import com.example.merchant.biz.service.DeliveryFeeCalculateService;
 import com.example.merchant.biz.service.MerchantService;
 import com.example.order.api.dto.DeliveryCalculateDTO;

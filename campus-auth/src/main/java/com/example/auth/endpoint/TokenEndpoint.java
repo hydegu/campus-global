@@ -3,17 +3,12 @@ package com.example.auth.endpoint;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.TemporalAccessorUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.admin.api.entity.SysOauthClientDetails;
 import com.example.admin.api.feign.RemoteClientDetailsService;
 import com.example.admin.api.vo.TokenVo;
 import com.example.auth.support.handler.AuthenticationFailureEventHandler;
 import com.example.common.core.constant.CacheConstants;
-import com.example.common.core.constant.CommonConstants;
-import com.example.common.core.constant.SecurityConstants;
-import com.example.common.core.util.RedisUtils;
 import com.example.common.core.util.Result;
 import com.example.common.core.util.SpringContextHolder;
 import com.example.common.security.annotation.Inner;
@@ -66,6 +61,50 @@ public class TokenEndpoint {
 	private final OAuth2AuthorizationService authorizationService;
 
 	private final CacheManager cacheManager;
+
+	private final RemoteClientDetailsService clientDetailsService;
+
+	/**
+	 * 授权码模式：认证页面
+	 * @param modelAndView 视图模型对象
+	 * @param error 表单登录失败处理回调的错误信息
+	 * @return 包含登录页面视图和错误信息的ModelAndView对象
+	 */
+	@GetMapping("/token/login")
+	@Operation(summary = "授权码模式：认证页面", description = "授权码模式：认证页面")
+	public ModelAndView require(ModelAndView modelAndView, @RequestParam(required = false) String error) {
+		modelAndView.setViewName("ftl/login");
+		modelAndView.addObject("error", error);
+		return modelAndView;
+	}
+
+	/**
+	 * 授权码模式：确认页面
+	 * @param principal 用户主体信息
+	 * @param modelAndView 模型和视图对象
+	 * @param clientId 客户端ID
+	 * @param scope 请求的权限范围
+	 * @param state 状态参数
+	 * @return 包含确认页面信息的ModelAndView对象
+	 */
+	@GetMapping("/oauth2/confirm_access")
+	@Operation(summary = "授权码模式：确认页面", description = "授权码模式：确认页面")
+	public ModelAndView confirm(Principal principal, ModelAndView modelAndView,
+								@RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
+								@RequestParam(OAuth2ParameterNames.SCOPE) String scope,
+								@RequestParam(OAuth2ParameterNames.STATE) String state) {
+		SysOauthClientDetails clientDetails = Optional.ofNullable(clientDetailsService.getClientDetailsById(clientId)
+				.getData())
+				.orElseThrow(() -> new OAuthClientException("clientId 不合法"));
+
+		Set<String> authorizedScopes = StringUtils.commaDelimitedListToSet(clientDetails.getScope());
+		modelAndView.addObject("clientId", clientId);
+		modelAndView.addObject("state", state);
+		modelAndView.addObject("scopeList", authorizedScopes);
+		modelAndView.addObject("principalName", principal.getName());
+		modelAndView.setViewName("ftl/confirm");
+		return modelAndView;
+	}
 
 	/**
 	 * 注销并删除令牌

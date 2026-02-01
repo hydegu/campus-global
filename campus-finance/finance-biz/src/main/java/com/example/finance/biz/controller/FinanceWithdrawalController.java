@@ -60,4 +60,12 @@ public class FinanceWithdrawalController {
         financeWithdrawalService.updateStatus(id, status);
         return Result.ok();
     }
+
+    @Inner
+    @GetMapping("/by-audit-id")
+    @Operation(summary = "根据审核记录ID查询提现记录", description = "内部调用接口")
+    public Result<FinanceWithdrawalVO> getByAuditId(@RequestParam Long auditId) {
+        FinanceWithdrawalVO vo = financeWithdrawalService.getByAuditId(auditId);
+        return Result.ok(vo);
+    }
 }

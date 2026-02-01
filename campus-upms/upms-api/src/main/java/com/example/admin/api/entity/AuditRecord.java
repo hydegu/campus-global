@@ -27,8 +27,8 @@ public class AuditRecord implements Serializable {
 	private String bizType;
 
 	@TableField("applicant_id")
-	@Schema(description = "申请人ID")
-	private Long applicantId;
+	@Schema(description = "业务实体ID（提现ID/商品ID/商家ID等）")
+	private Long bizId;
 
 	@Schema(description = "审核状态:0-待审核 1-审核通过 2-审核拒绝")
 	private Integer status;

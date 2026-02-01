@@ -1,1 +1,1 @@
-com.example.merchant.api.feign.RemoteMchUserService
+com.example.merchant.api.feign.RemoteProductService

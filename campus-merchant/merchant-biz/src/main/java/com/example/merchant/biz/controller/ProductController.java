@@ -3,6 +3,7 @@ package com.example.merchant.biz.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.util.Result;
 import com.example.common.mybatis.utils.PageResult;
+import com.example.common.security.annotation.Inner;
 import com.example.merchant.api.dto.product.*;
 import com.example.merchant.api.vo.ProductVO;
 import com.example.merchant.biz.service.ProductService;
@@ -75,12 +76,21 @@ public class ProductController {
         return Result.ok();
     }
 
+    @Inner
     @PutMapping("/{id}/shelf-status")
-    @Operation(summary = "修改商品上架状态",
-            description = "上架或下架指定的商品。shelfStatus=1上架，shelfStatus=0下架。商品上架前需要完成审核。下架后商品将无法在前端展示。")
-    public Result<Void> updateProductShelfStatus(@PathVariable Long id,
-                                                 @Validated @RequestBody ProductShelfStatusDTO statusDTO) {
+    @Operation(summary = "更新商品上架状态", description = "内部调用接口，用于审核模块更新商品上架状态")
+    public Result<Void> updateShelfStatus(@PathVariable Long id, @RequestParam Integer shelfStatus) {
+        ProductShelfStatusDTO statusDTO = new ProductShelfStatusDTO();
+        statusDTO.setShelfStatus(shelfStatus);
         productService.updateProductShelfStatus(id, statusDTO);
         return Result.ok();
+    }
+
+    @Inner
+    @GetMapping("/by-audit-id")
+    @Operation(summary = "根据审核记录ID查询商品", description = "内部调用接口")
+    public Result<ProductVO> getByAuditId(@RequestParam Long auditId) {
+        ProductVO vo = productService.getByAuditId(auditId);
+        return Result.ok(vo);
     }
 }
