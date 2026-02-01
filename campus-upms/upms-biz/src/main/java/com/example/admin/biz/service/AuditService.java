@@ -17,12 +17,23 @@ import com.example.admin.api.vo.ServiceStaffAuditVO;
 
 public interface AuditService {
 
+	/**
+	 * 通用审核方法（通过审核记录ID审核）
+	 * @param auditRecordId 审核记录ID
+	 * @param auditDTO 审核状态和意见
+	 */
+	void auditByRecordId(Long auditRecordId, AuditDTO auditDTO);
+
+	@Deprecated
 	void auditPartner(Long id, AuditDTO auditDTO);
 
+	@Deprecated
 	void auditMerchant(Long id, AuditDTO auditDTO);
 
+	@Deprecated
 	void auditStaff(Long id, AuditDTO auditDTO);
 
+	@Deprecated
 	void auditRider(Long id, AuditDTO auditDTO);
 
 	AuditRecord getAuditRecordByBizTypeAndId(String bizType, Long bizId);

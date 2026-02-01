@@ -156,6 +156,28 @@ public class FinanceWithdrawalServiceImpl extends ServiceImpl<FinanceWithdrawalM
         return buildWithdrawalVO(withdrawal);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStatus(Long id, Integer status) {
+        if (id == null) {
+            throw new BusinessException("INVALID_PARAM", "提现记录ID不能为空");
+        }
+        if (status == null) {
+            throw new BusinessException("INVALID_PARAM", "状态不能为空");
+        }
+
+        FinanceWithdrawal withdrawal = baseMapper.selectById(id);
+        if (withdrawal == null) {
+            throw new BusinessException("WITHDRAWAL_NOT_FOUND", "提现记录不存在");
+        }
+
+        withdrawal.setStatus(status);
+        withdrawal.setUpdateAt(LocalDateTime.now());
+        baseMapper.updateById(withdrawal);
+
+        log.info("提现状态更新成功，提现ID：{}，状态：{}", id, status);
+    }
+
     /**
      * 生成提现单号
      * 格式：WD + yyyyMMddHHmmss + 8位随机大写字符

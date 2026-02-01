@@ -1,7 +1,6 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.admin.api.dto.AuditDTO;
 import com.example.admin.api.dto.PartnerAuditQueryDTO;
 import com.example.admin.biz.service.AuditService;
 import com.example.admin.api.vo.PartnerAuditVO;
@@ -30,21 +29,5 @@ public class PartnerController {
 	public Result<Page<PartnerAuditVO>> listPartnerAudit(@Valid @ParameterObject PartnerAuditQueryDTO queryDTO) {
 		Page<PartnerAuditVO> page = auditService.listPartnerAudit(queryDTO);
 		return Result.ok(page);
-	}
-
-	@PostMapping("/{id}/approve")
-	@Operation(summary = "审批通过合伙人申请", description = "审核通过合伙人申请，可附带审核意见")
-	public Result<Void> approvePartner(@PathVariable Long id, @Valid @RequestBody AuditDTO auditDTO) {
-		auditDTO.setAuditStatus(1);
-		auditService.auditPartner(id, auditDTO);
-		return Result.ok();
-	}
-
-	@PostMapping("/{id}/reject")
-	@Operation(summary = "审批拒绝合伙人申请", description = "审核拒绝合伙人申请，需填写拒绝原因")
-	public Result<Void> rejectPartner(@PathVariable Long id, @Valid @RequestBody AuditDTO auditDTO) {
-		auditDTO.setAuditStatus(2);
-		auditService.auditPartner(id, auditDTO);
-		return Result.ok();
 	}
 }

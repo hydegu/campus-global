@@ -13,7 +13,7 @@ store:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://49.232.245.147:3306/seata?rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai&useSSL=false
     user: root
-    password: ${MYSQL_PASSWORD}
+    password: 119;bA9987Qq231
     min-conn: 5
     max-conn: 100
     global-table: global_table

@@ -36,6 +36,13 @@ import com.example.common.core.enums.AuditStatus;
 import com.example.common.core.enums.UserStatus;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.security.util.SecurityUtils;
+import com.example.finance.api.entity.FinanceWithdrawal;
+import com.example.finance.api.feign.RemoteFinanceWithdrawalService;
+import com.example.finance.api.mapper.FinanceWithdrawalMapper;
+import com.example.merchant.api.entity.MchProduct;
+import com.example.merchant.api.feign.RemoteProductService;
+import com.example.merchant.api.mapper.MchProductMapper;
+import com.example.common.core.util.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,11 +66,196 @@ public class AuditServiceImpl implements AuditService {
 	private final UserRiderMapper userRiderMapper;
 	private final AddressMapper addressMapper;
 	private final SysSchoolMapper sysSchoolMapper;
+	private final RemoteFinanceWithdrawalService remoteFinanceWithdrawalService;
+	private final RemoteProductService remoteProductService;
+	private final FinanceWithdrawalMapper financeWithdrawalMapper;
+	private final MchProductMapper mchProductMapper;
 
 	private static final String BIZ_TYPE_PARTNER = "PARTNER_APPLY";
 	private static final String BIZ_TYPE_MERCHANT = "MERCHANT_SETTLE";
 	private static final String BIZ_TYPE_STAFF = "STAFF_APPLY";
 	private static final String BIZ_TYPE_RIDER = "RIDER_APPLY";
+	private static final String BIZ_TYPE_WITHDRAW = "WITHDRAW";
+	private static final String BIZ_TYPE_GOODS = "GOODS";
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void auditByRecordId(Long auditRecordId, AuditDTO auditDTO) {
+		// 1. 参数校验
+		if (auditRecordId == null) {
+			throw new BusinessException("INVALID_PARAM", "审核记录ID不能为空");
+		}
+		if (auditDTO == null || auditDTO.getAuditStatus() == null) {
+			throw new BusinessException("INVALID_PARAM", "审核状态不能为空");
+		}
+		if (!Arrays.asList(AuditStatus.APPROVED.getCode(), AuditStatus.REJECTED.getCode())
+				.contains(auditDTO.getAuditStatus())) {
+			throw new BusinessException("INVALID_AUDIT_STATUS", "审核状态不合法");
+		}
+
+		// 2. 查询审核记录
+		AuditRecord auditRecord = auditRecordMapper.selectById(auditRecordId);
+		if (auditRecord == null) {
+			throw new BusinessException("AUDIT_RECORD_NOT_FOUND", "审核记录不存在");
+		}
+
+		// 3. 验证审核状态
+		if (!AuditStatus.PENDING.getCode().equals(auditRecord.getStatus())) {
+			throw new BusinessException("AUDIT_ALREADY_PROCESSED", 
+				"当前状态不允许审核，当前状态：" + AuditStatus.getText(auditRecord.getStatus()));
+		}
+
+		// 4. 获取审核人信息
+		Long auditorId = SecurityUtils.getCurrentUserId();
+		String auditorName = SecurityUtils.getCurrentUsername();
+
+		// 5. 更新审核记录
+		auditRecord.setStatus(auditDTO.getAuditStatus());
+		auditRecord.setRemark(auditDTO.getAuditOpinion());
+		auditRecord.setAuditorId(auditorId);
+		auditRecordMapper.updateById(auditRecord);
+
+		// 6. 根据业务类型执行不同的业务逻辑
+		String bizType = auditRecord.getBizType();
+		Long applicantId = auditRecord.getApplicantId();
+
+		switch (bizType) {
+			case BIZ_TYPE_MERCHANT:
+				auditMerchantByRecord(auditRecordId, applicantId, auditDTO);
+				break;
+			case BIZ_TYPE_PARTNER:
+				auditPartnerByRecord(auditRecordId, applicantId, auditDTO);
+				break;
+			case BIZ_TYPE_STAFF:
+				auditStaffByRecord(auditRecordId, applicantId, auditDTO);
+				break;
+			case BIZ_TYPE_RIDER:
+				auditRiderByRecord(auditRecordId, applicantId, auditDTO);
+				break;
+			case BIZ_TYPE_WITHDRAW:
+				auditWithdrawalByRecord(auditRecordId, auditDTO);
+				break;
+			case BIZ_TYPE_GOODS:
+				auditGoodsByRecord(auditRecordId, auditDTO);
+				break;
+			default:
+				throw new BusinessException("INVALID_BIZ_TYPE", "不支持的业务类型：" + bizType);
+		}
+
+		log.info("审核完成，审核记录ID：{}，业务类型：{}，审核状态：{}", 
+				auditRecordId, bizType, auditDTO.getAuditStatus());
+	}
+
+	/**
+	 * 审核商家入驻
+	 */
+	private void auditMerchantByRecord(Long auditRecordId, Long applicantId, AuditDTO auditDTO) {
+		LambdaQueryWrapper<UserMch> wrapper = Wrappers.lambdaQuery();
+		wrapper.eq(UserMch::getAuditId, auditRecordId);
+		UserMch merchant = userMchMapper.selectOne(wrapper);
+		if (merchant == null) {
+			throw new BusinessException("MERCHANT_NOT_FOUND", "商家不存在");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(applicantId);
+		if (baseUser != null) {
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
+			baseUserMapper.updateById(baseUser);
+		}
+	}
+
+	/**
+	 * 审核合伙人申请
+	 */
+	private void auditPartnerByRecord(Long auditRecordId, Long applicantId, AuditDTO auditDTO) {
+		LambdaQueryWrapper<UserPartner> wrapper = Wrappers.lambdaQuery();
+		wrapper.eq(UserPartner::getAuditId, auditRecordId);
+		UserPartner partner = userPartnerMapper.selectOne(wrapper);
+		if (partner == null) {
+			throw new BusinessException("PARTNER_NOT_FOUND", "合伙人不存在");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(applicantId);
+		if (baseUser != null) {
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
+			baseUserMapper.updateById(baseUser);
+		}
+	}
+
+	/**
+	 * 审核服务人员申请
+	 */
+	private void auditStaffByRecord(Long auditRecordId, Long applicantId, AuditDTO auditDTO) {
+		LambdaQueryWrapper<UserApp> wrapper = Wrappers.lambdaQuery();
+		wrapper.eq(UserApp::getAuditId, auditRecordId);
+		UserApp staff = userAppMapper.selectOne(wrapper);
+		if (staff == null) {
+			throw new BusinessException("STAFF_NOT_FOUND", "服务人员不存在");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(applicantId);
+		if (baseUser != null) {
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
+			baseUserMapper.updateById(baseUser);
+		}
+	}
+
+	/**
+	 * 审核骑手申请
+	 */
+	private void auditRiderByRecord(Long auditRecordId, Long applicantId, AuditDTO auditDTO) {
+		LambdaQueryWrapper<UserRider> wrapper = Wrappers.lambdaQuery();
+		wrapper.eq(UserRider::getAuditId, auditRecordId);
+		UserRider rider = userRiderMapper.selectOne(wrapper);
+		if (rider == null) {
+			throw new BusinessException("RIDER_NOT_FOUND", "骑手不存在");
+		}
+
+		BaseUser baseUser = baseUserMapper.selectById(applicantId);
+		if (baseUser != null) {
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
+			baseUserMapper.updateById(baseUser);
+		}
+	}
+
+	/**
+	 * 审核提现申请
+	 */
+	private void auditWithdrawalByRecord(Long auditRecordId, AuditDTO auditDTO) {
+		LambdaQueryWrapper<FinanceWithdrawal> wrapper = Wrappers.lambdaQuery();
+		wrapper.eq(FinanceWithdrawal::getAuditId, auditRecordId);
+		FinanceWithdrawal withdrawal = financeWithdrawalMapper.selectOne(wrapper);
+		if (withdrawal == null) {
+			throw new BusinessException("WITHDRAWAL_NOT_FOUND", "提现记录不存在");
+		}
+
+		Result<Void> result = remoteFinanceWithdrawalService.updateStatus(withdrawal.getId(), auditDTO.getAuditStatus());
+		if (result.getCode() != 1) {
+			throw new BusinessException("AUDIT_FAILED", "提现状态更新失败");
+		}
+	}
+
+	/**
+	 * 审核商品上架
+	 */
+	private void auditGoodsByRecord(Long auditRecordId, AuditDTO auditDTO) {
+		LambdaQueryWrapper<MchProduct> wrapper = Wrappers.lambdaQuery();
+		wrapper.eq(MchProduct::getAuditId, auditRecordId);
+		MchProduct product = mchProductMapper.selectOne(wrapper);
+		if (product == null) {
+			throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
+		}
+
+		int shelfStatus = auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 1 : 0;
+		Result<Void> result = remoteProductService.updateShelfStatus(product.getId(), shelfStatus);
+		if (result.getCode() != 1) {
+			throw new BusinessException("AUDIT_FAILED", "商品状态更新失败");
+		}
+	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)

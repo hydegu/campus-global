@@ -40,4 +40,12 @@ public interface FinanceWithdrawalService extends IService<FinanceWithdrawal> {
      * @return 提现记录详情VO
      */
     FinanceWithdrawalVO getDetail(Long id);
+
+    /**
+     * 更新提现状态
+     *
+     * @param id 提现记录ID
+     * @param status 状态：1-审核通过，2-审核拒绝
+     */
+    void updateStatus(Long id, Integer status);
 }

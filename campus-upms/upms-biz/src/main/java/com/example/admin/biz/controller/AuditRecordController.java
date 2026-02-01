@@ -51,4 +51,14 @@ public class AuditRecordController {
 		Page<AuditRecordVO> page = auditService.listAuditRecords(queryDTO);
 		return Result.ok(page);
 	}
+
+	@PutMapping("/{id}/audit")
+	@Operation(summary = "审核", description = "通过审核记录ID审核，支持所有业务类型（商家入驻、合伙人申请、服务人员申请、骑手申请、提现、商品上架）。需要权限：audit:record:audit")
+	public Result<Void> auditByRecordId(
+			@Parameter(description = "审核记录ID", required = true)
+			@PathVariable Long id,
+			@Valid @RequestBody com.example.admin.api.dto.AuditDTO auditDTO) {
+		auditService.auditByRecordId(id, auditDTO);
+		return Result.ok();
+	}
 }

@@ -28,5 +28,15 @@
             <groupId>com.example</groupId>
             <artifactId>common-mybatis</artifactId>
         </dependency>
+        <!--finance-api 用于远程调用财务服务-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>finance-api</artifactId>
+        </dependency>
+        <!--merchant-api 用于远程调用商家服务-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>merchant-api</artifactId>
+        </dependency>
     </dependencies>
 </project>

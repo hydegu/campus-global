@@ -1,7 +1,6 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.admin.api.dto.AuditDTO;
 import com.example.admin.api.dto.ServiceStaffAuditQueryDTO;
 import com.example.admin.biz.service.AuditService;
 import com.example.admin.api.vo.ServiceStaffAuditVO;
@@ -30,21 +29,5 @@ public class StaffAuditController {
 	public Result<Page<ServiceStaffAuditVO>> listServiceStaffAudit(@Valid @ParameterObject ServiceStaffAuditQueryDTO queryDTO) {
 		Page<ServiceStaffAuditVO> page = auditService.listServiceStaffAudit(queryDTO);
 		return Result.ok(page);
-	}
-
-	@PostMapping("/{id}/approve")
-	@Operation(summary = "审核通过服务人员申请", description = "审核通过指定的服务人员申请。可选提供审核意见")
-	public Result<Void> approveServiceStaff(@PathVariable Long id, @Valid @RequestBody AuditDTO auditDTO) {
-		auditDTO.setAuditStatus(1);
-		auditService.auditStaff(id, auditDTO);
-		return Result.ok();
-	}
-
-	@PostMapping("/{id}/reject")
-	@Operation(summary = "审核拒绝服务人员申请", description = "审核拒绝指定的服务人员申请。可选提供审核意见")
-	public Result<Void> rejectServiceStaff(@PathVariable Long id, @Valid @RequestBody AuditDTO auditDTO) {
-		auditDTO.setAuditStatus(2);
-		auditService.auditStaff(id, auditDTO);
-		return Result.ok();
 	}
 }

@@ -2,6 +2,7 @@ package com.example.finance.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.util.Result;
+import com.example.common.security.annotation.Inner;
 import com.example.finance.api.dto.FinanceWithdrawalApplyDTO;
 import com.example.finance.api.dto.FinanceWithdrawalAuditDTO;
 import com.example.finance.api.dto.FinanceWithdrawalQueryDTO;
@@ -50,5 +51,13 @@ public class FinanceWithdrawalController {
     public Result<FinanceWithdrawalVO> getWithdrawalDetail(@PathVariable Long id) {
         FinanceWithdrawalVO vo = financeWithdrawalService.getDetail(id);
         return Result.ok(vo);
+    }
+
+    @Inner
+    @PutMapping("/{id}/status")
+    @Operation(summary = "更新提现状态", description = "更新提现记录状态（内部调用）")
+    public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
+        financeWithdrawalService.updateStatus(id, status);
+        return Result.ok();
     }
 }

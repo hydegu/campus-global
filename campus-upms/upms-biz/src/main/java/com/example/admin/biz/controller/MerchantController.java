@@ -1,7 +1,6 @@
 package com.example.admin.biz.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.admin.api.dto.AuditDTO;
 import com.example.admin.api.dto.MerchantSettleInQueryDTO;
 import com.example.admin.api.vo.MerchantSettleInVO;
 import com.example.admin.biz.service.AuditService;
@@ -30,12 +29,5 @@ public class MerchantController {
 	public Result<Page<MerchantSettleInVO>> listMerchantSettleIn(@Valid @ParameterObject MerchantSettleInQueryDTO queryDTO) {
 		Page<MerchantSettleInVO> page = auditService.listMerchantSettleIn(queryDTO);
 		return Result.ok(page);
-	}
-
-	@PostMapping("/{id}/audit")
-	@Operation(summary = "审核商家入驻申请", description = "审核指定的商家入驻申请。必填字段：审核结果（1-通过，2-拒绝）；可选字段：审核意见（最多500字符）。业务逻辑：1. 验证申请是否存在且关联了审核记录 2. 状态校验：只能审核待审核状态（audit_status = 0）的申请 3. 获取当前登录用户作为审核人（使用SecurityUtils） 4. 更新审核记录：设置审核状态、审核意见、审核时间、审核人信息 5. 更新商家状态：- 审核通过（audit_status = 1）→ merchant.status = 1（启用） - 审核拒绝（audit_status = 2）→ merchant.status = 0（禁用）")
-	public Result<Void> auditMerchant(@PathVariable Long id, @Valid @RequestBody AuditDTO auditDTO) {
-		auditService.auditMerchant(id, auditDTO);
-		return Result.ok();
 	}
 }
