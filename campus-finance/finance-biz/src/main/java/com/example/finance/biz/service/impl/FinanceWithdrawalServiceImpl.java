@@ -107,37 +107,6 @@ public class FinanceWithdrawalServiceImpl extends ServiceImpl<FinanceWithdrawalM
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void auditWithdrawal(FinanceWithdrawalAuditDTO auditDTO) {
-        // 1. 查询提现申请
-        FinanceWithdrawal withdrawal = baseMapper.selectById(auditDTO.getWithdrawalId());
-        if (withdrawal == null) {
-            throw new BusinessException("WITHDRAWAL_NOT_FOUND", "提现记录不存在");
-        }
-
-        // 2. 校验状态
-        if (!WithdrawalStatusEnum.PENDING.getCode().equals(withdrawal.getStatus())) {
-            throw new BusinessException("INVALID_STATUS", "提现记录状态不允许审核");
-        }
-
-        // 3. 更新状态
-        withdrawal.setStatus(auditDTO.getStatus());
-        withdrawal.setUpdateAt(LocalDateTime.now());
-        baseMapper.updateById(withdrawal);
-
-        // 4. 如果审核通过，更新流水状态
-        if (WithdrawalStatusEnum.APPROVED.getCode().equals(auditDTO.getStatus())) {
-            // 审核通过，等待打款
-            log.info("提现审核通过，提现ID：{}，提现单号：{}", withdrawal.getId(), withdrawal.getWithdrawalNo());
-        } else {
-            // 审核拒绝，退回余额
-            // TODO: 退回用户余额
-            log.info("提现审核拒绝，提现ID：{}，提现单号：{}，原因：{}",
-                    withdrawal.getId(), withdrawal.getWithdrawalNo(), auditDTO.getAuditRemark());
-        }
-    }
-
-    @Override
     public Page<FinanceWithdrawalVO> listByQuery(FinanceWithdrawalQueryDTO queryDTO) {
         // 1. 构建查询条件
         LambdaQueryWrapper<FinanceWithdrawal> wrapper = Wrappers.lambdaQuery();

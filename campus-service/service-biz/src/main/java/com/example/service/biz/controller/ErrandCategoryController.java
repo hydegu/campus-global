@@ -71,13 +71,6 @@ public class ErrandCategoryController {
         return Result.ok();
     }
 
-    @PutMapping("/batch")
-    @Operation(summary = "批量更新服务分类", description = "批量更新服务分类信息。所有更新将作为一个事务执行，全部成功或全部失败。")
-    public Result<Void> batchUpdateCategories(@Valid @RequestBody ErrandCategoryBatchUpdateDTO dto) {
-        errandCategoryService.batchUpdateCategories(dto);
-        return Result.ok();
-    }
-
     @GetMapping("/tree")
     @Operation(summary = "获取完整服务分类树", description = "返回所有层级的完整服务分类树形结构，包含所有子分类。支持按状态筛选。")
     public Result<List<ErrandCategoryVO>> getCategoryTree() {

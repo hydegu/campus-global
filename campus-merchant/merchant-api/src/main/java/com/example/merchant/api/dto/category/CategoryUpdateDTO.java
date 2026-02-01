@@ -10,10 +10,6 @@ import lombok.Data;
 @Schema(name = "CategoryUpdateDTO", description = "更新商品分类请求DTO")
 public class CategoryUpdateDTO {
 
-    @Schema(description = "分类ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "分类ID不能为空")
-    private Long id;
-
     @Schema(description = "分类名称", example = "食品饮料")
     private String categoryName;
 

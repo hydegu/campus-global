@@ -59,13 +59,6 @@ public interface ProductService extends IService<MchProduct> {
     void batchAddProducts(ProductBatchAddDTO dto);
 
     /**
-     * 批量更新商品
-     *
-     * @param dto 批量更新DTO
-     */
-    void batchUpdateProducts(ProductBatchUpdateDTO dto);
-
-    /**
      * 修改商品上架状态
      *
      * @param id        商品ID

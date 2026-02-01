@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+
 @Data
 @Schema(name = "ErrandCategoryAddDTO", description = "新增服务分类请求DTO")
 public class ErrandCategoryAddDTO {
@@ -40,5 +42,5 @@ public class ErrandCategoryAddDTO {
     @Schema(description = "服务分佣比例（0-100），10代表10%", example = "15")
     @Min(value = 0, message = "分佣比例不能小于0")
     @Max(value = 100, message = "分佣比例不能大于100")
-    private Integer commissionRate;
+    private BigDecimal commissionRate;
 }

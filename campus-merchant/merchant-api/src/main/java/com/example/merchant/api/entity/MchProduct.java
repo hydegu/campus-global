@@ -88,6 +88,11 @@ public class MchProduct implements Serializable {
     private Integer specType;
 
     /**
+     * 排序
+     */
+    private Integer sortOrder;
+
+    /**
      * 上架状态:0-未上架,1-已上架
      */
     private Integer shelfStatus;

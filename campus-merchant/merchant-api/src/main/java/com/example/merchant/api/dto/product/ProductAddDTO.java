@@ -85,4 +85,9 @@ public class ProductAddDTO {
     @Min(value = 0, message = "上架状态必须是0或1")
     @Max(value = 1, message = "上架状态必须是0或1")
     private Integer shelfStatus;
+
+    // ========== 排序 ==========
+    @Schema(description = "排序（数字越小越靠前）", example = "0")
+    @Min(value = 0, message = "排序值不能小于0")
+    private Integer sortOrder;
 }

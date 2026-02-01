@@ -87,4 +87,8 @@ public class ProductVO implements Serializable {
 
     @Schema(description = "审核记录ID", example = "1")
     private Long auditId;
+
+    // ========== 排序 ==========
+    @Schema(description = "排序（数字越小越靠前）", example = "0")
+    private Integer sortOrder;
 }

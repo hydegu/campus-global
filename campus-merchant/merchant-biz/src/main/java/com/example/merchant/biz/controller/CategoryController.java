@@ -79,14 +79,6 @@ public class CategoryController {
         return Result.ok();
     }
 
-    @PutMapping("/batch")
-    @Operation(summary = "批量更新商品分类",
-            description = "批量更新商品分类信息。所有更新将作为一个事务执行，全部成功或全部失败。")
-    public Result<Void> batchUpdateCategories(@Validated @RequestBody CategoryBatchUpdateDTO dto) {
-        categoryService.batchUpdateCategories(dto);
-        return Result.ok();
-    }
-
     @GetMapping("/tree")
     @Operation(summary = "获取完整分类树",
             description = "返回所有层级的完整分类树形结构，包含所有子分类。支持按isGlobal和mchId筛选全局分类或商家自定义分类。")

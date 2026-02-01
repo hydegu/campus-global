@@ -155,6 +155,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
         product.setMerchantProfit(dto.getMerchantProfit());
         product.setSpecType(dto.getSpecType());
         product.setShelfStatus(dto.getShelfStatus() != null ? dto.getShelfStatus() : 0);
+        product.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
         product.setCreateAt(LocalDateTime.now());
         product.setUpdateAt(LocalDateTime.now());
 
@@ -266,6 +267,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
         }
         if (dto.getShelfStatus() != null) {
             product.setShelfStatus(dto.getShelfStatus());
+        }
+        if (dto.getSortOrder() != null) {
+            product.setSortOrder(dto.getSortOrder());
         }
         product.setUpdateAt(LocalDateTime.now());
         baseMapper.updateById(product);
@@ -419,25 +423,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void batchUpdateProducts(ProductBatchUpdateDTO dto) {
-        log.info("批量更新商品，参数：{}", dto);
-
-        if (dto == null || dto.getProducts() == null || dto.getProducts().isEmpty()) {
-            throw new BusinessException("INVALID_PARAM", "批量更新商品参数不能为空");
-        }
-
-        for (ProductUpdateDTO productDTO : dto.getProducts()) {
-            if (productDTO.getId() == null) {
-                throw new BusinessException("INVALID_PARAM", "批量更新时商品ID不能为空");
-            }
-            updateProduct(productDTO.getId(), productDTO);
-        }
-
-        log.info("批量更新商品成功，共{}个商品", dto.getProducts().size());
-    }
-
-    @Override
     public void updateProductShelfStatus(Long id, ProductShelfStatusDTO statusDTO) {
         log.info("修改商品上架状态，参数：id={}, statusDTO={}", id, statusDTO);
 
@@ -576,6 +561,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
                 case "shelf_status":
                     wrapper.orderBy(true, isAsc, MchProduct::getShelfStatus);
                     break;
+                case "sortorder":
+                case "sort_order":
+                    wrapper.orderBy(true, isAsc, MchProduct::getSortOrder);
+                    break;
                 case "createat":
                 case "create_at":
                     if (isAsc) {
@@ -683,6 +672,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, MchProduct>
         vo.setSpecType(product.getSpecType());
         vo.setShelfStatus(product.getShelfStatus());
         vo.setAuditId(product.getAuditId());
+        vo.setSortOrder(product.getSortOrder());
 
         // 填充分类信息
         List<Long> categoryIds = productCategoryMap.getOrDefault(product.getId(), Collections.emptyList());

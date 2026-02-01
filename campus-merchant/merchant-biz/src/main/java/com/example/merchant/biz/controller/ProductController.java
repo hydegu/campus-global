@@ -75,14 +75,6 @@ public class ProductController {
         return Result.ok();
     }
 
-    @PutMapping("/batch")
-    @Operation(summary = "批量更新商品",
-            description = "批量更新商品信息。所有更新将作为一个事务执行，全部成功或全部失败。")
-    public Result<Void> batchUpdateProducts(@Validated @RequestBody ProductBatchUpdateDTO dto) {
-        productService.batchUpdateProducts(dto);
-        return Result.ok();
-    }
-
     @PutMapping("/{id}/shelf-status")
     @Operation(summary = "修改商品上架状态",
             description = "上架或下架指定的商品。shelfStatus=1上架，shelfStatus=0下架。商品上架前需要完成审核。下架后商品将无法在前端展示。")

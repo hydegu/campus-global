@@ -61,13 +61,6 @@ public interface CategoryService extends IService<MchCategory> {
     void batchAddCategories(CategoryBatchAddDTO dto);
 
     /**
-     * 批量更新商品分类
-     *
-     * @param dto 批量更新DTO
-     */
-    void batchUpdateCategories(CategoryBatchUpdateDTO dto);
-
-    /**
      * 获取完整分类树
      *
      * @param isGlobal 是否全局分类：0-全局分类，1-商家自定义分类

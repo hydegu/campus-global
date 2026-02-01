@@ -23,12 +23,7 @@ public interface FinanceWithdrawalService extends IService<FinanceWithdrawal> {
      */
     Long applyWithdrawal(FinanceWithdrawalApplyDTO applyDTO);
 
-    /**
-     * 审核提现
-     *
-     * @param auditDTO 提现审核请求
-     */
-    void auditWithdrawal(FinanceWithdrawalAuditDTO auditDTO);
+
 
     /**
      * 按条件查询提现记录

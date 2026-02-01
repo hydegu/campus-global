@@ -314,21 +314,6 @@ public class ErrandCategoryServiceImpl extends ServiceImpl<ErrandCategoryMapper,
 	}
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void batchUpdateCategories(ErrandCategoryBatchUpdateDTO dto) {
-		if (dto == null || dto.getCategories() == null || dto.getCategories().isEmpty()) {
-			throw new BusinessException("INVALID_PARAM", "批量更新数据不能为空");
-		}
-
-		for (ErrandCategoryUpdateDTO categoryDto : dto.getCategories()) {
-			if (categoryDto.getId() == null) {
-				throw new BusinessException("INVALID_PARAM", "批量更新数据中包含缺失ID的分类");
-			}
-			updateCategory(categoryDto.getId(), categoryDto);
-		}
-	}
-
-    @Override
     public List<ErrandCategoryVO> getCategoryTree() {
 		// 查询所有未删除的分类
 		LambdaQueryWrapper<ErrandCategory> wrapper = Wrappers.lambdaQuery();

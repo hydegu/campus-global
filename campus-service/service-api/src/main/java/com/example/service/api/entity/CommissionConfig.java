@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Data;
 
@@ -34,7 +35,7 @@ public class CommissionConfig implements Serializable {
     /**
      * 分佣比例，10代表10%
      */
-    private Integer commissionRate;
+    private BigDecimal commissionRate;
 
     /**
      * 

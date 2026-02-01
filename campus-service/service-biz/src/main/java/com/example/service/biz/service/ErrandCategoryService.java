@@ -44,11 +44,6 @@ public interface ErrandCategoryService extends IService<ErrandCategory> {
     void batchAddCategories(ErrandCategoryBatchAddDTO dto);
 
     /**
-     * 批量更新服务分类
-     */
-    void batchUpdateCategories(ErrandCategoryBatchUpdateDTO dto);
-
-    /**
      * 获取完整服务分类树
      */
     List<ErrandCategoryVO> getCategoryTree();

@@ -310,25 +310,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, MchCategory
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void batchUpdateCategories(CategoryBatchUpdateDTO dto) {
-        log.info("批量更新商品分类，参数：{}", dto);
-
-        if (dto == null || dto.getCategories() == null || dto.getCategories().isEmpty()) {
-            throw new BusinessException("INVALID_PARAM", "批量更新分类参数不能为空");
-        }
-
-        for (CategoryUpdateDTO categoryDTO : dto.getCategories()) {
-            if (categoryDTO.getId() == null) {
-                throw new BusinessException("INVALID_PARAM", "批量更新时分类ID不能为空");
-            }
-            updateCategory(categoryDTO.getId(), categoryDTO);
-        }
-
-        log.info("批量更新商品分类成功，共{}个分类", dto.getCategories().size());
-    }
-
-    @Override
     public List<CategoryVO> getCategoryTree(Integer isGlobal, Long mchId) {
         log.info("获取完整分类树，参数：isGlobal={}, mchId={}", isGlobal, mchId);
 

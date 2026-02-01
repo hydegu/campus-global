@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -27,7 +28,7 @@ public class CommissionInfo implements Serializable {
     private Integer configType;
 
     @Schema(description = "分佣比例，10代表10%", example = "15")
-    private Integer commissionRate;
+    private BigDecimal commissionRate;
 
     @Schema(description = "状态：0-禁用，1-启用", example = "1")
     private Integer status;

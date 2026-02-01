@@ -16,11 +16,6 @@ import java.util.List;
 @Schema(name = "ProductUpdateDTO", description = "更新商品请求DTO")
 public class ProductUpdateDTO {
 
-    // ========== 基本标识 ==========
-    @Schema(description = "商品ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "商品ID不能为空")
-    private Long id;
-
     // ========== 基本信息 ==========
     @Schema(description = "商品名称", example = "珍珠奶茶")
     private String productName;
@@ -78,4 +73,9 @@ public class ProductUpdateDTO {
     @Min(value = 0, message = "上架状态必须是0或1")
     @Max(value = 1, message = "上架状态必须是0或1")
     private Integer shelfStatus;
+
+    // ========== 排序 ==========
+    @Schema(description = "排序（数字越小越靠前）", example = "0")
+    @Min(value = 0, message = "排序值不能小于0")
+    private Integer sortOrder;
 }

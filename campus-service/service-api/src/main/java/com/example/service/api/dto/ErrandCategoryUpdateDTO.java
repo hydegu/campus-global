@@ -8,13 +8,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+
 @Data
 @Schema(name = "ErrandCategoryUpdateDTO", description = "更新服务分类请求DTO")
 public class ErrandCategoryUpdateDTO {
-
-    @Schema(description = "主键ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "主键ID不能为空")
-    private Long id;
 
     @Schema(description = "父级ID（0为顶级分类）", example = "0")
     private Long parentId;
@@ -39,5 +37,5 @@ public class ErrandCategoryUpdateDTO {
     @Schema(description = "服务分佣比例（0-100），10代表10%", example = "15")
     @Min(value = 0, message = "分佣比例不能小于0")
     @Max(value = 100, message = "分佣比例不能大于100")
-    private Integer commissionRate;
+    private BigDecimal commissionRate;
 }

@@ -34,12 +34,6 @@ public class FinanceWithdrawalController {
         return Result.ok(withdrawalId);
     }
 
-    @PostMapping("/audit")
-    @Operation(summary = "提现审核", description = "管理员审核提现申请（管理端）")
-    public Result<Void> auditWithdrawal(@Valid @RequestBody FinanceWithdrawalAuditDTO auditDTO) {
-        financeWithdrawalService.auditWithdrawal(auditDTO);
-        return Result.ok();
-    }
 
     @GetMapping("/list")
     @Operation(summary = "查询提现记录", description = "根据查询条件分页查询提现记录")
