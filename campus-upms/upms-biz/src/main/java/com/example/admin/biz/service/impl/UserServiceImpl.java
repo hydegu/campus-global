@@ -28,6 +28,7 @@ import com.example.common.core.enums.Gender;
 import com.example.common.core.enums.UserType;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.file.core.FileTemplate;
+import com.example.common.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -1906,5 +1907,14 @@ public class UserServiceImpl implements UserService {
 		} else {
 			throw new BusinessException("INVALID_USER_TYPE", "无效的用户类型");
 		}
+	}
+
+	@Override
+	public UserInfo getCurrentUserInfo() {
+		long userId = SecurityUtils.getCurrentUserId();
+		if (userId == 0) {
+			return null;
+		}
+		return getUserInfoById(userId);
 	}
 }

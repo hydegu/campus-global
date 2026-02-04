@@ -9,6 +9,7 @@ import com.example.admin.api.feign.RemoteUserService;
 import com.example.common.core.constant.CommonConstants;
 import com.example.common.core.exception.BusinessException;
 import com.example.common.core.util.Result;
+import com.example.common.security.util.SecurityUtils;
 import com.example.finance.api.dto.FinanceTransactionAddDTO;
 import com.example.finance.api.dto.FinanceWithdrawalApplyDTO;
 import com.example.finance.api.dto.FinanceWithdrawalAuditDTO;
@@ -50,8 +51,8 @@ public class FinanceWithdrawalServiceImpl extends ServiceImpl<FinanceWithdrawalM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long applyWithdrawal(FinanceWithdrawalApplyDTO applyDTO) {
-        // 1. 获取当前用户ID（从SecurityContext，这里暂时使用固定值）
-        Long currentUserId = 1001L; // TODO: 从SecurityContext获取当前用户ID
+        // 1. 获取当前用户ID
+        Long currentUserId = SecurityUtils.getCurrentUserId();
 
         // 2. 查询用户信息
         Result<UserInfo> userResult = remoteUserService.getUserInfoById(currentUserId);

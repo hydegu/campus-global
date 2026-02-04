@@ -104,4 +104,10 @@ public interface UserService {
 	 * @param dto 用户余额更新DTO
 	 */
 	void updateUserBalance(MerchantBalanceUpdateDTO dto);
+
+	/**
+	 * 获取当前登录用户信息
+	 * @return 当前用户信息
+	 */
+	UserInfo getCurrentUserInfo();
 }

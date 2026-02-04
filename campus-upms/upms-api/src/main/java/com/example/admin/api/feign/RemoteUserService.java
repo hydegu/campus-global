@@ -37,6 +37,14 @@ public interface RemoteUserService {
 	Result<UserInfo> getUserInfoById(@PathVariable("id") Long id);
 
 	/**
+	 * 获取当前登录用户信息
+	 * @return Result<UserInfo> 当前用户信息响应对象
+	 */
+	@NoToken
+	@GetMapping("/user/current/info")
+	Result<UserInfo> getCurrentUserInfo();
+
+	/**
 	 * 更新用户余额或累计总收入（支持商家/骑手/合伙人）
 	 * @param dto 用户余额更新DTO
 	 * @return 操作结果

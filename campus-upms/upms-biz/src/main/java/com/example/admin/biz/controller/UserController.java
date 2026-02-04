@@ -49,6 +49,16 @@ public class UserController {
 		return Result.ok(userInfo);
 	}
 
+	@GetMapping("/current/info")
+	@Operation(summary = "查看当前用户信息", description = "获取当前登录用户的详细信息")
+	public Result<UserInfo> getCurrentUserInfo() {
+		UserInfo userInfo = userService.getCurrentUserInfo();
+		if (userInfo == null) {
+			return Result.failed("用户不存在或未登录");
+		}
+		return Result.ok(userInfo);
+	}
+
 	@GetMapping("/app-user/list")
 	@Operation(summary = "分页查询C端用户列表", description = "根据查询条件分页查询C端用户列表，支持按用户名、手机号、状态、学校、注册时间等条件筛选")
 	public Result<Page<UserAppListVO>> listAppUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
