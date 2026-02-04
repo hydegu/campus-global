@@ -94,6 +94,12 @@ public class SysMenu extends Model<SysMenu> {
 	private String component;
 
 	/**
+	 * 重定向路径
+	 */
+	@Schema(description = "重定向路径")
+	private String redirect;
+
+	/**
 	 * 更新时间
 	 */
 	@Schema(description = "更新时间")

@@ -102,6 +102,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 		menu.setPermission(dto.getPerms());
 		menu.setComponent(dto.getComponent());
 		menu.setPath(dto.getPath());
+		menu.setRedirect(dto.getRedirect());
 		menu.setStatus(dto.getStatus());
 		save(menu);
 	}
@@ -145,6 +146,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 		if (dto.getPath() != null) {
 			menu.setPath(dto.getPath());
 		}
+		if (dto.getRedirect() != null) {
+			menu.setRedirect(dto.getRedirect());
+		}
 		if (dto.getStatus() != null) {
 			menu.setStatus(dto.getStatus());
 		}
@@ -183,15 +187,25 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 		vo.setId(menu.getId());
 		vo.setParentId(menu.getParentId());
 		vo.setMenuType(Integer.parseInt(menu.getMenuType()));
-		vo.setMenuIcon(menu.getMenuIcon());
-		vo.setMenuName(menu.getMenuName());
-		vo.setSortOrder(menu.getSortOrder());
-		vo.setIsFrame(Integer.parseInt(menu.getIsFrame()));
-		vo.setPerms(menu.getPermission());
-		vo.setComponent(menu.getComponent());
 		vo.setPath(menu.getPath());
-		vo.setStatus(menu.getStatus());
-		vo.setCreatedAt(menu.getCreateAt());
+		vo.setComponent(menu.getComponent());
+		vo.setName(menu.getMenuName());
+		vo.setRedirect(menu.getRedirect());
+
+		// 构建meta对象
+		SysMenuVO.MenuMeta meta = new SysMenuVO.MenuMeta();
+		meta.setTitle(menu.getMenuName());
+		meta.setIcon(menu.getMenuIcon());
+		meta.setIsIframe(Integer.parseInt(menu.getIsFrame()) == 1);
+
+		// 将permission转换为数组
+		ArrayList<String> roles = new ArrayList<>();
+		if (menu.getPermission() != null && !menu.getPermission().isEmpty()) {
+			roles.add(menu.getPermission());
+		}
+		meta.setRoles(roles);
+
+		vo.setMeta(meta);
 		return vo;
 	}
 }

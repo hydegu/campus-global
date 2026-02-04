@@ -49,12 +49,12 @@ public interface CommonConstants {
 	/**
 	 * 成功标记
 	 */
-	Integer SUCCESS = 1;
+	Integer SUCCESS = 0;
 
 	/**
 	 * 失败标记
 	 */
-	Integer FAIL = 0;
+	Integer FAIL = 1;
 
 	/**
 	 * 当前页

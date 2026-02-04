@@ -41,6 +41,9 @@ public class SysMenuAddDTO {
 	@Schema(description = "访问路径", example = "/system/user")
 	private String path;
 
+	@Schema(description = "重定向路径", example = "/system/user/sys-user")
+	private String redirect;
+
 	@Schema(description = "状态:0-隐藏,1-显示", example = "1")
 	private Integer status;
 }

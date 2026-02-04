@@ -245,7 +245,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 			.map(menu -> {
 				SysMenuVO vo = new SysMenuVO();
 				BeanUtils.copyProperties(menu, vo);
-				vo.setCreatedAt(menu.getCreateAt());
 				return vo;
 			})
 			.collect(Collectors.toList());
