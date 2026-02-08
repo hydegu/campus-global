@@ -114,9 +114,11 @@ public class FileServiceImpl extends ServiceImpl<AppFileMapper, AppFile> impleme
 
 		// 6. 构建返回结果
 		String fileUrl = buildFileUrl(bucketName, filePath);
+		String relativePath = buildRelativePath(bucketName, filePath);
 		FileUploadVO uploadVO = FileUploadVO.builder()
 			.fileId(appFile.getId())
 			.fileUrl(fileUrl)
+			.relativePath(relativePath)
 			.fileName(fileName)
 			.originalName(originalFilename)
 			.fileSize(file.getSize())
@@ -256,12 +258,14 @@ public class FileServiceImpl extends ServiceImpl<AppFileMapper, AppFile> impleme
 
 		// 3. 构建返回结果
 		String fileUrl = buildFileUrl(appFile.getBucketName(), appFile.getFilePath());
+		String relativePath = buildRelativePath(appFile.getBucketName(), appFile.getFilePath());
 		FileInfoVO fileInfoVO = FileInfoVO.builder()
 			.fileId(appFile.getId())
 			.fileName(appFile.getFileName())
 			.originalName(appFile.getOriginalName())
 			.filePath(appFile.getFilePath())
 			.fileUrl(fileUrl)
+			.relativePath(relativePath)
 			.fileSize(appFile.getFileSize())
 			.fileType(appFile.getFileType())
 			.fileExtension(appFile.getFileExtension())
@@ -313,11 +317,13 @@ public class FileServiceImpl extends ServiceImpl<AppFileMapper, AppFile> impleme
 		List<FileListVO> voList = new ArrayList<>();
 		for (AppFile appFile : pageResult.getRecords()) {
 			String fileUrl = buildFileUrl(appFile.getBucketName(), appFile.getFilePath());
+			String relativePath = buildRelativePath(appFile.getBucketName(), appFile.getFilePath());
 			FileListVO vo = FileListVO.builder()
 				.fileId(appFile.getId())
 				.fileName(appFile.getFileName())
 				.originalName(appFile.getOriginalName())
 				.fileUrl(fileUrl)
+				.relativePath(relativePath)
 				.fileSize(appFile.getFileSize())
 				.fileType(appFile.getFileType())
 				.businessType(appFile.getBusinessType())
@@ -440,6 +446,13 @@ public class FileServiceImpl extends ServiceImpl<AppFileMapper, AppFile> impleme
 	 */
 	private String buildFileUrl(String bucketName, String filePath) {
 		return fileUrlPrefix + "/" + bucketName + "/" + filePath;
+	}
+
+	/**
+	 * 构建文件相对路径
+	 */
+	private String buildRelativePath(String bucketName, String filePath) {
+		return "/files/" + bucketName + "/" + filePath;
 	}
 
 }

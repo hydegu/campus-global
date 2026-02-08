@@ -388,7 +388,6 @@ CREATE TABLE `sys_menu`  (
   `sort_order` int NOT NULL DEFAULT 0 COMMENT '排序',
   `permission` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '权限标识',
   `is_frame` tinyint NULL DEFAULT 1 COMMENT '0:是外链 1:站内路由',
-  `component` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '组件路径',
   `path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '访问路径',
   `redirect` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '重定向路径',
   `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态:0-隐藏,1-显示',
@@ -403,40 +402,40 @@ CREATE TABLE `sys_menu`  (
 -- ----------------------------
 -- Records of sys_menu
 -- ----------------------------
-INSERT INTO `sys_menu` VALUES (1, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user/index', '/system/user', 1, '2026-01-17 04:54:42', '2026-01-17 07:14:18', NULL);
+INSERT INTO `sys_menu` VALUES (1, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user', 1, '2026-01-17 04:54:42', '2026-01-17 07:14:18', NULL);
 INSERT INTO `sys_menu` VALUES (2, 0, 0, 'el-icon-s-custom', '角色管理', 2, NULL, 1, NULL, '/system/role', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
 INSERT INTO `sys_menu` VALUES (3, 0, 0, 'el-icon-menu', '菜单管理', 3, NULL, 1, NULL, '/system/menu', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
 INSERT INTO `sys_menu` VALUES (4, 0, 0, 'el-icon-notebook', '字典管理', 4, NULL, 1, NULL, '/system/dict', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
 INSERT INTO `sys_menu` VALUES (5, 0, 0, 'el-icon-school', '学校管理', 5, NULL, 1, NULL, '/system/school', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
 INSERT INTO `sys_menu` VALUES (6, 0, 0, 'el-icon-s-check', '审核管理', 6, NULL, 1, NULL, '/system/audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
 INSERT INTO `sys_menu` VALUES (7, 0, 0, 'el-icon-setting', '系统管理', 7, NULL, 1, NULL, '/system/config', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (11, 1, 1, NULL, '系统用户', 1, 'system:user:list', 1, '/system/user/index', 'sys-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (12, 1, 1, NULL, '普通用户', 2, 'system:appuser:list', 1, '/system/appuser/index', 'app-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (13, 1, 1, NULL, '骑手用户', 3, 'system:rider:list', 1, '/system/rider/index', 'rider-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (14, 1, 1, NULL, '商家用户', 4, 'system:mch:list', 1, '/system/mch/index', 'mch-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (15, 1, 1, NULL, '合伙人用户', 5, 'system:partner:list', 1, '/system/partner/index', 'partner-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (21, 2, 1, NULL, '角色列表', 1, 'system:role:list', 1, '/system/role/index', 'role-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (22, 2, 2, NULL, '角色新增', 2, 'system:role:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (23, 2, 2, NULL, '角色编辑', 3, 'system:role:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (24, 2, 2, NULL, '角色删除', 4, 'system:role:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (31, 3, 1, NULL, '菜单列表', 1, 'system:menu:list', 1, '/system/menu/index', 'menu-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (32, 3, 2, NULL, '菜单新增', 2, 'system:menu:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (33, 3, 2, NULL, '菜单编辑', 3, 'system:menu:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (34, 3, 2, NULL, '菜单删除', 4, 'system:menu:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (41, 4, 1, NULL, '字典列表', 1, 'system:dict:list', 1, '/system/dict/index', 'dict-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (42, 4, 2, NULL, '字典新增', 2, 'system:dict:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (43, 4, 2, NULL, '字典编辑', 3, 'system:dict:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (44, 4, 2, NULL, '字典删除', 4, 'system:dict:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (51, 5, 1, NULL, '学校列表', 1, 'system:school:list', 1, '/system/school/index', 'school-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (52, 5, 2, NULL, '学校新增', 2, 'system:school:add', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (53, 5, 2, NULL, '学校编辑', 3, 'system:school:edit', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (54, 5, 2, NULL, '学校删除', 4, 'system:school:delete', 1, NULL, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (61, 6, 1, NULL, '骑手审核', 1, 'system:rider:audit', 1, '/system/audit/rider', 'rider-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (62, 6, 1, NULL, '合伙人审核', 2, 'system:partner:audit', 1, '/system/audit/partner', 'partner-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (63, 6, 1, NULL, '商家入驻审核', 3, 'system:mch:audit', 1, '/system/audit/mch', 'mch-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (64, 6, 1, NULL, '服务人员审核', 4, 'system:staff:audit', 1, '/system/audit/staff', 'staff-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (71, 7, 1, NULL, '客户端管理', 1, 'system:client:list', 1, '/system/client/index', 'client-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (72, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user/index', '/system/user', 1, '2026-01-17 15:11:42', '2026-01-17 15:30:26', '2026-01-17 07:30:28');
+INSERT INTO `sys_menu` VALUES (11, 1, 1, NULL, '系统用户', 1, 'system:user:list', 1, 'sys-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (12, 1, 1, NULL, '普通用户', 2, 'system:appuser:list', 1, 'app-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (13, 1, 1, NULL, '骑手用户', 3, 'system:rider:list', 1, 'rider-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (14, 1, 1, NULL, '商家用户', 4, 'system:mch:list', 1, 'mch-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (15, 1, 1, NULL, '合伙人用户', 5, 'system:partner:list', 1, 'partner-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (21, 2, 1, NULL, '角色列表', 1, 'system:role:list', 1, 'role-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (22, 2, 2, NULL, '角色新增', 2, 'system:role:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (23, 2, 2, NULL, '角色编辑', 3, 'system:role:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (24, 2, 2, NULL, '角色删除', 4, 'system:role:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (31, 3, 1, NULL, '菜单列表', 1, 'system:menu:list', 1, 'menu-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (32, 3, 2, NULL, '菜单新增', 2, 'system:menu:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (33, 3, 2, NULL, '菜单编辑', 3, 'system:menu:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (34, 3, 2, NULL, '菜单删除', 4, 'system:menu:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (41, 4, 1, NULL, '字典列表', 1, 'system:dict:list', 1, 'dict-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (42, 4, 2, NULL, '字典新增', 2, 'system:dict:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (43, 4, 2, NULL, '字典编辑', 3, 'system:dict:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (44, 4, 2, NULL, '字典删除', 4, 'system:dict:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (51, 5, 1, NULL, '学校列表', 1, 'system:school:list', 1, 'school-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (52, 5, 2, NULL, '学校新增', 2, 'system:school:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (53, 5, 2, NULL, '学校编辑', 3, 'system:school:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (54, 5, 2, NULL, '学校删除', 4, 'system:school:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (61, 6, 1, NULL, '骑手审核', 1, 'system:rider:audit', 1, 'rider-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (62, 6, 1, NULL, '合伙人审核', 2, 'system:partner:audit', 1, 'partner-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (63, 6, 1, NULL, '商家入驻审核', 3, 'system:mch:audit', 1, 'mch-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (64, 6, 1, NULL, '服务人员审核', 4, 'system:staff:audit', 1, 'staff-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (71, 7, 1, NULL, '客户端管理', 1, 'system:client:list', 1, 'client-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
+INSERT INTO `sys_menu` VALUES (72, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user', 1, '2026-01-17 15:11:42', '2026-01-17 15:30:26', '2026-01-17 07:30:28');
 
 -- ----------------------------
 -- Table structure for sys_oauth_client_details

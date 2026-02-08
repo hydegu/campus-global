@@ -36,6 +36,12 @@ public class FileUploadVO implements Serializable {
 	private String fileUrl;
 
 	/**
+	 * 文件相对路径
+	 */
+	@Schema(description = "文件相对路径（用于数据库存储）")
+	private String relativePath;
+
+	/**
 	 * 文件名
 	 */
 	@Schema(description = "文件名")

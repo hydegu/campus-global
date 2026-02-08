@@ -35,9 +35,6 @@ public class SysMenuAddDTO {
 	@Schema(description = "权限", example = "system:user:list")
 	private String perms;
 
-	@Schema(description = "组件路径", example = "/system/user/index")
-	private String component;
-
 	@Schema(description = "访问路径", example = "/system/user")
 	private String path;
 

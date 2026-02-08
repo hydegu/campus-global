@@ -88,12 +88,6 @@ public class SysMenu extends Model<SysMenu> {
 	private Integer status;
 
 	/**
-	 * 组件路径
-	 */
-	@Schema(description = "组件路径")
-	private String component;
-
-	/**
 	 * 重定向路径
 	 */
 	@Schema(description = "重定向路径")

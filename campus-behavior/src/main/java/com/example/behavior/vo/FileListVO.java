@@ -49,6 +49,12 @@ public class FileListVO implements Serializable {
 	private String fileUrl;
 
 	/**
+	 * 文件相对路径
+	 */
+	@Schema(description = "文件相对路径（用于数据库存储）")
+	private String relativePath;
+
+	/**
 	 * 文件大小（字节）
 	 */
 	@Schema(description = "文件大小（字节）")

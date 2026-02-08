@@ -21,9 +21,6 @@ public class SysMenuVO {
 	@Schema(description = "路由路径", example = "/system/user")
 	private String path;
 
-	@Schema(description = "组件路径", example = "/system/user/index")
-	private String component;
-
 	@Schema(description = "路由名称", example = "用户管理")
 	private String name;
 
@@ -47,7 +44,7 @@ public class SysMenuVO {
 		private String icon;
 
 		@Schema(description = "是否iframe", example = "true")
-		private Boolean isIframe;
+		private Boolean isFrame;
 
 		@Schema(description = "角色权限列表", example = "[\"system:user:list\"]")
 		private List<String> roles;

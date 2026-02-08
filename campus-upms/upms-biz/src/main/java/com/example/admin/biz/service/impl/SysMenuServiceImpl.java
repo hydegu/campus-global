@@ -100,7 +100,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 		menu.setSortOrder(dto.getSortOrder());
 		menu.setIsFrame(dto.getIsFrame() != null ? dto.getIsFrame().toString() : "1");
 		menu.setPermission(dto.getPerms());
-		menu.setComponent(dto.getComponent());
 		menu.setPath(dto.getPath());
 		menu.setRedirect(dto.getRedirect());
 		menu.setStatus(dto.getStatus());
@@ -139,9 +138,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 		}
 		if (dto.getPerms() != null) {
 			menu.setPermission(dto.getPerms());
-		}
-		if (dto.getComponent() != null) {
-			menu.setComponent(dto.getComponent());
 		}
 		if (dto.getPath() != null) {
 			menu.setPath(dto.getPath());
@@ -188,7 +184,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 		vo.setParentId(menu.getParentId());
 		vo.setMenuType(Integer.parseInt(menu.getMenuType()));
 		vo.setPath(menu.getPath());
-		vo.setComponent(menu.getComponent());
 		vo.setName(menu.getMenuName());
 		vo.setRedirect(menu.getRedirect());
 
@@ -196,7 +191,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 		SysMenuVO.MenuMeta meta = new SysMenuVO.MenuMeta();
 		meta.setTitle(menu.getMenuName());
 		meta.setIcon(menu.getMenuIcon());
-		meta.setIsIframe(Integer.parseInt(menu.getIsFrame()) == 1);
+		meta.setIsFrame(Integer.parseInt(menu.getIsFrame()) == 1);
 
 		// 将permission转换为数组
 		ArrayList<String> roles = new ArrayList<>();

@@ -23,7 +23,6 @@
 		<result property="sortOrder" column="menu_sort_order"/>
 		<result property="isFrame" column="is_frame"/>
 		<result property="perms" column="perms"/>
-		<result property="component" column="component"/>
 		<result property="path" column="path"/>
 		<result property="status" column="menu_status"/>
 		<result property="createdAt" column="menu_create_at"/>
@@ -45,7 +44,6 @@
 			m.sort_order AS menu_sort_order,
 			m.is_frame,
 			m.permission AS perms,
-			m.component,
 			m.path,
 			m.status AS menu_status,
 			m.create_at AS menu_create_at
