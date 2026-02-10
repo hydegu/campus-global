@@ -53,7 +53,7 @@ public class FinanceStatisticsServiceImpl implements FinanceStatisticsService {
         // 3. 统计今日提现金额
         BigDecimal todayWithdrawalAmount = financeTransactionMapper.sumAmountByTypeAndTime(
                 TransactionTypeEnum.WITHDRAWAL.getCode(), startDateTime, endDateTime);
-        vo.setTodayWithdrawalAmount(todayWithdrawalAmount != null ? todayWithdrawalAmount : BigDecimal.ZERO);
+        vo.setTodayWithdrawalAmount(todayWithdrawalAmount != null ? todayWithdrawalAmount.abs() : BigDecimal.ZERO);
 
         // 4. 统计今日总流水（消费+打款）
         BigDecimal todayTurnover = financeTransactionMapper.sumAmountByTypeAndTime(
@@ -66,17 +66,14 @@ public class FinanceStatisticsServiceImpl implements FinanceStatisticsService {
         // 5. 统计今日成交金额
         BigDecimal todayTransactionAmount = financeTransactionMapper.sumAmountByTypeAndTime(
                 TransactionTypeEnum.CONSUMPTION.getCode(), startDateTime, endDateTime);
-        vo.setTodayTransactionAmount(todayTransactionAmount != null ? todayTransactionAmount : BigDecimal.ZERO);
+        vo.setTodayOrderAmount(todayTransactionAmount != null ? todayTransactionAmount : BigDecimal.ZERO);
 
-        // 6. 统计今日服务收益（TODO：根据业务规则计算）
-        vo.setTodayServiceRevenue(BigDecimal.ZERO);
-
-        // 7. 统计今日成交订单数
+        // 6. 统计今日成交订单数
         Integer todayOrderCount = financeTransactionMapper.countByRelatedTypeAndTime(
                 RelatedTypeEnum.ORDER.getCode(), startDateTime, endDateTime);
         vo.setTodayOrderCount(todayOrderCount != null ? todayOrderCount : 0);
 
-        // 8. 查询最近12个月的月度流水
+        // 7. 查询最近12个月的月度流水
         List<MonthlyTurnoverItem> monthlyData = financeTransactionMapper.queryMonthlyTurnover(12);
         vo.setMonthlyData(monthlyData);
 

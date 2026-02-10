@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Schema(description = "交易流水统计VO")
@@ -24,10 +25,7 @@ public class TransactionLogVO implements Serializable {
     private BigDecimal todayTurnover;
 
     @Schema(description = "今日成交金额/元", example = "6500.00")
-    private BigDecimal todayTransactionAmount;
-
-    @Schema(description = "今日服务收益/元", example = "1500.00")
-    private BigDecimal todayServiceRevenue;
+    private BigDecimal todayOrderAmount;
 
     @Schema(description = "今日成交订单/单", example = "50")
     private Integer todayOrderCount;
@@ -35,3 +33,4 @@ public class TransactionLogVO implements Serializable {
     @Schema(description = "平台每月流水", example = "[{\"month\":\"2024-01\",\"amount\":\"100000.00\"}]")
     private List<MonthlyTurnoverItem> monthlyData;
 }
+
