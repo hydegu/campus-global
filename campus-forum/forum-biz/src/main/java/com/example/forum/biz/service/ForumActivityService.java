@@ -15,6 +15,7 @@ import com.example.forum.api.vo.ForumActivityQueryVO;
 */
 public interface ForumActivityService extends IService<ForumActivity> {
 
+
     /*
     * 活动列表
     * */

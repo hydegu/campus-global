@@ -3,6 +3,7 @@ package com.example.admin.biz.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.admin.api.dto.*;
 import com.example.admin.api.entity.Address;
 import com.example.admin.api.entity.AuditRecord;
 import com.example.admin.api.entity.BaseUser;
@@ -11,11 +12,6 @@ import com.example.admin.api.entity.UserApp;
 import com.example.admin.api.entity.UserMch;
 import com.example.admin.api.entity.UserPartner;
 import com.example.admin.api.entity.UserRider;
-import com.example.admin.api.dto.AuditDTO;
-import com.example.admin.api.dto.MerchantSettleInQueryDTO;
-import com.example.admin.api.dto.PartnerAuditQueryDTO;
-import com.example.admin.api.dto.RiderApplyQueryDTO;
-import com.example.admin.api.dto.ServiceStaffAuditQueryDTO;
 import com.example.admin.biz.mapper.AuditRecordMapper;
 import com.example.admin.biz.mapper.AddressMapper;
 import com.example.admin.biz.mapper.BaseUserMapper;
@@ -200,6 +196,31 @@ public class AuditServiceImpl implements AuditService {
 		}
 
 		log.info("骑手审核完成，骑手ID：{}，审核状态：{}", id, auditDTO.getAuditStatus());
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public AuditRecord createAuditRecord(CreateAuditDTO dto) {
+		String bizType = dto.getBizType();
+		Long applicantId = dto.getApplicantId();
+		if (!StringUtils.hasText(bizType) || applicantId == null) {
+			throw new BusinessException("INVALID_PARAM", "业务类型和申请人ID不能为空");
+		}
+		AuditRecord auditRecord = new AuditRecord();
+		auditRecord.setAuditNo(generateAuditNo(bizType));
+		auditRecord.setBizType(bizType);
+		auditRecord.setApplicantId(applicantId);
+		auditRecord.setStatus(AuditStatus.PENDING.getCode());
+		auditRecord.setRemark("活动申请");
+
+		auditRecordMapper.insert(auditRecord);
+
+		log.info("创建审核记录成功，审核ID：{}，业务类型：{}，申请人ID：{}", auditRecord.getId(), bizType, applicantId);
+		return auditRecord;
+	}
+
+	private String generateAuditNo(String bizType) {
+		return "AUD" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
 	}
 
 	@Override

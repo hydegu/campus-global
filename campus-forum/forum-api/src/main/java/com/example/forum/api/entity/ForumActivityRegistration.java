@@ -44,6 +44,12 @@ public class ForumActivityRegistration implements Serializable {
     private Integer status;
 
     /**
+     * 审核结果(0-待审核 1-已通过 2-已拒绝)
+     */
+    @Schema(description = "审核结果(0-待审核 1-已通过 2-已拒绝)")
+    private Integer auditResult;
+
+    /**
      * 报名时间
      */
     @Schema(description = "报名时间")

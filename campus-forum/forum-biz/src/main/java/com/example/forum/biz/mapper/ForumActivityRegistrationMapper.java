@@ -1,7 +1,10 @@
 package com.example.forum.biz.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.forum.api.entity.ForumActivityRegistration;
+import com.example.forum.api.vo.ForumActivityRegistrationQueryVO;
 import com.example.forum.api.vo.UserRegisteredActivityVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,4 +26,11 @@ public interface ForumActivityRegistrationMapper extends BaseMapper<ForumActivit
      * @return 活动列表
      */
     List<UserRegisteredActivityVO> selectRegisteredActivitiesByUserId(@Param("userId") Long userId);
+     /**
+     * 查询活动报名列表
+     * @param page 分页信息
+     * @param activityId 活动ID
+     * @return 报名列表
+     */
+    IPage<ForumActivityRegistrationQueryVO> selectRegisteredActivitiesByActivityId(Page<ForumActivityRegistrationQueryVO> page, @Param("activityId") Long activityId);
 }

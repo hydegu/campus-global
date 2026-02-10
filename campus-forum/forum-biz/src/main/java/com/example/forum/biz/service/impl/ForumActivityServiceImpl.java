@@ -7,7 +7,10 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.admin.api.entity.AuditRecord;
+import com.example.forum.api.feign.RemoteAuditService;
 import com.example.forum.api.feign.RemoteSchoolService;
+import com.example.admin.api.dto.CreateAuditDTO;
 import com.example.admin.api.vo.SysSchoolVO;
 import com.example.common.core.exception.DuplicateException;
 import com.example.common.core.exception.ForbiddenException;
@@ -44,6 +47,9 @@ public class ForumActivityServiceImpl extends ServiceImpl<ForumActivityMapper, F
 
     private  final ForumLikeRecordMapper forumLikeRecordMapper;
     private  final RemoteSchoolService remoteSchoolService;
+    private  final RemoteAuditService remoteAuditService;
+
+
 
     @Override
     public IPage<ForumActivityQueryVO> getForumActivityList(ForumActivityListDTO queryDTO) {
@@ -113,14 +119,20 @@ public class ForumActivityServiceImpl extends ServiceImpl<ForumActivityMapper, F
 
         List<String> imagesList = dto.getImages();
         if (imagesList != null && !imagesList.isEmpty()) {
-            // 将List转换为JSON数组字符串（如["image1.jpg","image2.jpg"]）
             String imagesJson = JSONUtil.toJsonStr(imagesList);
             activity.setImages(imagesJson);
         } else {
-            // 可选：设置空JSON数组或null
             activity.setImages("[]");
         }
-
+        CreateAuditDTO createAuditDTO = new CreateAuditDTO();
+        createAuditDTO.setBizType("ACTIVITY_PUBLISH");
+        createAuditDTO.setApplicantId(userId);
+        Result<AuditRecord> result = remoteAuditService.createAuditRecord(createAuditDTO);
+        if (result.getCode() == 1 && result.getData() != null) {
+            activity.setAuditId(result.getData().getId());
+        }
+        activity.setPublisherId(userId);
+        activity.setStatus(1);
         save(activity);
     }
 

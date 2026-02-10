@@ -77,7 +77,7 @@
             create_at
         from forum_activity
         where
-            <if test="publisherId != null">
+            <if test="queryDTO.publisherId != null">
                 fa.publisher_id = #{queryDTO.publisherId}
                 and
             </if>

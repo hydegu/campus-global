@@ -4,11 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class ForumPostQueryVO {
+public class ForumPostQueryVO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @NotNull
     @Schema(description = "帖子ID", example = "1")

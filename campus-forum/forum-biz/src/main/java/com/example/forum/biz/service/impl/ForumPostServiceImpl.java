@@ -174,11 +174,14 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
     @CacheEvict(value = "hotPostsCache", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void createPost(Long userId ,ForumPost post) {
-        // 1. 获取当前用户ID
-        if (userId == null) {
-            throw new ForbiddenException("用户未登录");
+        // 1. 检查是否已存在
+        LambdaQueryWrapper<ForumPost> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ForumPost::getPostTitle, post.getPostTitle());
+        queryWrapper.eq(ForumPost::getPostContent, post.getPostContent());
+        ForumPost existingPost = getOne(queryWrapper);
+        if (existingPost != null) {
+            throw new IllegalArgumentException("帖子已存在");
         }
-
         // 2. 设置帖子属性
         post.setUserId(userId);
 

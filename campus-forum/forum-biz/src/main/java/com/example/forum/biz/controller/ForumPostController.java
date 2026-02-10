@@ -135,27 +135,6 @@ public class ForumPostController {
     }
 
     /**
-     * 上传图片
-     * POST /api/app/forum/posts/upload
-     *
-     * @param imageFiles 图片文件数组
-     * @return 上传结果
-     */
-    @PostMapping(value = "/posts/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(
-            summary = "上传图片",
-            description = "用户上传图片文件，返回图片的相对路径列表。"
-    )
-    public Result<List<String>> uploadImages(
-            @Parameter(description = "图片文件数组")
-            @RequestPart("imageFiles") MultipartFile[] imageFiles
-    ) {
-
-            List<String> imageUrls = forumPostService.upload(imageFiles);
-            return Result.ok(imageUrls);
-    }
-
-    /**
      * 用户发布帖子 (JSON请求)
      * POST /api/app/forum/posts
      *

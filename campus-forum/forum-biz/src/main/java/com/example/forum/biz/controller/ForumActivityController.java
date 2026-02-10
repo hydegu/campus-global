@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import com.example.common.security.util.SecurityUtils;
+import com.example.forum.api.dto.forumActivity.ForumActivityRegistrationListDTO;
+import com.example.forum.api.vo.ForumActivityRegistrationQueryVO;
 import com.example.forum.biz.utils.PageUtil;
 import com.example.forum.api.dto.forumActivity.ForumActivityAddDTO;
 import com.example.forum.api.dto.forumActivity.ForumActivityListDTO;
@@ -52,7 +54,9 @@ public class ForumActivityController {
         IPage<ForumActivityQueryVO> iPage = forumActivityService.getForumActivityList(queryDTO);
         return Result.ok(PageUtil.toPageResult(iPage));
     }
-    
+
+
+
     /**
      * 获取活动详情
      * @param id 活动ID

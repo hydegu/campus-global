@@ -42,6 +42,9 @@ public class ForumLikeController {
     public Result<List<ForumLikeVO>> getLikeRecords(
             @Parameter(description = "点赞类型(1=活动, 2=帖子, 3=活动评论, 4=帖子评论)", example = "1")
             @RequestParam(value = "likeType", required = false) Integer likeType) {
+        if(likeType == null){
+            throw new IllegalArgumentException("点赞类型不能为空");
+        }
         Long userId = SecurityUtils.getCurrentUserId();
         ForumLikeDTO forumLikeDTO = new ForumLikeDTO();
         forumLikeDTO.setUserId(userId);

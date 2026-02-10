@@ -51,4 +51,16 @@
           AND fa.delete_at IS NULL
         ORDER BY far.create_at DESC
     </select>
+    <select id="selectRegisteredActivitiesByActivityId" resultType="com.example.forum.api.vo.ForumActivityRegistrationQueryVO">
+        SELECT
+            far.id ,
+            far.activity_id,
+            far.user_id,
+            far.audit_result,
+            far.create_at
+        FROM forum_activity_registration far
+        WHERE far.activity_id = #{activityId}
+          AND far.delete_at IS NULL
+        ORDER BY far.create_at DESC
+    </select>
 </mapper>
