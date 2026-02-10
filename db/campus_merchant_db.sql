@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 28/01/2026 14:52:13
+ Date: 10/02/2026 15:27:19
 */
 
 SET NAMES utf8mb4;
@@ -85,11 +85,12 @@ CREATE TABLE `mch_category`  (
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_sort`(`sort_order` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 437 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '商品分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 438 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '商品分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of mch_category
 -- ----------------------------
+INSERT INTO `mch_category` VALUES (437, '蔬菜', 0, 1, 0, 1, 0, 1, '2026-01-29 07:11:44', '2026-01-29 07:38:25', NULL);
 
 -- ----------------------------
 -- Table structure for mch_product
@@ -109,6 +110,7 @@ CREATE TABLE `mch_product`  (
   `profit_type` tinyint UNSIGNED NOT NULL DEFAULT 1 COMMENT '收益类型:1-按比例,2-固定金额',
   `partner_profit` decimal(10, 2) NOT NULL DEFAULT 0.00 COMMENT '合伙人收益（按比例时为百分比，固定金额时为具体金额）',
   `merchant_profit` decimal(10, 2) NOT NULL DEFAULT 0.00 COMMENT '服务商家收益（按比例时为百分比，固定金额时为具体金额）',
+  `sort_order` int NOT NULL DEFAULT 0 COMMENT '排序',
   `spec_type` tinyint UNSIGNED NOT NULL DEFAULT 1 COMMENT '规格类型:1-统一规格,2-多规格',
   `shelf_status` tinyint NOT NULL DEFAULT 0 COMMENT '上架状态:0-未上架,1-已上架',
   `audit_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '关联的审核记录ID（审核商品）',
@@ -121,11 +123,12 @@ CREATE TABLE `mch_product`  (
   INDEX `idx_audit`(`audit_id` ASC) USING BTREE,
   INDEX `idx_deleted`(`delete_at` ASC) USING BTREE,
   INDEX `idx_merchant`(`merchant_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '商品表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '商品表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of mch_product
 -- ----------------------------
+INSERT INTO `mch_product` VALUES (10, '番茄', '新鲜有机番茄 500g起售', '有机种植，新鲜采摘，营养丰富，富含维生素C', '<p>【产地】山东有机农场</p>\r\n     <p>【特点】无农药残留，自然成熟，口感酸甜适中</p>\r\n     <p>【营养】富含番茄红素、维生素C</p>\r\n     <p>【储存】冷藏保存，建议3天内食用</p>', 'https://cdn.example.com/images/tomato/main.jpg', '[\"https://cdn.example.com/images/tomato/1.jpg\", \"https://cdn.example.com/images/tomato/2.jpg\", \"https://cdn.example.com/images/tomato/3.jpg\"]', 437, 1, 8.80, 1, 15.00, 8.00, 1, 2, 1, NULL, '2026-01-29 07:24:10', '2026-01-29 07:24:10', NULL);
 
 -- ----------------------------
 -- Table structure for mch_product_category
@@ -136,11 +139,12 @@ CREATE TABLE `mch_product_category`  (
   `category_id` bigint UNSIGNED NOT NULL COMMENT '商品分类id',
   PRIMARY KEY (`product_id`, `category_id`) USING BTREE,
   INDEX `idx_category_id`(`category_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '商家-商品分类关联表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '商家-商品分类关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of mch_product_category
 -- ----------------------------
+INSERT INTO `mch_product_category` VALUES (10, 437);
 
 -- ----------------------------
 -- Table structure for mch_product_spec
@@ -155,6 +159,9 @@ CREATE TABLE `mch_product_spec`  (
 -- ----------------------------
 -- Records of mch_product_spec
 -- ----------------------------
+INSERT INTO `mch_product_spec` VALUES (10, 1);
+INSERT INTO `mch_product_spec` VALUES (10, 2);
+INSERT INTO `mch_product_spec` VALUES (10, 3);
 
 -- ----------------------------
 -- Table structure for mch_spec
@@ -175,11 +182,14 @@ CREATE TABLE `mch_spec`  (
   `delete_at` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_dish`(`product_id` ASC, `status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '商品规格表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '商品规格表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of mch_spec
 -- ----------------------------
+INSERT INTO `mch_spec` VALUES (1, 10, '重量', '500g', 8.80, 'https://cdn.example.com/images/tomato/spec-500g.jpg', 1, 1, 1, '2026-01-29 07:24:32', '2026-01-29 07:24:32', NULL);
+INSERT INTO `mch_spec` VALUES (2, 10, '重量', '1kg', 15.80, 'https://cdn.example.com/images/tomato/spec-1kg.jpg', 1, 0, 2, '2026-01-29 07:24:32', '2026-01-29 07:24:32', NULL);
+INSERT INTO `mch_spec` VALUES (3, 10, '重量', '2kg', 28.80, 'https://cdn.example.com/images/tomato/spec-2kg.jpg', 1, 0, 3, '2026-01-29 07:24:32', '2026-01-29 07:24:32', NULL);
 
 -- ----------------------------
 -- Table structure for mch_user_category
@@ -212,7 +222,7 @@ CREATE TABLE `undo_log`  (
   `log_modified` datetime(6) NOT NULL COMMENT 'modify datetime',
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of undo_log

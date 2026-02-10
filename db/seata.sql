@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 28/01/2026 14:51:51
+ Date: 10/02/2026 15:28:41
 */
 
 SET NAMES utf8mb4;
@@ -55,9 +55,9 @@ CREATE TABLE `distributed_lock`  (
 -- ----------------------------
 -- Records of distributed_lock
 -- ----------------------------
-INSERT INTO `distributed_lock` VALUES ('AsyncCommitting', ' ', 0);
-INSERT INTO `distributed_lock` VALUES ('RetryCommitting', ' ', 0);
-INSERT INTO `distributed_lock` VALUES ('RetryRollbacking', ' ', 0);
+INSERT INTO `distributed_lock` VALUES ('AsyncCommitting', 'seata:8091', 1770708532093);
+INSERT INTO `distributed_lock` VALUES ('RetryCommitting', 'seata:8091', 1770708532093);
+INSERT INTO `distributed_lock` VALUES ('RetryRollbacking', 'seata:8091', 1770708532092);
 INSERT INTO `distributed_lock` VALUES ('TxTimeoutCheck', ' ', 0);
 INSERT INTO `distributed_lock` VALUES ('UndologDelete', ' ', 0);
 

@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 28/01/2026 14:54:47
+ Date: 10/02/2026 15:28:03
 */
 
 SET NAMES utf8mb4;
@@ -76,8 +76,8 @@ DROP TABLE IF EXISTS `audit_record`;
 CREATE TABLE `audit_record`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `audit_no` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '审核编号',
-  `biz_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '审核项:MERCHANT_SETTLE-商家入驻 WITHDRAW-提现 GOODS-商品上架 STAFF_APPLY-服务人员 RIDER_APPLY-骑手',
-  `applicant_id` bigint UNSIGNED NOT NULL COMMENT '申请人ID',
+  `biz_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '审核项:\r\nMERCHANT_SETTLE-商家入驻\r\nWITHDRAW-提现\r\nGOODS-商品上架\r\nPARTNER_APPLY-合伙人\r\nSTAFF_APPLY-服务人员\r\nRIDER_APPLY-骑手',
+  `biz_id` bigint UNSIGNED NOT NULL COMMENT '业务实体ID',
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   `status` tinyint NOT NULL DEFAULT 0 COMMENT '审核状态:0-待审核 1-审核通过 2-审核拒绝',
   `auditor_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '审核人ID',
@@ -86,7 +86,7 @@ CREATE TABLE `audit_record`  (
   `delete_at` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_audit_no`(`audit_no` ASC) USING BTREE,
-  INDEX `idx_applicant`(`applicant_id` ASC, `status` ASC) USING BTREE,
+  INDEX `idx_applicant`(`biz_id` ASC, `status` ASC) USING BTREE,
   INDEX `idx_delete`(`delete_at` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2015710533714206722 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
 
@@ -136,7 +136,7 @@ CREATE TABLE `base_user`  (
 -- ----------------------------
 -- Records of base_user
 -- ----------------------------
-INSERT INTO `base_user` VALUES (1001, 'admin', '超级管理员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/admin.jpg', '13800138001', 'admin@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:29', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (1001, 'admin', '超级管理员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, '/files/campus-default/default/2026/02/05/0abf36c3aeaf4af0abb4a3105110b203.png', '13800138001', 'admin@campus.com', 1, '2026-01-17 02:21:48', '2026-02-05 12:31:29', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (1002, 'sysadmin', '系统管理员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/sysadmin.jpg', '13800138002', 'sysadmin@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:32', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (1003, 'auditor', '审核员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/auditor.jpg', '13800138003', 'auditor@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:36', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (1004, 'operator', '运营人员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/operator.jpg', '13800138004', 'operator@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:39', NULL, '2026-01-17 02:21:48', '127.0.0.1');
@@ -146,6 +146,9 @@ INSERT INTO `base_user` VALUES (2002, 'student2', '学生李小红', '$2a$10$D3w
 INSERT INTO `base_user` VALUES (2003, 'student3', '学生王小刚', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/student3.jpg', '13900139003', 'student3@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:47', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2004, 'student4', '学生赵小美', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student4.jpg', '13900139004', 'student4@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:50', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2005, 'student5', '学生陈小龙', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student5.jpg', '13900139005', 'student5@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:51', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2006, 'student6', '学生刘小花', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student6.jpg', '13900139006', 'student6@campus.com', 2, '2026-02-08 08:00:00', '2026-02-08 08:00:00', NULL, '2026-02-08 08:00:00', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2007, 'student7', '学生陈小明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student7.jpg', '13900139007', 'student7@campus.com', 2, '2026-02-08 08:00:00', '2026-02-08 08:00:00', NULL, '2026-02-08 08:00:00', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2008, 'student8', '学生周小丽', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student8.jpg', '13900139008', 'student8@campus.com', 2, '2026-02-08 08:00:00', '2026-02-08 08:00:00', NULL, '2026-02-08 08:00:00', '127.0.0.1');
 INSERT INTO `base_user` VALUES (3001, 'rider1', '骑手刘大伟', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/rider1.jpg', '13700137001', 'rider1@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:54', NULL, '2026-01-17 02:23:06', '127.0.0.1');
 INSERT INTO `base_user` VALUES (3002, 'rider2', '骑手孙小芳', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/rider2.jpg', '13700137002', 'rider2@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:56', NULL, '2026-01-17 02:23:06', '127.0.0.1');
 INSERT INTO `base_user` VALUES (3003, 'rider3', '骑手周小军', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/rider3.jpg', '13700137003', 'rider3@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:58', NULL, '2026-01-17 02:23:06', '127.0.0.1');
@@ -387,7 +390,7 @@ CREATE TABLE `sys_menu`  (
   `menu_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '菜单名称',
   `sort_order` int NOT NULL DEFAULT 0 COMMENT '排序',
   `permission` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '权限标识',
-  `is_frame` tinyint NULL DEFAULT 1 COMMENT '0:是外链 1:站内路由',
+  `is_frame` tinyint NOT NULL DEFAULT 1 COMMENT '0:是外链 1:站内路由',
   `path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '访问路径',
   `redirect` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '重定向路径',
   `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态:0-隐藏,1-显示',
@@ -397,45 +400,13 @@ CREATE TABLE `sys_menu`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_parent`(`parent_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 73 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
 -- ----------------------------
-INSERT INTO `sys_menu` VALUES (1, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user', 1, '2026-01-17 04:54:42', '2026-01-17 07:14:18', NULL);
-INSERT INTO `sys_menu` VALUES (2, 0, 0, 'el-icon-s-custom', '角色管理', 2, NULL, 1, NULL, '/system/role', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (3, 0, 0, 'el-icon-menu', '菜单管理', 3, NULL, 1, NULL, '/system/menu', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (4, 0, 0, 'el-icon-notebook', '字典管理', 4, NULL, 1, NULL, '/system/dict', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (5, 0, 0, 'el-icon-school', '学校管理', 5, NULL, 1, NULL, '/system/school', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (6, 0, 0, 'el-icon-s-check', '审核管理', 6, NULL, 1, NULL, '/system/audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (7, 0, 0, 'el-icon-setting', '系统管理', 7, NULL, 1, NULL, '/system/config', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (11, 1, 1, NULL, '系统用户', 1, 'system:user:list', 1, 'sys-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (12, 1, 1, NULL, '普通用户', 2, 'system:appuser:list', 1, 'app-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (13, 1, 1, NULL, '骑手用户', 3, 'system:rider:list', 1, 'rider-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (14, 1, 1, NULL, '商家用户', 4, 'system:mch:list', 1, 'mch-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (15, 1, 1, NULL, '合伙人用户', 5, 'system:partner:list', 1, 'partner-user', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (21, 2, 1, NULL, '角色列表', 1, 'system:role:list', 1, 'role-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (22, 2, 2, NULL, '角色新增', 2, 'system:role:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (23, 2, 2, NULL, '角色编辑', 3, 'system:role:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (24, 2, 2, NULL, '角色删除', 4, 'system:role:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (31, 3, 1, NULL, '菜单列表', 1, 'system:menu:list', 1, 'menu-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (32, 3, 2, NULL, '菜单新增', 2, 'system:menu:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (33, 3, 2, NULL, '菜单编辑', 3, 'system:menu:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (34, 3, 2, NULL, '菜单删除', 4, 'system:menu:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (41, 4, 1, NULL, '字典列表', 1, 'system:dict:list', 1, 'dict-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (42, 4, 2, NULL, '字典新增', 2, 'system:dict:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (43, 4, 2, NULL, '字典编辑', 3, 'system:dict:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (44, 4, 2, NULL, '字典删除', 4, 'system:dict:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (51, 5, 1, NULL, '学校列表', 1, 'system:school:list', 1, 'school-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (52, 5, 2, NULL, '学校新增', 2, 'system:school:add', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (53, 5, 2, NULL, '学校编辑', 3, 'system:school:edit', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (54, 5, 2, NULL, '学校删除', 4, 'system:school:delete', 1, NULL, 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (61, 6, 1, NULL, '骑手审核', 1, 'system:rider:audit', 1, 'rider-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (62, 6, 1, NULL, '合伙人审核', 2, 'system:partner:audit', 1, 'partner-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (63, 6, 1, NULL, '商家入驻审核', 3, 'system:mch:audit', 1, 'mch-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (64, 6, 1, NULL, '服务人员审核', 4, 'system:staff:audit', 1, 'staff-audit', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (71, 7, 1, NULL, '客户端管理', 1, 'system:client:list', 1, 'client-list', 1, '2026-01-17 04:54:42', '2026-01-17 04:54:42', NULL);
-INSERT INTO `sys_menu` VALUES (72, 0, 1, 'el-icon-menu', '用户管理', 1, 'system:user:list', 1, '/system/user', 1, '2026-01-17 15:11:42', '2026-01-17 15:30:26', '2026-01-17 07:30:28');
+INSERT INTO `sys_menu` VALUES (1, 0, 0, NULL, '系统设置', 0, NULL, 1, '/system', '', 1, '2026-02-05 12:02:08', '2026-02-06 11:47:26', NULL);
+INSERT INTO `sys_menu` VALUES (2, 1, 1, NULL, '系统用户', 0, NULL, 1, '/system/user', NULL, 1, '2026-02-06 08:20:04', '2026-02-06 08:50:25', NULL);
 
 -- ----------------------------
 -- Table structure for sys_oauth_client_details
@@ -503,7 +474,7 @@ CREATE TABLE `undo_log`  (
   `log_modified` datetime(6) NOT NULL COMMENT 'modify datetime',
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of undo_log
@@ -565,6 +536,8 @@ CREATE TABLE `user_mch`  (
   `business_start_time` time NULL DEFAULT NULL COMMENT '开始营业时间',
   `business_end_time` time NULL DEFAULT NULL COMMENT '结束营业时间',
   `is_open` tinyint UNSIGNED NOT NULL DEFAULT 0 COMMENT '是否营业 0-休息 1-营业（默认休息）',
+  `balance` decimal(10, 2) NULL DEFAULT NULL COMMENT '余额',
+  `total_amount` decimal(10, 2) NOT NULL COMMENT '累计收益',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `delete_time` datetime NULL DEFAULT NULL,
@@ -578,10 +551,10 @@ CREATE TABLE `user_mch`  (
 -- ----------------------------
 -- Records of user_mch
 -- ----------------------------
-INSERT INTO `user_mch` VALUES (301, 4001, '校园便利店', 1, 'https://example.com/logo/mch1.jpg', '张老板', 'https://example.com/license/mch1.jpg', 5001, '110101198001011234', 10.00, '6222021234567890126', 2001, '08:00:00', '22:00:00', 1, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
-INSERT INTO `user_mch` VALUES (302, 4002, '美味餐厅', 2, 'https://example.com/logo/mch2.jpg', '李大厨', 'https://example.com/license/mch2.jpg', 5001, '110101198002021235', 20.00, '6222021234567890127', 2002, '10:00:00', '21:00:00', 1, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
-INSERT INTO `user_mch` VALUES (303, 4003, '水果超市', 3, 'https://example.com/logo/mch3.jpg', '王经理', 'https://example.com/license/mch3.jpg', 5002, '110101198003031236', 15.00, '6222021234567890128', 2003, '09:00:00', '20:00:00', 0, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
-INSERT INTO `user_mch` VALUES (901, 9003, '待审核商家', 5, 'https://example.com/logo/pending_mch.jpg', '待审核联系人', 'https://example.com/license/pending_mch.jpg', 5001, '110101198001019999', 10.00, '6222021234567890998', 3003, '08:00:00', '22:00:00', 0, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
+INSERT INTO `user_mch` VALUES (301, 4001, '校园便利店', 1, 'https://example.com/logo/mch1.jpg', '张老板', 'https://example.com/license/mch1.jpg', 5001, '110101198001011234', 10.00, '6222021234567890126', 2001, '08:00:00', '22:00:00', 1, NULL, 0.00, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_mch` VALUES (302, 4002, '美味餐厅', 2, 'https://example.com/logo/mch2.jpg', '李大厨', 'https://example.com/license/mch2.jpg', 5001, '110101198002021235', 20.00, '6222021234567890127', 2002, '10:00:00', '21:00:00', 1, NULL, 0.00, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_mch` VALUES (303, 4003, '水果超市', 3, 'https://example.com/logo/mch3.jpg', '王经理', 'https://example.com/license/mch3.jpg', 5002, '110101198003031236', 15.00, '6222021234567890128', 2003, '09:00:00', '20:00:00', 0, NULL, 0.00, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_mch` VALUES (901, 9003, '待审核商家', 5, 'https://example.com/logo/pending_mch.jpg', '待审核联系人', 'https://example.com/license/pending_mch.jpg', 5001, '110101198001019999', 10.00, '6222021234567890998', 3003, '08:00:00', '22:00:00', 0, NULL, 0.00, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
 
 -- ----------------------------
 -- Table structure for user_partner
@@ -597,6 +570,8 @@ CREATE TABLE `user_partner`  (
   `commission_rate` decimal(5, 2) NOT NULL DEFAULT 0.00 COMMENT '分佣比例(%)',
   `parent_id` bigint UNSIGNED NULL DEFAULT 0 COMMENT '上级合伙人ID(0代表无上级)',
   `audit_id` bigint NULL DEFAULT NULL COMMENT '关联的审核表id',
+  `balance` decimal(10, 2) NULL DEFAULT NULL COMMENT '余额',
+  `total_amount` decimal(10, 2) NULL DEFAULT NULL COMMENT '总收益',
   `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `delete_at` datetime NULL DEFAULT NULL COMMENT '软删除时间',
@@ -609,10 +584,10 @@ CREATE TABLE `user_partner`  (
 -- ----------------------------
 -- Records of user_partner
 -- ----------------------------
-INSERT INTO `user_partner` VALUES (401, 5001, '吴大明', 'INVITE001', 'https://example.com/qrcode/partner1.jpg', '6222021234567890129', 5.00, 0, 3001, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
-INSERT INTO `user_partner` VALUES (402, 5002, '郑小红', 'INVITE002', 'https://example.com/qrcode/partner2.jpg', '6222021234567890130', 6.00, 401, 3002, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
-INSERT INTO `user_partner` VALUES (403, 5003, '王小华', 'INVITE003', 'https://example.com/qrcode/partner3.jpg', '6222021234567890131', 4.50, 401, 3003, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
-INSERT INTO `user_partner` VALUES (901, 9004, '待审核合伙人', 'INVITE999', 'https://example.com/qrcode/pending_partner.jpg', '6222021234567890997', 5.00, 0, 2003, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
+INSERT INTO `user_partner` VALUES (401, 5001, '吴大明', 'INVITE001', 'https://example.com/qrcode/partner1.jpg', '6222021234567890129', 5.00, 0, 3001, NULL, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_partner` VALUES (402, 5002, '郑小红', 'INVITE002', 'https://example.com/qrcode/partner2.jpg', '6222021234567890130', 6.00, 401, 3002, NULL, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_partner` VALUES (403, 5003, '王小华', 'INVITE003', 'https://example.com/qrcode/partner3.jpg', '6222021234567890131', 4.50, 401, 3003, NULL, NULL, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_partner` VALUES (901, 9004, '待审核合伙人', 'INVITE999', 'https://example.com/qrcode/pending_partner.jpg', '6222021234567890997', 5.00, 0, 2003, NULL, NULL, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
 
 -- ----------------------------
 -- Table structure for user_rider
@@ -631,7 +606,7 @@ CREATE TABLE `user_rider`  (
   `openid` char(28) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `audit_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '联表审核表id（审核棋手资质）',
   `balance` decimal(10, 2) NULL DEFAULT NULL COMMENT '余额',
-  `commission_total` decimal(10, 2) NULL DEFAULT NULL COMMENT '累计收益',
+  `total_amount` decimal(10, 2) NULL DEFAULT NULL COMMENT '累计收益',
   `address_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '联表地址id',
   `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

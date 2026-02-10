@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 28/01/2026 14:51:21
+ Date: 10/02/2026 15:27:01
 */
 
 SET NAMES utf8mb4;
@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `finance_transaction`;
 CREATE TABLE `finance_transaction`  (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `transaction_no` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流水号',
-  `user_id` bigint UNSIGNED NOT NULL COMMENT '用户ID',
+  `user_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '用户ID',
   `transaction_type` tinyint UNSIGNED NOT NULL COMMENT '交易类型:1-打款 2-消费 3-退款 4-提现',
   `amount` decimal(15, 2) NOT NULL COMMENT '交易金额(正数为收入,负数为支出)',
   `related_type` tinyint UNSIGNED NULL DEFAULT NULL COMMENT '关联业务类型:1-订单 2-提现 3-退款',
@@ -40,11 +40,52 @@ CREATE TABLE `finance_transaction`  (
   INDEX `idx_type`(`transaction_type` ASC) USING BTREE,
   INDEX `idx_related`(`related_type` ASC, `related_id` ASC) USING BTREE,
   INDEX `idx_create_at`(`create_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '财务流水表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '财务流水表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of finance_transaction
 -- ----------------------------
+INSERT INTO `finance_transaction` VALUES (4, 'TRX20260208130001', NULL, 1, 100.00, 4, 1, '打款给商家-校园便利店', '2026-02-08 13:00:00', '2026-02-08 13:00:00', NULL, NULL, NULL);
+INSERT INTO `finance_transaction` VALUES (5, 'TRX20260208140001', NULL, 1, 150.00, 4, 2, '打款给商家-川菜馆', '2026-02-08 14:00:00', '2026-02-08 14:00:00', NULL, NULL, NULL);
+INSERT INTO `finance_transaction` VALUES (6, 'TRX20260208140002', 2006, 4, -50.00, 2, 1, '用户提现-刘小花', '2026-02-08 14:00:00', '2026-02-08 14:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (7, 'TRX20260208150001', 2007, 4, -80.00, 2, 2, '用户提现-陈小明', '2026-02-08 15:00:00', '2026-02-08 15:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (8, 'TRX20260208160001', 2006, 3, -30.00, 3, 103, '订单退款-部分退款', '2026-02-08 16:00:00', '2026-02-08 16:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (9, 'TRX20260125100001', 2006, 2, 85.50, 1, 103, '订单支付-水果超市', '2026-01-25 10:00:00', '2026-01-25 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (10, 'TRX20260130100001', 2007, 2, 32.00, 1, 104, '订单支付-川菜馆', '2026-01-30 10:00:00', '2026-01-30 10:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (11, 'TRX20260128110001', 2008, 2, 65.00, 1, NULL, '订单支付-奶茶店', '2026-01-28 11:00:00', '2026-01-28 11:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (12, 'TRX20251220100001', 2006, 2, 120.00, 1, NULL, '订单支付-校园便利店', '2025-12-20 10:00:00', '2025-12-20 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (13, 'TRX20251225110001', 2007, 2, 95.50, 1, NULL, '订单支付-水果超市', '2025-12-25 11:00:00', '2025-12-25 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (14, 'TRX20251230120001', 2008, 2, 45.00, 1, NULL, '订单支付-奶茶店', '2025-12-30 12:00:00', '2025-12-30 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (15, 'TRX20251115100001', 2006, 2, 78.00, 1, NULL, '订单支付-川菜馆', '2025-11-15 10:00:00', '2025-11-15 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (16, 'TRX20251120110001', 2007, 2, 56.00, 1, NULL, '订单支付-校园便利店', '2025-11-20 11:00:00', '2025-11-20 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (17, 'TRX20251125120001', 2008, 2, 88.50, 1, NULL, '订单支付-水果超市', '2025-11-25 12:00:00', '2025-11-25 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (18, 'TRX20251010100001', 2006, 2, 105.00, 1, NULL, '订单支付-奶茶店', '2025-10-10 10:00:00', '2025-10-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (19, 'TRX20251015110001', 2007, 2, 67.50, 1, NULL, '订单支付-川菜馆', '2025-10-15 11:00:00', '2025-10-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (20, 'TRX20251020120001', 2008, 2, 42.00, 1, NULL, '订单支付-校园便利店', '2025-10-20 12:00:00', '2025-10-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (21, 'TRX20250910100001', 2006, 2, 92.00, 1, NULL, '订单支付-水果超市', '2025-09-10 10:00:00', '2025-09-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (22, 'TRX20250915110001', 2007, 2, 73.00, 1, NULL, '订单支付-奶茶店', '2025-09-15 11:00:00', '2025-09-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (23, 'TRX20250920120001', 2008, 2, 58.50, 1, NULL, '订单支付-川菜馆', '2025-09-20 12:00:00', '2025-09-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (24, 'TRX20250810100001', 2006, 2, 115.00, 1, NULL, '订单支付-校园便利店', '2025-08-10 10:00:00', '2025-08-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (25, 'TRX20250815110001', 2007, 2, 84.00, 1, NULL, '订单支付-水果超市', '2025-08-15 11:00:00', '2025-08-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (26, 'TRX20250820120001', 2008, 2, 49.50, 1, NULL, '订单支付-奶茶店', '2025-08-20 12:00:00', '2025-08-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (27, 'TRX20250710100001', 2006, 2, 98.00, 1, NULL, '订单支付-川菜馆', '2025-07-10 10:00:00', '2025-07-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (28, 'TRX20250715110001', 2007, 2, 76.50, 1, NULL, '订单支付-校园便利店', '2025-07-15 11:00:00', '2025-07-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (29, 'TRX20250720120001', 2008, 2, 52.00, 1, NULL, '订单支付-水果超市', '2025-07-20 12:00:00', '2025-07-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (30, 'TRX20250610100001', 2006, 2, 110.00, 1, NULL, '订单支付-奶茶店', '2025-06-10 10:00:00', '2025-06-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (31, 'TRX20250615110001', 2007, 2, 89.00, 1, NULL, '订单支付-川菜馆', '2025-06-15 11:00:00', '2025-06-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (32, 'TRX20250620120001', 2008, 2, 64.50, 1, NULL, '订单支付-校园便利店', '2025-06-20 12:00:00', '2025-06-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (33, 'TRX20250510100001', 2006, 2, 125.00, 1, NULL, '订单支付-水果超市', '2025-05-10 10:00:00', '2025-05-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (34, 'TRX20250515110001', 2007, 2, 93.50, 1, NULL, '订单支付-奶茶店', '2025-05-15 11:00:00', '2025-05-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (35, 'TRX20250520120001', 2008, 2, 68.00, 1, NULL, '订单支付-川菜馆', '2025-05-20 12:00:00', '2025-05-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (36, 'TRX20250410100001', 2006, 2, 108.00, 1, NULL, '订单支付-校园便利店', '2025-04-10 10:00:00', '2025-04-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (37, 'TRX20250415110001', 2007, 2, 81.00, 1, NULL, '订单支付-水果超市', '2025-04-15 11:00:00', '2025-04-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (38, 'TRX20250420120001', 2008, 2, 55.50, 1, NULL, '订单支付-奶茶店', '2025-04-20 12:00:00', '2025-04-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (39, 'TRX20250310100001', 2006, 2, 118.00, 1, NULL, '订单支付-川菜馆', '2025-03-10 10:00:00', '2025-03-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (40, 'TRX20250315110001', 2007, 2, 86.50, 1, NULL, '订单支付-校园便利店', '2025-03-15 11:00:00', '2025-03-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (41, 'TRX20250320120001', 2008, 2, 61.00, 1, NULL, '订单支付-水果超市', '2025-03-20 12:00:00', '2025-03-20 12:00:00', NULL, '周小丽', '13900139008');
+INSERT INTO `finance_transaction` VALUES (42, 'TRX20250210100001', 2006, 2, 132.00, 1, NULL, '订单支付-奶茶店', '2025-02-10 10:00:00', '2025-02-10 10:00:00', NULL, '刘小花', '13900139006');
+INSERT INTO `finance_transaction` VALUES (43, 'TRX20250215110001', 2007, 2, 95.00, 1, NULL, '订单支付-川菜馆', '2025-02-15 11:00:00', '2025-02-15 11:00:00', NULL, '陈小明', '13900139007');
+INSERT INTO `finance_transaction` VALUES (44, 'TRX20250220120001', 2008, 2, 73.50, 1, NULL, '订单支付-校园便利店', '2025-02-20 12:00:00', '2025-02-20 12:00:00', NULL, '周小丽', '13900139008');
 
 -- ----------------------------
 -- Table structure for finance_withdrawal
@@ -77,11 +118,13 @@ CREATE TABLE `finance_withdrawal`  (
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_audit_id`(`audit_id` ASC) USING BTREE,
   INDEX `idx_created_at`(`create_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '提现申请表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '提现申请表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of finance_withdrawal
 -- ----------------------------
+INSERT INTO `finance_withdrawal` VALUES (1, 'WD20260208100001', 2006, '刘小花', '13900139006', 50.00, 1, 'wxid_lxh123456', '刘小花', 4, 1001, 1004, '2026-02-08 14:00:00', '提现审核通过，打款成功', 'OUT2026020800001', 'WX2026020814000001', 'SUCCESS', NULL, '2026-02-08 10:00:00', '2026-02-08 14:00:00');
+INSERT INTO `finance_withdrawal` VALUES (2, 'WD20260208110002', 2007, '陈小明', '13900139007', 80.00, 1, 'wxid_cxm123456', '陈小明', 4, 1001, 1004, '2026-02-08 15:00:00', '提现审核通过，打款成功', 'OUT2026020800002', 'WX2026020815000001', 'SUCCESS', NULL, '2026-02-08 11:00:00', '2026-02-08 15:00:00');
 
 -- ----------------------------
 -- Table structure for payment_account
@@ -122,14 +165,14 @@ CREATE TABLE `payment_record`  (
   `payment_no` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '打款单号',
   `payer_account_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '打款账户ID(关联企业账户表)',
   `target_id` bigint UNSIGNED NOT NULL COMMENT '打款目标id',
-  `target_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '打款目标类型',
+  `target_type` tinyint NOT NULL COMMENT '打款目标类型 1-商家 2-骑手 3-合伙人',
   `account_type` tinyint UNSIGNED NOT NULL DEFAULT 1 COMMENT '账户类型(1:银行卡; 2:微信; 3:支付宝)',
   `account_no` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '收款账号',
   `account_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '收款人姓名',
   `bank_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '开户银行',
   `bank_branch` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '开户支行',
   `payment_amount` decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '打款金额',
-  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态:0-待确认 1-待打款 2-已打款 3-打款失败',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态:1-待打款 2-已打款 3-打款失败',
   `pay_operator_id` bigint UNSIGNED NULL DEFAULT NULL COMMENT '打款操作人',
   `pay_time` datetime NULL DEFAULT NULL COMMENT '打款时间',
   `pay_serial_no` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '第三方流水号',
@@ -142,11 +185,13 @@ CREATE TABLE `payment_record`  (
   INDEX `idx_status`(`status` ASC, `created_at` DESC) USING BTREE,
   INDEX `idx_payer_account`(`payer_account_id` ASC) USING BTREE,
   INDEX `idx_pay_serial_no`(`pay_serial_no` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '打款记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '打款记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of payment_record
 -- ----------------------------
+INSERT INTO `payment_record` VALUES (1, 'PAY20260208130001', 1, 2001, 1, 2, 'wxid_merchant001', '校园便利店', NULL, NULL, 100.00, 2, 1004, '2026-02-08 13:00:00', 'WX2026020813000001', '打款给商家-校园便利店', '2026-02-08 13:00:00', '2026-02-08 13:00:00');
+INSERT INTO `payment_record` VALUES (2, 'PAY20260208140002', 1, 2002, 1, 2, 'wxid_merchant002', '川菜馆', NULL, NULL, 150.00, 2, 1004, '2026-02-08 14:00:00', 'WX2026020814000001', '打款给商家-川菜馆', '2026-02-08 14:00:00', '2026-02-08 14:00:00');
 
 -- ----------------------------
 -- Table structure for undo_log
@@ -162,7 +207,7 @@ CREATE TABLE `undo_log`  (
   `log_modified` datetime(6) NOT NULL COMMENT 'modify datetime',
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of undo_log

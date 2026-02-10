@@ -11,7 +11,7 @@
  Target Server Version : 90500 (9.5.0)
  File Encoding         : 65001
 
- Date: 28/01/2026 14:51:29
+ Date: 10/02/2026 15:27:11
 */
 
 SET NAMES utf8mb4;
@@ -188,7 +188,7 @@ CREATE TABLE `forum_post`  (
   INDEX `idx_deleted`(`delete_at` ASC, `id` ASC) USING BTREE,
   INDEX `idx_listhot`(`like_count` DESC, `share_count` DESC, `favorite_count` DESC) USING BTREE,
   CONSTRAINT `chk_counts` CHECK ((`view_count` >= 0) and (`like_count` >= 0))
-) ENGINE = InnoDB AUTO_INCREMENT = 51 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '帖子表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '帖子表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of forum_post
@@ -196,7 +196,8 @@ CREATE TABLE `forum_post`  (
 INSERT INTO `forum_post` VALUES (47, 1001, '校园生活的美好时光', '今天在校园里遇到了很多有趣的事情...', NULL, NULL, 1, 0, 0, 0, 1, NULL, '2026-01-19 11:38:09', '2026-01-28 06:24:31', NULL);
 INSERT INTO `forum_post` VALUES (48, 1001, '校园生活的美好时光', '今天在校园里遇到了很多有趣的事情...', NULL, NULL, 0, 0, 0, 0, 0, NULL, '2026-01-20 09:08:23', '2026-01-20 09:08:23', NULL);
 INSERT INTO `forum_post` VALUES (49, 1001, '校园生活的美好时光', '今天在校园里遇到了很多有趣的事情...', NULL, NULL, 0, 0, 0, 0, 0, NULL, '2026-01-28 06:23:31', '2026-01-28 06:23:31', NULL);
-INSERT INTO `forum_post` VALUES (50, 1001, '校园生活的美好时光', '今天在校园里遇到了很多有趣的事情...', NULL, NULL, 0, 0, 0, 0, 0, NULL, '2026-01-28 06:24:51', '2026-01-28 06:24:51', NULL);
+INSERT INTO `forum_post` VALUES (50, 1001, '校园生活的美好时光', '今天在校园里遇到了很多有趣的事情...', NULL, NULL, 1, 0, 0, 0, 1, NULL, '2026-01-28 06:24:51', '2026-01-28 07:16:05', NULL);
+INSERT INTO `forum_post` VALUES (51, 1001, '校园生活的美好时光', '今天在校园里遇到了', NULL, NULL, 0, 0, 0, 0, 0, NULL, '2026-01-28 07:14:58', '2026-01-28 07:14:58', NULL);
 
 -- ----------------------------
 -- Table structure for forum_post_comment
@@ -224,7 +225,7 @@ CREATE TABLE `forum_post_comment`  (
   INDEX `idx_root`(`root_id` ASC, `level` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_deleted`(`delete_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 54 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '帖子评论表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 55 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '帖子评论表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of forum_post_comment
@@ -232,6 +233,7 @@ CREATE TABLE `forum_post_comment`  (
 INSERT INTO `forum_post_comment` VALUES (51, 47, 1001, '评论内容', 0, 51, 0, 0, 1, 1, NULL, NULL, '2026-01-20 09:08:43', '2026-01-22 19:47:24');
 INSERT INTO `forum_post_comment` VALUES (52, 47, 1001, '评论内容', 51, 51, 1, 0, 0, 1, NULL, NULL, '2026-01-22 03:22:27', '2026-01-22 03:22:27');
 INSERT INTO `forum_post_comment` VALUES (53, 47, 1001, '评论内容', 52, 51, 2, 0, 0, 2, 1001, '2026-01-28 14:24:32', '2026-01-22 03:23:04', '2026-01-22 03:23:04');
+INSERT INTO `forum_post_comment` VALUES (54, 50, 1001, '评论内容', 0, 54, 0, 0, 0, 1, NULL, NULL, '2026-01-28 07:16:05', '2026-01-28 07:16:05');
 
 -- ----------------------------
 -- Table structure for undo_log
@@ -247,7 +249,7 @@ CREATE TABLE `undo_log`  (
   `log_modified` datetime(6) NOT NULL COMMENT 'modify datetime',
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of undo_log
