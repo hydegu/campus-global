@@ -1,3 +1,7 @@
+-- 创建数据库
+CREATE DATABASE IF NOT EXISTS `campus_finance_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `campus_finance_db`;
+
 /*
  Navicat Premium Dump SQL
 
