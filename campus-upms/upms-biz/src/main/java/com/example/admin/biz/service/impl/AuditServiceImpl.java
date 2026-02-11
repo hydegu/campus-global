@@ -411,7 +411,6 @@ public class AuditServiceImpl implements AuditService {
 		AuditRecord auditRecord = new AuditRecord();
 		auditRecord.setAuditNo(generateAuditNo(bizType));
 		auditRecord.setBizType(bizType);
-		auditRecord.setApplicantId(applicantId);
 		auditRecord.setStatus(AuditStatus.PENDING.getCode());
 		auditRecord.setRemark("活动申请");
 
@@ -419,10 +418,6 @@ public class AuditServiceImpl implements AuditService {
 
 		log.info("创建审核记录成功，审核ID：{}，业务类型：{}，申请人ID：{}", auditRecord.getId(), bizType, applicantId);
 		return auditRecord;
-	}
-
-	private String generateAuditNo(String bizType) {
-		return "AUD" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
 	}
 
 	@Override
