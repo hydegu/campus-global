@@ -9,15 +9,13 @@ import lombok.Data;
 @Schema(description = "角色查询DTO")
 public class RoleQueryDTO {
 
-	@NotNull(message = "页码不能为空")
 	@Min(value = 1, message = "页码必须大于0")
 	@Schema(description = "当前页码，从1开始", example = "1")
-	private Integer page;
+	private Integer page = 1;
 
-	@NotNull(message = "每页条数不能为空")
 	@Min(value = 1, message = "每页条数必须大于0")
 	@Schema(description = "每页条数", example = "10")
-	private Integer size;
+	private Integer size = 10;
 
 	@Schema(description = "角色名称")
 	private String roleName;

@@ -10,16 +10,14 @@ import lombok.Data;
 @Schema(description = "骑手申请查询DTO")
 public class RiderApplyQueryDTO {
 
-	@NotNull(message = "页码不能为空")
 	@Min(value = 1, message = "页码最小为1")
 	@Schema(description = "页码", example = "1")
-	private Integer page;
+	private Integer page = 1;
 
-	@NotNull(message = "每页条数不能为空")
 	@Min(value = 1, message = "每页条数最小为1")
 	@Max(value = 100, message = "每页条数最大为100")
 	@Schema(description = "每页条数", example = "10")
-	private Integer size;
+	private Integer size = 10;
 
 	@Schema(description = "骑手姓名", example = "李四骑手")
 	private String riderName;
