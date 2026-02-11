@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.forum.biz.mapper.ForumPostCommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.forum.api.entity.ForumPostComment">
+            <id property="id" column="id" />
+            <result property="postId" column="post_id" />
+            <result property="userId" column="user_id" />
+            <result property="commentContent" column="comment_content" />
+            <result property="parentId" column="parent_id" />
+            <result property="rootId" column="root_id" />
+            <result property="level" column="level" />
+            <result property="likeCount" column="like_count" />
+            <result property="replyCount" column="reply_count" />
+            <result property="status" column="status" />
+            <result property="deletedBy" column="deleted_by" />
+            <result property="createAt" column="create_at" />
+            <result property="updateAt" column="update_at" />
+            <result property="deleteAt" column="delete_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,post_id,user_id,comment_content,parent_id,root_id,
+        level,like_count,reply_count,status,deleted_by,
+        deleted_at,created_at,updated_at
+    </sql>
+    <select id="selectCommentByParentId" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO" >
+        select
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.create_at,
+            fpc.delete_at
+            from forum_post_comment fpc
+        where fpc.post_id = #{postId} and fpc.parent_id in
+        <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+            #{parentId}
+        </foreach>
+        and fpc.delete_at is null
+        and fpc.status = 1
+    </select>
+    
+    <select id="selectCommentByParentIdsAndLevel" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO" >
+        select
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.create_at,
+            fpc.delete_at
+            from forum_post_comment fpc
+        where fpc.post_id = #{postId} 
+        and fpc.parent_id in
+        <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+            #{parentId}
+        </foreach>
+        and fpc.level = #{level}
+        and fpc.delete_at is null
+        and fpc.status = 1
+    </select>
+
+    <select id="selectAllDescendantCommentsByParentIdsNonRecursive" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO">
+        select
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.create_at,
+            fpc.delete_at
+        from forum_post_comment fpc
+        where fpc.post_id = #{postId}
+        <if test="parentIds != null and parentIds.size() > 0">
+            and fpc.root_id in
+            <foreach collection="parentIds" item="parentId" open="(" separator="," close=")">
+                #{parentId}
+            </foreach>
+        </if>
+        <if test="parentIds == null or parentIds.size() == 0">
+            and 1 = 2
+        </if>
+        and fpc.delete_at is null
+        and fpc.status = 1
+        and fpc.level &gt; 0  -- 排除根评论本身
+        order by fpc.create_at ASC
+    </select>
+
+    <select id="selectCommentPageByPostId" resultType="com.example.forum.api.vo.ForumPostCommentQueryVO">
+        select
+            fpc.id,
+            fpc.post_id,
+            fpc.user_id,
+            fpc.parent_id,
+            fpc.root_id,
+            fpc.comment_content,
+            fpc.level,
+            fpc.like_count,
+            fpc.reply_count,
+            fpc.status,
+            fpc.create_at,
+            fpc.delete_at
+            from forum_post_comment fpc
+        where fpc.post_id = #{postId}
+                and fpc.parent_id = 0
+                and fpc.delete_at is null
+                and fpc.status = 1
+        ORDER BY fpc.create_at asc
+    </select>
+    
+    <!-- 根据帖子ID软删除所有评论 -->
+    <update id="updateDeleteByPostId">
+        UPDATE forum_post_comment 
+        SET 
+            status = 2,
+            deleted_by = #{userId},
+            delete_at = NOW()
+        WHERE post_id = #{postId} AND status = 1
+    </update>
+
+    <select id="selectCountByPostId" resultType="int">
+        select count(*)
+        from forum_post_comment
+        where post_id = #{postId}
+            and status = 1
+            and delete_at is null
+    </select>
+</mapper>

@@ -2,6 +2,7 @@
 package com.example.common.security.component;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.example.common.security.annotation.Inner;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,7 +24,7 @@ public class PermitAllUrlProperties implements InitializingBean {
 
 	private static final Pattern PATTERN = Pattern.compile("\\{(.*?)\\}");
 
-	private static final String[] DEFAULT_IGNORE_URLS = new String[] { "/actuator/**", "/error", "/v3/api-docs" };
+	private static final String[] DEFAULT_IGNORE_URLS = new String[]{"/actuator/**", "/error", "/v3/api-docs"};
 
 	@Getter
 	@Setter
@@ -43,5 +44,4 @@ public class PermitAllUrlProperties implements InitializingBean {
 
 		});
 	}
-
 }

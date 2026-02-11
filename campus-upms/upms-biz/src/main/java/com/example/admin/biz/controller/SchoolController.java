@@ -8,6 +8,7 @@ import com.example.admin.api.vo.SysSchoolVO;
 import com.example.common.core.util.Result;
 import com.example.common.docs.annotation.StandardApiResponses;
 import com.example.common.mybatis.utils.PageResult;
+import com.example.common.security.annotation.Inner;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,6 +49,7 @@ public class SchoolController {
     }
 
     @GetMapping("/{id}")
+    @Inner
     @Operation(summary = "查询学校详情", description = "根据ID查询学校的详细信息")
     public Result<SysSchoolVO> getSchoolById(@PathVariable Long id) {
         SysSchoolVO vo = schoolService.getSchoolById(id);

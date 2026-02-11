@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.forum.biz.mapper.ForumPostMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.forum.api.entity.ForumPost">
+            <id property="id" column="id" />
+            <result property="userId" column="user_id" />
+            <result property="postTitle" column="post_title" />
+            <result property="postContent" column="post_content" />
+            <result property="imageUrls" column="image_urls" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+            <result property="tags" column="tags" />
+            <result property="viewCount" column="view_count" />
+            <result property="likeCount" column="like_count" />
+            <result property="shareCount" column="share_count" />
+            <result property="favoriteCount" column="favorite_count" />
+            <result property="commentCount" column="comment_count" />
+            <result property="auditId" column="audit_id" />
+            <result property="createdAt" column="created_at" />
+            <result property="updatedAt" column="updated_at" />
+            <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+    <resultMap id="ForumPostQueryVOResultMap" type="com.example.forum.api.vo.ForumPostQueryVO">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="username" column="username" />
+        <result property="avatarUrl" column="avatar" />
+        <result property="postTitle" column="post_title" />
+        <result property="postContent" column="post_content" />
+        <result property="imageUrls" column="image_urls" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="viewCount" column="view_count" />
+        <result property="likeCount" column="like_count" />
+        <result property="shareCount" column="share_count" />
+        <result property="favoriteCount" column="favorite_count" />
+        <result property="commentCount" column="comment_count" />
+        <result property="createdAt" column="created_at" />
+        <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_id,post_title,post_content,image_urls,tags,
+        view_count,like_count,share_count,favorite_count,comment_count,
+        audit_id,created_at,updated_at,deleted_at
+    </sql>
+    
+    <select id="selectForumPostHotPage" resultType="com.example.forum.api.vo.ForumPostQueryVO">
+        select fp.id,
+               fp.user_id,
+               fp.post_title,
+               fp.post_content,
+               fp.image_urls,
+               fp.view_count,
+               fp.like_count,
+               fp.share_count,
+               fp.favorite_count,
+               fp.comment_count,
+               fp.create_at
+               from forum_post fp
+               where fp.delete_at is null
+               order by (fp.view_count * 0.1 + fp.comment_count * 2 + fp.like_count * 1 - (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(fp.create_at)) / 86400 * 0.5) desc
+    </select>
+    
+    <select id="selectForumPostTimePage" resultType="com.example.forum.api.vo.ForumPostQueryVO">
+        select fp.id,
+               fp.user_id,
+               fp.post_title,
+               fp.post_content,
+               fp.image_urls,
+               fp.view_count,
+               fp.like_count,
+               fp.share_count,
+               fp.favorite_count,
+               fp.comment_count,
+               fp.create_at
+                from forum_post fp
+                where fp.delete_at is null
+                order by fp.create_at desc
+    </select>
+    
+    <select id="selectPostDetailById" resultType="com.example.forum.api.vo.ForumPostQueryVO">
+        select
+            fp.id,
+            fp.user_id,
+            fp.post_title,
+            fp.post_content,
+            fp.image_urls,
+            fp.view_count,
+            fp.like_count,
+            fp.share_count,
+            fp.favorite_count,
+            fp.comment_count,
+            fp.create_at
+        from forum_post fp
+        where fp.id = #{id}
+    </select>
+    
+    <!-- 更新帖子评论数 -->
+    <update id="updateCommentCount">
+        UPDATE forum_post 
+        SET comment_count = GREATEST(0, COALESCE(comment_count, 0) + #{increment}),
+            update_at = NOW()
+        WHERE id = #{postId}
+    </update>
+</mapper>

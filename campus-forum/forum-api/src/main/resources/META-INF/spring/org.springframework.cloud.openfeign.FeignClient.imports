@@ -1,0 +1,3 @@
+com.example.forum.api.feign.RemoteSchoolService
+com.example.forum.api.feign.RemoteUserService
+com.example.forum.api.feign.RemoteAuditService

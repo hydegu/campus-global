@@ -10,6 +10,8 @@ import com.example.admin.api.dto.RiderApplyQueryDTO;
 import com.example.admin.api.dto.ServiceStaffAuditQueryDTO;
 import com.example.admin.api.entity.AuditRecord;
 import com.example.admin.api.vo.AuditRecordVO;
+import com.example.admin.api.dto.*;
+import com.example.admin.api.entity.AuditRecord;
 import com.example.admin.api.vo.MerchantSettleInVO;
 import com.example.admin.api.vo.PartnerAuditVO;
 import com.example.admin.api.vo.RiderApplyVO;
@@ -35,6 +37,8 @@ public interface AuditService {
 
 	@Deprecated
 	void auditRider(Long id, AuditDTO auditDTO);
+
+	AuditRecord createAuditRecord(CreateAuditDTO dto);
 
 	AuditRecord getAuditRecordByBizTypeAndId(String bizType, Long bizId);
 

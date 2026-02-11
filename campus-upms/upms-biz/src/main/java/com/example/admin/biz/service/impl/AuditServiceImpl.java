@@ -3,6 +3,7 @@ package com.example.admin.biz.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.admin.api.dto.*;
 import com.example.admin.api.entity.Address;
 import com.example.admin.api.entity.AuditRecord;
 import com.example.admin.api.entity.BaseUser;
@@ -97,7 +98,7 @@ public class AuditServiceImpl implements AuditService {
 
 		// 3. 验证审核状态
 		if (!AuditStatus.PENDING.getCode().equals(auditRecord.getStatus())) {
-			throw new BusinessException("AUDIT_ALREADY_PROCESSED", 
+			throw new BusinessException("AUDIT_ALREADY_PROCESSED",
 				"当前状态不允许审核，当前状态：" + AuditStatus.getText(auditRecord.getStatus()));
 		}
 
@@ -138,7 +139,7 @@ public class AuditServiceImpl implements AuditService {
 				throw new BusinessException("INVALID_BIZ_TYPE", "不支持的业务类型：" + bizType);
 		}
 
-		log.info("审核完成，审核记录ID：{}，业务类型：{}，审核状态：{}", 
+		log.info("审核完成，审核记录ID：{}，业务类型：{}，审核状态：{}",
 				auditRecordId, bizType, auditDTO.getAuditStatus());
 	}
 
@@ -155,7 +156,7 @@ public class AuditServiceImpl implements AuditService {
 
 		BaseUser baseUser = baseUserMapper.selectById(applicantId);
 		if (baseUser != null) {
-			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ?
 				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
 			baseUserMapper.updateById(baseUser);
 		}
@@ -174,7 +175,7 @@ public class AuditServiceImpl implements AuditService {
 
 		BaseUser baseUser = baseUserMapper.selectById(applicantId);
 		if (baseUser != null) {
-			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ?
 				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
 			baseUserMapper.updateById(baseUser);
 		}
@@ -193,7 +194,7 @@ public class AuditServiceImpl implements AuditService {
 
 		BaseUser baseUser = baseUserMapper.selectById(applicantId);
 		if (baseUser != null) {
-			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ?
 				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
 			baseUserMapper.updateById(baseUser);
 		}
@@ -212,7 +213,7 @@ public class AuditServiceImpl implements AuditService {
 
 		BaseUser baseUser = baseUserMapper.selectById(applicantId);
 		if (baseUser != null) {
-			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ? 
+			baseUser.setStatus(auditDTO.getAuditStatus().equals(AuditStatus.APPROVED.getCode()) ?
 				UserStatus.ENABLED.getCode() : UserStatus.DISABLED.getCode());
 			baseUserMapper.updateById(baseUser);
 		}
@@ -397,6 +398,31 @@ public class AuditServiceImpl implements AuditService {
 		}
 
 		log.info("骑手审核完成，骑手ID：{}，审核状态：{}", id, auditDTO.getAuditStatus());
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public AuditRecord createAuditRecord(CreateAuditDTO dto) {
+		String bizType = dto.getBizType();
+		Long applicantId = dto.getApplicantId();
+		if (!StringUtils.hasText(bizType) || applicantId == null) {
+			throw new BusinessException("INVALID_PARAM", "业务类型和申请人ID不能为空");
+		}
+		AuditRecord auditRecord = new AuditRecord();
+		auditRecord.setAuditNo(generateAuditNo(bizType));
+		auditRecord.setBizType(bizType);
+		auditRecord.setApplicantId(applicantId);
+		auditRecord.setStatus(AuditStatus.PENDING.getCode());
+		auditRecord.setRemark("活动申请");
+
+		auditRecordMapper.insert(auditRecord);
+
+		log.info("创建审核记录成功，审核ID：{}，业务类型：{}，申请人ID：{}", auditRecord.getId(), bizType, applicantId);
+		return auditRecord;
+	}
+
+	private String generateAuditNo(String bizType) {
+		return "AUD" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
 	}
 
 	@Override
@@ -835,7 +861,7 @@ public class AuditServiceImpl implements AuditService {
 
 		auditRecordMapper.insert(auditRecord);
 
-		log.info("创建审核记录成功，审核编号：{}，业务类型：{}，申请人ID：{}", 
+		log.info("创建审核记录成功，审核编号：{}，业务类型：{}，申请人ID：{}",
 			auditRecord.getAuditNo(), dto.getBizType(), dto.getApplicantId());
 
 		return auditRecord.getId();

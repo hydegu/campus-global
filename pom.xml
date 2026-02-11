@@ -77,6 +77,7 @@
     <module>campus-message</module> <!-- 消息模块 (端口: 4500) -->
     <module>campus-merchant</module> <!-- 商家模块 (端口: 4200) -->
     <module>campus-service</module> <!-- 服务模块 (端口: 4600) -->
+    <module>campus-forum</module> <!-- 论坛模块 (端口: 4100) -->
     <module>campus-order</module> <!-- 订单模块 (端口: 4300) -->
     <module>campus-behavior</module> <!-- 行为模块 (端口: 4700) -->
     <module>campus-finance</module>  <!-- 财务模块 (端口: 4800) -->
