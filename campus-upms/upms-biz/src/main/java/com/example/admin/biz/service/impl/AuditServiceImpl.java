@@ -450,7 +450,7 @@ public class AuditServiceImpl implements AuditService {
 		if (queryDTO.getAuditStatus() != null) {
 			wrapper.eq(UserRider::getAuditId, queryDTO.getAuditStatus());
 		}
-		wrapper.orderByDesc(UserRider::getCreateTime);
+		wrapper.orderByDesc(UserRider::getCreateAt);
 
 		Page<UserRider> riderPage = userRiderMapper.selectPage(page, wrapper);
 

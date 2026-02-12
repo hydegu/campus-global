@@ -28,9 +28,6 @@ public class UpdateUserSysDTO implements Serializable {
 	@Schema(description = "性别", example = "1")
 	private Integer gender;
 
-	@Schema(description = "出生日期", example = "1985-01-01")
-	private String birthday;
-
 	@Schema(description = "邮箱", example = "admin@example.com")
 	private String email;
 

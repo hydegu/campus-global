@@ -69,6 +69,18 @@ public class CreateMchUserDTO implements Serializable {
 	@Schema(description = "银行卡号", example = "6222021234567890123")
 	private String cardNumber;
 
+	@Schema(description = "省", example = "北京市")
+	private String province;
+
+	@Schema(description = "市", example = "北京市")
+	private String city;
+
+	@Schema(description = "区", example = "海淀区")
+	private String district;
+
+	@Schema(description = "详细地址", example = "中关村大街1号")
+	private String detailAddress;
+
 	@Schema(description = "余额", example = "0.00")
 	private BigDecimal balance;
 

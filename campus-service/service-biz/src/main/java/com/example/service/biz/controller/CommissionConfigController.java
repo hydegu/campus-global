@@ -1,8 +1,10 @@
 package com.example.service.biz.controller;
 
 import com.example.common.core.util.Result;
+import com.example.common.security.annotation.Inner;
 import com.example.service.api.dto.CommissionConfigAddDTO;
 import com.example.service.api.dto.CommissionConfigUpdateDTO;
+import com.example.service.api.entity.CommissionConfig;
 import com.example.service.biz.service.CommissionConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * 分佣配置管理Controller
@@ -35,5 +39,13 @@ public class CommissionConfigController {
     public Result<Void> updateCommissionConfig(@PathVariable Long id, @Valid @RequestBody CommissionConfigUpdateDTO dto) {
         commissionConfigService.updateCommissionConfig(id, dto);
         return Result.ok();
+    }
+
+    @GetMapping("/list")
+    @Inner
+    @Operation(summary = "查询分佣配置列表", description = "根据服务分类ID批量查询分佣配置，若categoryId为null则查询全局默认配置。返回Map包含所有配置类型：1-全局默认，2-服务分佣，3-商家分佣，4-合伙人分佣")
+    public Result<Map<Integer, CommissionConfig>> getCommissionConfigs(@RequestParam(required = false) Long categoryId) {
+        Map<Integer, CommissionConfig> configs = commissionConfigService.getCommissionConfigs(categoryId);
+        return Result.ok(configs);
     }
 }

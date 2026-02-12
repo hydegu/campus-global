@@ -33,6 +33,8 @@ import com.example.order.biz.mapper.OrderErrandMapper;
 import com.example.order.biz.mapper.OrderMainMapper;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.ErrandService;
+import com.example.service.api.entity.CommissionConfig;
+import com.example.service.api.feign.RemoteCommissionConfigService;
 import com.example.service.api.vo.ErrandCategoryVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -56,6 +59,7 @@ public class ErrandServiceImpl implements ErrandService {
 	private final RemoteFinanceService remoteFinanceService;
 	private final RemoteErrandCategoryService remoteErrandCategoryService;
 	private final AmapService amapService;
+	private final RemoteCommissionConfigService commissionConfigService;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -90,6 +94,32 @@ public class ErrandServiceImpl implements ErrandService {
 			totalAmount = totalAmount.add(createDTO.getDeliveryFee());
 		}
 
+		// ========== 计算各方收益 ==========
+		// 获取分佣配置（跑腿订单使用服务分佣）
+		Map<Integer, CommissionConfig> commissionConfigs = commissionConfigService.getCommissionConfigs(createDTO.getServiceTypeId()).getData();
+
+		// 服务人员收益：订单金额 × 服务分佣比例 (configType=2)
+		BigDecimal providerIncome = BigDecimal.ZERO;
+		CommissionConfig serviceConfig = commissionConfigs.get(2);
+		if (serviceConfig != null && serviceConfig.getCommissionRate() != null) {
+			providerIncome = totalAmount.multiply(serviceConfig.getCommissionRate())
+					.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
+		}
+
+		// 合伙人收益：订单金额 × 合伙人分佣比例 (configType=4)
+		BigDecimal partnerIncome = BigDecimal.ZERO;
+		CommissionConfig partnerConfig = commissionConfigs.get(4);
+		if (partnerConfig != null && partnerConfig.getCommissionRate() != null) {
+			partnerIncome = totalAmount.multiply(partnerConfig.getCommissionRate())
+					.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
+		}
+
+		// 平台收益：订单金额 - 服务人员收益 - 合伙人收益
+		BigDecimal platformIncome = totalAmount.subtract(providerIncome).subtract(partnerIncome);
+		if (platformIncome.compareTo(BigDecimal.ZERO) < 0) {
+			platformIncome = BigDecimal.ZERO;
+		}
+
 		OrderMain orderMain = new OrderMain();
 		orderMain.setOrderNo(generateOrderNo());
 		orderMain.setOrderType(OrderTypeEnum.SERVICE.getCode());
@@ -101,6 +131,10 @@ public class ErrandServiceImpl implements ErrandService {
 		orderMain.setServiceProviderType(2);
 		orderMain.setRemark(createDTO.getRemark());
 		orderMain.setVersion(0);
+		// 设置各方预计收益
+		orderMain.setEstimatedProviderIncome(providerIncome);
+		orderMain.setEstimatedPartnerIncome(partnerIncome);
+		orderMain.setEstimatedPlatformIncome(platformIncome);
 
 		orderMainMapper.insert(orderMain);
 
@@ -357,6 +391,10 @@ public class ErrandServiceImpl implements ErrandService {
 			balanceUpdateDTO.setAmount(providerIncome);
 			balanceUpdateDTO.setUpdateType(1);
 			remoteUserService.updateUserBalance(balanceUpdateDTO);
+
+			// 更新服务人员累计收益
+			balanceUpdateDTO.setUpdateType(2);
+			remoteUserService.updateUserBalance(balanceUpdateDTO);
 		}
 
 		// 合伙人收入
@@ -378,6 +416,10 @@ public class ErrandServiceImpl implements ErrandService {
 			partnerBalanceDTO.setUserType(3);
 			partnerBalanceDTO.setAmount(partnerIncome);
 			partnerBalanceDTO.setUpdateType(1);
+			remoteUserService.updateUserBalance(partnerBalanceDTO);
+
+			// 更新合伙人累计收益
+			partnerBalanceDTO.setUpdateType(2);
 			remoteUserService.updateUserBalance(partnerBalanceDTO);
 		}
 		

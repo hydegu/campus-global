@@ -100,4 +100,10 @@ public class BaseUser implements Serializable {
 	 */
 	 @Schema(description = "最后登陆时间")
 	 private LocalDateTime lastLoginAt;
+
+	/**
+	 * 最后登录IP
+	 */
+	@Schema(description = "最后登录IP")
+	private String lastLoginIp;
 }

@@ -35,6 +35,8 @@ import com.example.order.biz.mapper.OrderMainMapper;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.DeliveryFeeService;
 import com.example.order.biz.service.OrderService;
+import com.example.service.api.entity.CommissionConfig;
+import com.example.service.api.feign.RemoteCommissionConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -44,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -57,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
 	private final RemoteFinanceService remoteFinanceService;
 	private final DeliveryFeeService deliveryFeeService;
 	private final AmapService amapService;
+	private final RemoteCommissionConfigService commissionConfigService;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -83,6 +87,32 @@ public class OrderServiceImpl implements OrderService {
 			throw new BusinessException("INVALID_PARAM", "商品金额必须大于0");
 		}
 
+		// ========== 计算各方收益 ==========
+		// 获取分佣配置（外卖订单使用商家分佣）
+		Map<Integer, CommissionConfig> commissionConfigs = commissionConfigService.getCommissionConfigs(null).getData();
+
+		// 商家收益：订单金额 × 商家分佣比例 (configType=3)
+		BigDecimal providerIncome = BigDecimal.ZERO;
+		CommissionConfig merchantConfig = commissionConfigs.get(3);
+		if (merchantConfig != null && merchantConfig.getCommissionRate() != null) {
+			providerIncome = goodsAmount.multiply(merchantConfig.getCommissionRate())
+					.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
+		}
+
+		// 合伙人收益：订单金额 × 合伙人分佣比例 (configType=4)
+		BigDecimal partnerIncome = BigDecimal.ZERO;
+		CommissionConfig partnerConfig = commissionConfigs.get(4);
+		if (partnerConfig != null && partnerConfig.getCommissionRate() != null) {
+			partnerIncome = goodsAmount.multiply(partnerConfig.getCommissionRate())
+					.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
+		}
+
+		// 平台收益：订单金额 - 商家收益 - 合伙人收益
+		BigDecimal platformIncome = goodsAmount.subtract(providerIncome).subtract(partnerIncome);
+		if (platformIncome.compareTo(BigDecimal.ZERO) < 0) {
+			platformIncome = BigDecimal.ZERO;
+		}
+
 		OrderMain orderMain = new OrderMain();
 		orderMain.setOrderNo(generateOrderNo());
 		orderMain.setOrderType(1);
@@ -95,6 +125,10 @@ public class OrderServiceImpl implements OrderService {
 		orderMain.setServiceProviderId(createDTO.getMerchantId());
 		orderMain.setRemark(createDTO.getRemark());
 		orderMain.setVersion(0);
+		// 设置各方预计收益
+		orderMain.setEstimatedProviderIncome(providerIncome);
+		orderMain.setEstimatedPartnerIncome(partnerIncome);
+		orderMain.setEstimatedPlatformIncome(platformIncome);
 
 		orderMainMapper.insert(orderMain);
 
@@ -324,6 +358,10 @@ public class OrderServiceImpl implements OrderService {
 			riderBalanceDTO.setAmount(orderDelivery.getDeliveryFee());
 			riderBalanceDTO.setUpdateType(1);
 			remoteUserService.updateUserBalance(riderBalanceDTO);
+
+			// 更新骑手累计收益
+			riderBalanceDTO.setUpdateType(2);
+			remoteUserService.updateUserBalance(riderBalanceDTO);
 		}
 
 		// 服务提供方收入（商家）
@@ -346,6 +384,10 @@ public class OrderServiceImpl implements OrderService {
 			balanceUpdateDTO.setAmount(providerIncome);
 			balanceUpdateDTO.setUpdateType(1);
 			remoteUserService.updateUserBalance(balanceUpdateDTO);
+
+			// 更新商家累计收益
+			balanceUpdateDTO.setUpdateType(2);
+			remoteUserService.updateUserBalance(balanceUpdateDTO);
 		}
 
 		// 合伙人收入
@@ -367,6 +409,10 @@ public class OrderServiceImpl implements OrderService {
 			partnerBalanceDTO.setUserType(3);
 			partnerBalanceDTO.setAmount(partnerIncome);
 			partnerBalanceDTO.setUpdateType(1);
+			remoteUserService.updateUserBalance(partnerBalanceDTO);
+
+			// 更新合伙人累计收益
+			partnerBalanceDTO.setUpdateType(2);
 			remoteUserService.updateUserBalance(partnerBalanceDTO);
 		}
 		

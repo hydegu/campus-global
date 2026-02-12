@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -179,5 +180,97 @@ public class CommissionConfigServiceImpl extends ServiceImpl<CommissionConfigMap
             default:
                 return "未知类型";
         }
+    }
+
+    @Override
+    public CommissionConfig getCommissionConfig(Long categoryId, Integer configType) {
+        if (configType == null) {
+            return null;
+        }
+
+        // configType=1（全局默认）时，优先查询全局配置
+        if (configType == 1) {
+            LambdaQueryWrapper<CommissionConfig> wrapper = Wrappers.lambdaQuery();
+            wrapper.eq(CommissionConfig::getConfigType, 1);
+            wrapper.isNull(CommissionConfig::getCategoryId);
+            wrapper.isNull(CommissionConfig::getDeleteAt);
+            wrapper.eq(CommissionConfig::getStatus, 1);
+            wrapper.orderByDesc(CommissionConfig::getCreateAt);
+            wrapper.last("LIMIT 1");
+            return baseMapper.selectOne(wrapper);
+        }
+
+        // 其他类型，优先查询指定分类的配置
+        if (categoryId != null) {
+            LambdaQueryWrapper<CommissionConfig> wrapper = Wrappers.lambdaQuery();
+            wrapper.eq(CommissionConfig::getConfigType, configType);
+            wrapper.eq(CommissionConfig::getCategoryId, categoryId);
+            wrapper.isNull(CommissionConfig::getDeleteAt);
+            wrapper.eq(CommissionConfig::getStatus, 1);
+            wrapper.orderByDesc(CommissionConfig::getCreateAt);
+            wrapper.last("LIMIT 1");
+            CommissionConfig categoryConfig = baseMapper.selectOne(wrapper);
+            if (categoryConfig != null) {
+                return categoryConfig;
+            }
+        }
+
+        // 降级查询全局默认配置（configType=1）
+        LambdaQueryWrapper<CommissionConfig> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(CommissionConfig::getConfigType, 1);
+        wrapper.isNull(CommissionConfig::getCategoryId);
+        wrapper.isNull(CommissionConfig::getDeleteAt);
+        wrapper.eq(CommissionConfig::getStatus, 1);
+        wrapper.orderByDesc(CommissionConfig::getCreateAt);
+        wrapper.last("LIMIT 1");
+        return baseMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public Map<Integer, CommissionConfig> getCommissionConfigs(Long categoryId) {
+        Map<Integer, CommissionConfig> result = new HashMap<>();
+
+        // 查询指定分类的所有配置
+        LambdaQueryWrapper<CommissionConfig> wrapper = Wrappers.lambdaQuery();
+        wrapper.isNull(CommissionConfig::getDeleteAt);
+        wrapper.eq(CommissionConfig::getStatus, 1);
+        wrapper.orderByDesc(CommissionConfig::getCreateAt);
+        if (categoryId != null) {
+            wrapper.and(w -> w.eq(CommissionConfig::getCategoryId, categoryId).or().isNull(CommissionConfig::getCategoryId));
+        } else {
+            wrapper.isNull(CommissionConfig::getCategoryId);
+        }
+        List<CommissionConfig> allConfigs = baseMapper.selectList(wrapper);
+
+        // 按配置类型分组，保留最新的配置
+        Map<Integer, CommissionConfig> configMap = allConfigs.stream()
+                .collect(Collectors.toMap(
+                        CommissionConfig::getConfigType,
+                        config -> config,
+                        (existing, replacement) -> existing.getCreateAt().isAfter(replacement.getCreateAt()) ? existing : replacement
+                ));
+
+        // 获取全局默认配置（configType=1）
+        CommissionConfig globalConfig = configMap.get(1);
+        if (globalConfig == null) {
+            // 如果没有全局默认配置，创建一个默认配置（0%）
+            globalConfig = new CommissionConfig();
+            globalConfig.setConfigType(1);
+            globalConfig.setCategoryId(null);
+            globalConfig.setCommissionRate(BigDecimal.ZERO);
+        }
+
+        // 确保每种类型都有配置（使用全局默认作为兜底）
+        for (int configType = 1; configType <= 4; configType++) {
+            if (!configMap.containsKey(configType)) {
+                CommissionConfig defaultConfig = new CommissionConfig();
+                defaultConfig.setConfigType(configType);
+                defaultConfig.setCategoryId(categoryId);
+                defaultConfig.setCommissionRate(globalConfig.getCommissionRate());
+                configMap.put(configType, defaultConfig);
+            }
+        }
+
+        return configMap;
     }
 }

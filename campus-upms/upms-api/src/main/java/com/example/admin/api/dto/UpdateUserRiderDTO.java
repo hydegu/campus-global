@@ -54,13 +54,10 @@ public class UpdateUserRiderDTO implements Serializable {
 	private String emergencyContactPhone;
 
 	@Schema(description = "身份证正面URL", example = "https://example.com/id-front.jpg")
-	private String idCardFrontUrl;
+	private String idCardFront;
 
 	@Schema(description = "身份证反面URL", example = "https://example.com/id-back.jpg")
-	private String idCardBackUrl;
-
-	@Schema(description = "分佣比例(%)", example = "20.00")
-	private BigDecimal commissionRate;
+	private String idCardBack;
 
 	@Schema(description = "余额", example = "100.00")
 	private BigDecimal balance;

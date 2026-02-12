@@ -1,11 +1,13 @@
 package com.example.admin.api.vo;
 
+import com.example.admin.api.entity.Address;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Schema(description = "C端用户列表VO")
@@ -57,4 +59,7 @@ public class UserAppListVO extends AbstractUserVO implements Serializable {
 
 	@Schema(description = "创建时间")
 	private LocalDateTime createTime;
+
+	@Schema(description = "地址列表")
+	private List<Address> addresses;
 }

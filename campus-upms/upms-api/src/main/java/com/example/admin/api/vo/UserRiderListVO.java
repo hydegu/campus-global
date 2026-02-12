@@ -1,5 +1,6 @@
 package com.example.admin.api.vo;
 
+import com.example.admin.api.entity.Address;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -60,4 +61,7 @@ public class UserRiderListVO extends AbstractUserVO implements Serializable {
 
 	@Schema(description = "用户类型:1-系统用户 2-普通用户/服务者 3-商家 4-骑手")
 	private Integer userType;
+
+	@Schema(description = "地址信息")
+	private Address address;
 }

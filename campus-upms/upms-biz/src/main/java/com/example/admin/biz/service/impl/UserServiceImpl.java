@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.admin.api.dto.*;
 import com.example.admin.api.entity.*;
+import com.example.admin.api.entity.AppUserAddress;
 import com.example.admin.api.enums.MerchantBalanceUpdateTypeEnum;
 import com.example.admin.biz.mapper.BaseUserMapper;
 import com.example.admin.biz.mapper.RoleMapper;
@@ -17,12 +18,15 @@ import com.example.admin.biz.mapper.UserPartnerMapper;
 import com.example.admin.biz.mapper.UserRiderMapper;
 import com.example.admin.biz.mapper.UserRoleMapper;
 import com.example.admin.biz.mapper.UserSysMapper;
+import com.example.admin.biz.mapper.AddressMapper;
+import com.example.admin.biz.mapper.AppUserAddressMapper;
 import com.example.admin.biz.service.UserService;
 import com.example.admin.api.vo.UserAppListVO;
 import com.example.admin.api.vo.UserMchListVO;
 import com.example.admin.api.vo.UserPartnerListVO;
 import com.example.admin.api.vo.UserRiderListVO;
 import com.example.admin.api.vo.UserSysListVO;
+import com.example.admin.api.vo.CommonUserListVO;
 import com.example.admin.api.vo.AbstractUserVO;
 import com.example.common.core.enums.Gender;
 import com.example.common.core.enums.UserType;
@@ -61,6 +65,8 @@ public class UserServiceImpl implements UserService {
 	private final UserPartnerMapper userPartnerMapper;
 	private final UserSysMapper userSysMapper;
 	private final SysSchoolMapper sysSchoolMapper;
+	private final AddressMapper addressMapper;
+	private final AppUserAddressMapper appUserAddressMapper;
 	private final FileTemplate fileTemplate;
 	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -158,250 +164,67 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Page<UserAppListVO> listAppUsers(UserQueryDTO queryDTO) {
+	public Page<CommonUserListVO> listUsers(UserQueryDTO queryDTO) {
 		validatePageParams(queryDTO.getPage(), queryDTO.getSize());
 
-		Page<UserAppListVO> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
+		Page<CommonUserListVO> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
 
-		LambdaQueryWrapper<BaseUser> userWrapper = buildUserWrapper(queryDTO, UserType.APP.getCode());
-
-		IPage<BaseUser> userPage = baseUserMapper.selectPage(new Page<>(queryDTO.getPage(), queryDTO.getSize()), userWrapper);
-
-		if (userPage.getRecords().isEmpty()) {
-			return page;
-		}
-
-		List<Long> userIds = userPage.getRecords().stream()
-				.map(BaseUser::getId)
-				.collect(Collectors.toList());
-
-		Map<Long, UserApp> userAppMap = batchQueryUserApp(userIds);
-		Map<Long, SysSchool> schoolMap = batchQuerySchools(userAppMap.values());
-		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(userIds);
-
-		List<UserAppListVO> voList = userPage.getRecords().stream().map(user -> {
-			UserAppListVO vo = new UserAppListVO();
-			vo.setId(user.getId());
-			vo.setUsername(user.getUsername());
-			vo.setPhone(maskPhone(user.getPhone()));
-			vo.setAvatar(user.getAvatar());
-			vo.setStatus(user.getStatus());
-			vo.setCreateTime(user.getCreateAt());
-			vo.setUserType(user.getUserType());
-
-			fillAppUserDetail(vo, user.getId(), userAppMap, schoolMap);
-			fillRoleInfo(vo, user.getId(), userRoleMap);
-
-			return vo;
-		}).collect(Collectors.toList());
-
-		page.setRecords(voList);
-		page.setTotal(userPage.getTotal());
-
-		return page;
-	}
-
-	@Override
-	public Page<UserMchListVO> listMchUsers(UserQueryDTO queryDTO) {
-		validatePageParams(queryDTO.getPage(), queryDTO.getSize());
-
-		Page<UserMchListVO> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
-
-		LambdaQueryWrapper<BaseUser> userWrapper = buildUserWrapper(queryDTO, UserType.MERCHANT.getCode());
-
-		IPage<BaseUser> userPage = baseUserMapper.selectPage(new Page<>(queryDTO.getPage(), queryDTO.getSize()), userWrapper);
-
-		if (userPage.getRecords().isEmpty()) {
-			return page;
-		}
-
-		List<Long> userIds = userPage.getRecords().stream()
-				.map(BaseUser::getId)
-				.collect(Collectors.toList());
-
-		Map<Long, UserMch> userMchMap = batchQueryUserMch(userIds);
-		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(userIds);
-
-		List<UserMchListVO> voList = userPage.getRecords().stream().map(user -> {
-			UserMchListVO vo = new UserMchListVO();
-			vo.setId(user.getId());
-			vo.setUsername(user.getUsername());
-			vo.setPhone(maskPhone(user.getPhone()));
-			vo.setAvatar(user.getAvatar());
-			vo.setStatus(user.getStatus());
-			vo.setCreateTime(user.getCreateAt());
-			vo.setUserType(user.getUserType());
-
-			fillMchUserDetail(vo, user.getId(), userMchMap);
-			fillRoleInfo(vo, user.getId(), userRoleMap);
-
-			return vo;
-		}).collect(Collectors.toList());
-
-		page.setRecords(voList);
-		page.setTotal(userPage.getTotal());
-
-		return page;
-	}
-
-	@Override
-	public Page<UserRiderListVO> listRiderUsers(UserQueryDTO queryDTO) {
-		validatePageParams(queryDTO.getPage(), queryDTO.getSize());
-
-		Page<UserRiderListVO> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
-
-		LambdaQueryWrapper<BaseUser> userWrapper = buildUserWrapper(queryDTO, UserType.RIDER.getCode());
-
-		IPage<BaseUser> userPage = baseUserMapper.selectPage(new Page<>(queryDTO.getPage(), queryDTO.getSize()), userWrapper);
-
-		if (userPage.getRecords().isEmpty()) {
-			return page;
-		}
-
-		List<Long> userIds = userPage.getRecords().stream()
-				.map(BaseUser::getId)
-				.collect(Collectors.toList());
-
-		Map<Long, UserRider> userRiderMap = batchQueryUserRider(userIds);
-		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(userIds);
-
-		List<UserRiderListVO> voList = userPage.getRecords().stream().map(user -> {
-			UserRiderListVO vo = new UserRiderListVO();
-			vo.setId(user.getId());
-			vo.setUsername(user.getUsername());
-			vo.setPhone(maskPhone(user.getPhone()));
-			vo.setAvatar(user.getAvatar());
-			vo.setStatus(user.getStatus());
-			vo.setCreateTime(user.getCreateAt());
-			vo.setUserType(user.getUserType());
-
-			fillRiderUserDetail(vo, user.getId(), userRiderMap);
-			fillRoleInfo(vo, user.getId(), userRoleMap);
-
-			return vo;
-		}).collect(Collectors.toList());
-
-		page.setRecords(voList);
-		page.setTotal(userPage.getTotal());
-
-		return page;
-	}
-
-	@Override
-	public Page<UserSysListVO> listSysUsers(UserQueryDTO queryDTO) {
-		validatePageParams(queryDTO.getPage(), queryDTO.getSize());
-
-		Page<UserSysListVO> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
-
-		LambdaQueryWrapper<BaseUser> userWrapper = buildUserWrapper(queryDTO, UserType.SYSTEM.getCode());
-
-		IPage<BaseUser> userPage = baseUserMapper.selectPage(new Page<>(queryDTO.getPage(), queryDTO.getSize()), userWrapper);
-
-		if (userPage.getRecords().isEmpty()) {
-			return page;
-		}
-
-		List<Long> userIds = userPage.getRecords().stream()
-				.map(BaseUser::getId)
-				.collect(Collectors.toList());
-
-		Map<Long, UserSys> userSysMap = batchQueryUserSys(userIds);
-		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(userIds);
-
-		List<UserSysListVO> voList = userPage.getRecords().stream().map(user -> {
-			UserSysListVO vo = new UserSysListVO();
-			vo.setId(user.getId());
-			vo.setUsername(user.getUsername());
-			vo.setPhone(maskPhone(user.getPhone()));
-			vo.setAvatar(user.getAvatar());
-			vo.setNickname(user.getNickname());
-			vo.setEmail(user.getEmail());
-			vo.setStatus(user.getStatus());
-			vo.setCreateTime(user.getCreateAt());
-			vo.setLastLoginAt(user.getLastLoginAt());
-			vo.setUserType(user.getUserType());
-
-			fillSysUserDetail(vo, user.getId(), userSysMap);
-			fillRoleInfo(vo, user.getId(), userRoleMap);
-
-			return vo;
-		}).collect(Collectors.toList());
-
-		page.setRecords(voList);
-		page.setTotal(userPage.getTotal());
-
-		return page;
-	}
-
-	@Override
-	public Page<UserPartnerListVO> listPartnerUsers(UserQueryDTO queryDTO) {
-		validatePageParams(queryDTO.getPage(), queryDTO.getSize());
-
-		Page<UserPartnerListVO> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
-
-		LambdaQueryWrapper<BaseUser> userWrapper = buildUserWrapper(queryDTO, UserType.PARTNER.getCode());
-
-		IPage<BaseUser> userPage = baseUserMapper.selectPage(new Page<>(queryDTO.getPage(), queryDTO.getSize()), userWrapper);
-
-		if (userPage.getRecords().isEmpty()) {
-			return page;
-		}
-
-		List<Long> userIds = userPage.getRecords().stream()
-				.map(BaseUser::getId)
-				.collect(Collectors.toList());
-
-		Map<Long, UserPartner> userPartnerMap = batchQueryUserPartner(userIds);
-		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(userIds);
-
-		List<UserPartnerListVO> voList = userPage.getRecords().stream().map(user -> {
-			UserPartnerListVO vo = new UserPartnerListVO();
-			vo.setId(user.getId());
-			vo.setUsername(user.getUsername());
-			vo.setPhone(maskPhone(user.getPhone()));
-			vo.setAvatar(user.getAvatar());
-			vo.setStatus(user.getStatus());
-			vo.setCreateTime(user.getCreateAt());
-			vo.setUserType(user.getUserType());
-
-			fillPartnerUserDetail(vo, user.getId(), userPartnerMap);
-			fillRoleInfo(vo, user.getId(), userRoleMap);
-
-			return vo;
-		}).collect(Collectors.toList());
-
-		page.setRecords(voList);
-		page.setTotal(userPage.getTotal());
-
-		return page;
-	}
-
-	private LambdaQueryWrapper<BaseUser> buildUserWrapper(UserQueryDTO queryDTO, Integer userType) {
 		LambdaQueryWrapper<BaseUser> userWrapper = Wrappers.lambdaQuery();
-		userWrapper.eq(BaseUser::getUserType, userType);
 
-		if (StringUtils.hasText(queryDTO.getUsername())) {
-			userWrapper.like(BaseUser::getUsername, queryDTO.getUsername());
+		// 关键字搜索：支持用户名、手机号、邮箱、昵称
+		if (StringUtils.hasText(queryDTO.getKeyword())) {
+			userWrapper.and(wrapper -> wrapper
+					.like(BaseUser::getUsername, queryDTO.getKeyword())
+					.or()
+					.like(BaseUser::getPhone, queryDTO.getKeyword())
+					.or()
+					.like(BaseUser::getEmail, queryDTO.getKeyword())
+					.or()
+					.like(BaseUser::getNickname, queryDTO.getKeyword()));
 		}
 
-		if (StringUtils.hasText(queryDTO.getPhone())) {
-			userWrapper.like(BaseUser::getPhone, queryDTO.getPhone());
-		}
-
+		// 状态过滤
 		if (queryDTO.getStatus() != null) {
 			userWrapper.eq(BaseUser::getStatus, queryDTO.getStatus());
 		}
 
-		if (StringUtils.hasText(queryDTO.getStartTime())) {
-			userWrapper.ge(BaseUser::getCreateAt, queryDTO.getStartTime());
+		// 用户类型过滤
+		if (queryDTO.getUserType() != null) {
+			userWrapper.eq(BaseUser::getUserType, queryDTO.getUserType());
 		}
 
-		if (StringUtils.hasText(queryDTO.getEndTime())) {
-			userWrapper.le(BaseUser::getCreateAt, queryDTO.getEndTime());
+		IPage<BaseUser> userPage = baseUserMapper.selectPage(
+			new Page<>(queryDTO.getPage(), queryDTO.getSize()),
+			userWrapper
+		);
+
+		if (userPage.getRecords().isEmpty()) {
+			return page;
 		}
 
-		return userWrapper;
+		List<CommonUserListVO> voList = userPage.getRecords().stream().map(user -> {
+			CommonUserListVO vo = new CommonUserListVO();
+			vo.setId(user.getId());
+			vo.setUsername(user.getUsername());
+			vo.setNickname(user.getNickname());
+			vo.setPhone(user.getPhone());
+			vo.setEmail(user.getEmail());
+			vo.setUserType(user.getUserType());
+			vo.setAvatar(user.getAvatar());
+			vo.setStatus(user.getStatus());
+			vo.setLastLoginTime(user.getLastLoginAt());
+			vo.setLastLoginIp(user.getLastLoginIp());
+			vo.setCreateTime(user.getCreateAt());
+			return vo;
+		}).collect(Collectors.toList());
+
+		page.setRecords(voList);
+		page.setTotal(userPage.getTotal());
+
+		return page;
 	}
+
+
 
 	private Map<Long, UserApp> batchQueryUserApp(List<Long> userIds) {
 		if (userIds == null || userIds.isEmpty()) {
@@ -467,6 +290,104 @@ public class UserServiceImpl implements UserService {
 				.collect(Collectors.toMap(UserSys::getBaseUserId, Function.identity(), (v1, v2) -> v1));
 	}
 
+	private Map<Long, List<Address>> batchQueryAppUserAddresses(List<Long> userIds) {
+		if (userIds == null || userIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		LambdaQueryWrapper<AppUserAddress> wrapper = Wrappers.lambdaQuery();
+		wrapper.in(AppUserAddress::getUserId, userIds);
+		List<AppUserAddress> appUserAddresses = appUserAddressMapper.selectList(wrapper);
+
+		if (appUserAddresses.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		Set<Long> addressIds = appUserAddresses.stream()
+				.map(AppUserAddress::getAddressId)
+				.collect(Collectors.toSet());
+
+		List<Address> addresses = addressMapper.selectBatchIds(addressIds);
+		Map<Long, Address> addressMap = addresses.stream()
+				.collect(Collectors.toMap(Address::getId, Function.identity()));
+
+		return appUserAddresses.stream()
+				.collect(Collectors.groupingBy(
+					AppUserAddress::getUserId,
+					Collectors.mapping(aua -> addressMap.get(aua.getAddressId()), Collectors.toList())
+				));
+	}
+
+	private Map<Long, Address> batchQueryMchAddresses(List<Long> userIds) {
+		if (userIds == null || userIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		LambdaQueryWrapper<UserMch> mchWrapper = Wrappers.lambdaQuery();
+		mchWrapper.in(UserMch::getBaseUserId, userIds);
+		mchWrapper.isNotNull(UserMch::getAddressId);
+		List<UserMch> userMchs = userMchMapper.selectList(mchWrapper);
+
+		if (userMchs.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		Set<Long> addressIds = userMchs.stream()
+				.map(UserMch::getAddressId)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+
+		if (addressIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		List<Address> addresses = addressMapper.selectBatchIds(addressIds);
+		Map<Long, Address> addressMap = addresses.stream()
+				.collect(Collectors.toMap(Address::getId, Function.identity()));
+
+		return userMchs.stream()
+				.collect(Collectors.toMap(
+					UserMch::getBaseUserId,
+					um -> addressMap.get(um.getAddressId()),
+					(v1, v2) -> v1
+				));
+	}
+
+	private Map<Long, Address> batchQueryRiderAddresses(List<Long> userIds) {
+		if (userIds == null || userIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		LambdaQueryWrapper<UserRider> riderWrapper = Wrappers.lambdaQuery();
+		riderWrapper.in(UserRider::getBaseUserId, userIds);
+		riderWrapper.isNotNull(UserRider::getAddressId);
+		List<UserRider> userRiders = userRiderMapper.selectList(riderWrapper);
+
+		if (userRiders.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		Set<Long> addressIds = userRiders.stream()
+				.map(UserRider::getAddressId)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+
+		if (addressIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		List<Address> addresses = addressMapper.selectBatchIds(addressIds);
+		Map<Long, Address> addressMap = addresses.stream()
+				.collect(Collectors.toMap(Address::getId, Function.identity()));
+
+		return userRiders.stream()
+				.collect(Collectors.toMap(
+					UserRider::getBaseUserId,
+					ur -> addressMap.get(ur.getAddressId()),
+					(v1, v2) -> v1
+				));
+	}
+
 	private Map<Long, List<Role>> batchQueryUserRoles(List<Long> userIds) {
 		if (userIds == null || userIds.isEmpty()) {
 			return Collections.emptyMap();
@@ -492,7 +413,7 @@ public class UserServiceImpl implements UserService {
 						Collectors.mapping(ur -> roleMap.get(ur.getRoleId()), Collectors.toList())));
 	}
 
-	private void fillAppUserDetail(UserAppListVO vo, Long userId, Map<Long, UserApp> userAppMap, Map<Long, SysSchool> schoolMap) {
+	private void fillAppUserDetail(UserAppListVO vo, Long userId, Map<Long, UserApp> userAppMap, Map<Long, SysSchool> schoolMap, Map<Long, List<Address>> addressMap) {
 		UserApp userApp = userAppMap.get(userId);
 		if (userApp != null) {
 			vo.setCode(userApp.getStuCode());
@@ -506,9 +427,16 @@ public class UserServiceImpl implements UserService {
 				vo.setSchoolName(school.getSchoolName());
 			}
 		}
+
+		List<Address> addresses = addressMap.get(userId);
+		if (addresses != null && !addresses.isEmpty()) {
+			vo.setAddresses(addresses);
+		} else {
+			vo.setAddresses(Collections.emptyList());
+		}
 	}
 
-	private void fillMchUserDetail(UserMchListVO vo, Long userId, Map<Long, UserMch> userMchMap) {
+	private void fillMchUserDetail(UserMchListVO vo, Long userId, Map<Long, UserMch> userMchMap, Map<Long, Address> addressMap) {
 		UserMch userMch = userMchMap.get(userId);
 		if (userMch != null) {
 			vo.setMchName(userMch.getMchName());
@@ -519,17 +447,28 @@ public class UserServiceImpl implements UserService {
 			vo.setBusinessStartTime(userMch.getBusinessStartTime());
 			vo.setBusinessEndTime(userMch.getBusinessEndTime());
 		}
+
+		Address address = addressMap.get(userId);
+		if (address != null) {
+			vo.setAddress(address);
+		}
 	}
 
-	private void fillRiderUserDetail(UserRiderListVO vo, Long userId, Map<Long, UserRider> userRiderMap) {
+	private void fillRiderUserDetail(UserRiderListVO vo, Long userId, Map<Long, UserRider> userRiderMap, Map<Long, Address> addressMap) {
 		UserRider userRider = userRiderMap.get(userId);
 		if (userRider != null) {
 			vo.setGender(Gender.getText(userRider.getGender()));
 			vo.setRealName(userRider.getRealName());
 			vo.setBalance(userRider.getBalance());
+			vo.setIdCard(userRider.getIdCard());
 			vo.setCommissionTotal(userRider.getTotalAmount());
 			vo.setEmergencyContactName(userRider.getEmergencyContactName());
 			vo.setEmergencyContactPhone(maskPhone(userRider.getEmergencyContactPhone()));
+		}
+
+		Address address = addressMap.get(userId);
+		if (address != null) {
+			vo.setAddress(address);
 		}
 	}
 
@@ -842,21 +781,24 @@ public class UserServiceImpl implements UserService {
 		appWrapper.eq(UserApp::getBaseUserId, baseUser.getId());
 		UserApp userApp = userAppMapper.selectOne(appWrapper);
 
-		if (userApp != null) {
-			if (dto.getSchoolId() != null) {
-				userApp.setSchoolId(dto.getSchoolId());
-			}
-			if (StringUtils.hasText(dto.getRealName())) {
-				userApp.setRealName(dto.getRealName());
-			}
-			if (dto.getGender() != null) {
-				userApp.setGender(dto.getGender());
-			}
-			if (StringUtils.hasText(dto.getStuCode())) {
-				userApp.setStuCode(dto.getStuCode());
-			}
-			userAppMapper.updateById(userApp);
+		// 添加错误处理：如果拓展表记录不存在，抛出异常
+		if (userApp == null) {
+			throw new BusinessException("USER_EXT_NOT_FOUND", "C端用户扩展信息不存在，用户ID：" + baseUser.getId());
 		}
+
+		if (dto.getSchoolId() != null) {
+			userApp.setSchoolId(dto.getSchoolId());
+		}
+		if (StringUtils.hasText(dto.getRealName())) {
+			userApp.setRealName(dto.getRealName());
+		}
+		if (dto.getGender() != null) {
+			userApp.setGender(dto.getGender());
+		}
+		if (StringUtils.hasText(dto.getStuCode())) {
+			userApp.setStuCode(dto.getStuCode());
+		}
+		userAppMapper.updateById(userApp);
 	}
 
 	private void updateMchUser(BaseUser baseUser, UpdateUserMchDTO dto) {
@@ -882,44 +824,91 @@ public class UserServiceImpl implements UserService {
 		mchWrapper.eq(UserMch::getBaseUserId, baseUser.getId());
 		UserMch userMch = userMchMapper.selectOne(mchWrapper);
 
-		if (userMch != null) {
-			if (StringUtils.hasText(dto.getShopName())) {
-				userMch.setMchName(dto.getShopName());
+		// 添加错误处理：如果拓展表记录不存在，抛出异常
+		if (userMch == null) {
+			throw new BusinessException("USER_EXT_NOT_FOUND", "商家用户扩展信息不存在，用户ID：" + baseUser.getId());
+		}
+
+		if (StringUtils.hasText(dto.getShopName())) {
+			userMch.setMchName(dto.getShopName());
+		}
+		if (StringUtils.hasText(dto.getBusinessLicenseUrls())) {
+			userMch.setBusinessLicenseUrls(dto.getBusinessLicenseUrls());
+		}
+		if (StringUtils.hasText(dto.getPaymentAccount())) {
+			userMch.setCardNumber(dto.getPaymentAccount());
+		}
+		if (StringUtils.hasText(dto.getBusinessStartTime())) {
+			userMch.setBusinessStartTime(LocalTime.parse(dto.getBusinessStartTime()));
+		}
+		if (StringUtils.hasText(dto.getBusinessEndTime())) {
+			userMch.setBusinessEndTime(LocalTime.parse(dto.getBusinessEndTime()));
+		}
+		if (StringUtils.hasText(dto.getLogo())) {
+			userMch.setLogo(dto.getLogo());
+		}
+		if (StringUtils.hasText(dto.getContactName())) {
+			userMch.setContactName(dto.getContactName());
+		}
+		if (StringUtils.hasText(dto.getIdCard())) {
+			userMch.setIdCard(dto.getIdCard());
+		}
+		if (dto.getPartnerId() != null) {
+			userMch.setPartnerId(dto.getPartnerId());
+		}
+		if (dto.getMinimumOrderAmount() != null) {
+			userMch.setMinimumOrderAmount(dto.getMinimumOrderAmount());
+		}
+		if (dto.getBalance() != null) {
+			userMch.setBalance(dto.getBalance());
+		}
+		if (dto.getTotalAmount() != null) {
+			userMch.setTotalAmount(dto.getTotalAmount());
+		}
+		userMchMapper.updateById(userMch);
+
+		// 添加地址更新逻辑
+		if (StringUtils.hasText(dto.getProvince()) || StringUtils.hasText(dto.getCity()) ||
+			StringUtils.hasText(dto.getDistrict()) || StringUtils.hasText(dto.getDetailAddress())) {
+			Long addressId = userMch.getAddressId();
+			Address address = (addressId != null) ? addressMapper.selectById(addressId) : null;
+
+			if (address == null) {
+				// 创建新地址
+				address = new Address();
+				if (StringUtils.hasText(dto.getProvince())) {
+					address.setProvince(dto.getProvince());
+				}
+				if (StringUtils.hasText(dto.getCity())) {
+					address.setCity(dto.getCity());
+				}
+				if (StringUtils.hasText(dto.getDistrict())) {
+					address.setDistrict(dto.getDistrict());
+				}
+				if (StringUtils.hasText(dto.getDetailAddress())) {
+					address.setDetailAddress(dto.getDetailAddress());
+				}
+				addressMapper.insert(address);
+				userMch.setAddressId(address.getId());
+				userMchMapper.updateById(userMch);
+				log.info("商家用户地址创建成功，用户ID：{}，地址ID：{}", baseUser.getId(), address.getId());
+			} else {
+				// 更新现有地址
+				if (StringUtils.hasText(dto.getProvince())) {
+					address.setProvince(dto.getProvince());
+				}
+				if (StringUtils.hasText(dto.getCity())) {
+					address.setCity(dto.getCity());
+				}
+				if (StringUtils.hasText(dto.getDistrict())) {
+					address.setDistrict(dto.getDistrict());
+				}
+				if (StringUtils.hasText(dto.getDetailAddress())) {
+					address.setDetailAddress(dto.getDetailAddress());
+				}
+				addressMapper.updateById(address);
+				log.info("商家用户地址更新成功，用户ID：{}，地址ID：{}", baseUser.getId(), addressId);
 			}
-			if (StringUtils.hasText(dto.getBusinessLicenseUrls())) {
-				userMch.setBusinessLicenseUrls(dto.getBusinessLicenseUrls());
-			}
-			if (StringUtils.hasText(dto.getPaymentAccount())) {
-				userMch.setCardNumber(dto.getPaymentAccount());
-			}
-			if (StringUtils.hasText(dto.getBusinessStartTime())) {
-				userMch.setBusinessStartTime(LocalTime.parse(dto.getBusinessStartTime()));
-			}
-			if (StringUtils.hasText(dto.getBusinessEndTime())) {
-				userMch.setBusinessEndTime(LocalTime.parse(dto.getBusinessEndTime()));
-			}
-			if (StringUtils.hasText(dto.getLogo())) {
-				userMch.setLogo(dto.getLogo());
-			}
-			if (StringUtils.hasText(dto.getContactName())) {
-				userMch.setContactName(dto.getContactName());
-			}
-			if (StringUtils.hasText(dto.getIdCard())) {
-				userMch.setIdCard(dto.getIdCard());
-			}
-			if (dto.getPartnerId() != null) {
-				userMch.setPartnerId(dto.getPartnerId());
-			}
-			if (dto.getMinimumOrderAmount() != null) {
-				userMch.setMinimumOrderAmount(dto.getMinimumOrderAmount());
-			}
-			if (dto.getBalance() != null) {
-				userMch.setBalance(dto.getBalance());
-			}
-			if (dto.getTotalAmount() != null) {
-				userMch.setTotalAmount(dto.getTotalAmount());
-			}
-			userMchMapper.updateById(userMch);
 		}
 	}
 
@@ -943,38 +932,85 @@ public class UserServiceImpl implements UserService {
 		riderWrapper.eq(UserRider::getBaseUserId, baseUser.getId());
 		UserRider userRider = userRiderMapper.selectOne(riderWrapper);
 
-		if (userRider != null) {
-			if (StringUtils.hasText(dto.getRiderName())) {
-				userRider.setRealName(dto.getRiderName());
+		// 添加错误处理：如果拓展表记录不存在，抛出异常
+		if (userRider == null) {
+			throw new BusinessException("USER_EXT_NOT_FOUND", "骑手用户扩展信息不存在，用户ID：" + baseUser.getId());
+		}
+
+		if (StringUtils.hasText(dto.getRiderName())) {
+			userRider.setRealName(dto.getRiderName());
+		}
+		if (StringUtils.hasText(dto.getIdCard())) {
+			userRider.setIdCard(dto.getIdCard());
+		}
+		if (dto.getGender() != null) {
+			userRider.setGender(dto.getGender());
+		}
+		if (StringUtils.hasText(dto.getCardNumber())) {
+			userRider.setCardNumber(dto.getCardNumber());
+		}
+		if (StringUtils.hasText(dto.getEmergencyContactName())) {
+			userRider.setEmergencyContactName(dto.getEmergencyContactName());
+		}
+		if (StringUtils.hasText(dto.getEmergencyContactPhone())) {
+			userRider.setEmergencyContactPhone(dto.getEmergencyContactPhone());
+		}
+		if (StringUtils.hasText(dto.getIdCardFront())) {
+			userRider.setIdCardFront(dto.getIdCardFront());
+		}
+		if (StringUtils.hasText(dto.getIdCardBack())) {
+			userRider.setIdCardBack(dto.getIdCardBack());
+		}
+		if (dto.getBalance() != null) {
+			userRider.setBalance(dto.getBalance());
+		}
+		if (dto.getTotalAmount() != null) {
+			userRider.setTotalAmount(dto.getTotalAmount());
+		}
+		userRiderMapper.updateById(userRider);
+
+		// 添加地址更新逻辑
+		if (StringUtils.hasText(dto.getProvince()) || StringUtils.hasText(dto.getCity()) ||
+			StringUtils.hasText(dto.getDistrict()) || StringUtils.hasText(dto.getDetailAddress())) {
+			Long addressId = userRider.getAddressId();
+			Address address = (addressId != null) ? addressMapper.selectById(addressId) : null;
+
+			if (address == null) {
+				// 创建新地址
+				address = new Address();
+				if (StringUtils.hasText(dto.getProvince())) {
+					address.setProvince(dto.getProvince());
+				}
+				if (StringUtils.hasText(dto.getCity())) {
+					address.setCity(dto.getCity());
+				}
+				if (StringUtils.hasText(dto.getDistrict())) {
+					address.setDistrict(dto.getDistrict());
+				}
+				if (StringUtils.hasText(dto.getDetailAddress())) {
+					address.setDetailAddress(dto.getDetailAddress());
+				}
+				addressMapper.insert(address);
+				userRider.setAddressId(address.getId());
+				userRiderMapper.updateById(userRider);
+				log.info("骑手用户地址创建成功，用户ID：{}，地址ID：{}", baseUser.getId(), address.getId());
+			} else {
+				// 更新现有地址
+				if (StringUtils.hasText(dto.getProvince())) {
+					address.setProvince(dto.getProvince());
+				}
+				if (StringUtils.hasText(dto.getCity())) {
+					address.setCity(dto.getCity());
+				}
+				if (StringUtils.hasText(dto.getDistrict())) {
+					address.setDistrict(dto.getDistrict());
+				}
+				if (StringUtils.hasText(dto.getDetailAddress())) {
+					address.setDetailAddress(dto.getDetailAddress());
+				}
+				addressMapper.updateById(address);
+				log.info("骑手用户地址更新成功，用户ID：{}，地址ID：{}", baseUser.getId(), addressId);
 			}
-			if (StringUtils.hasText(dto.getIdCard())) {
-				userRider.setIdCard(dto.getIdCard());
-			}
-			if (dto.getGender() != null) {
-				userRider.setGender(dto.getGender());
-			}
-			if (StringUtils.hasText(dto.getCardNumber())) {
-				userRider.setCardNumber(dto.getCardNumber());
-			}
-			if (StringUtils.hasText(dto.getEmergencyContactName())) {
-				userRider.setEmergencyContactName(dto.getEmergencyContactName());
-			}
-			if (StringUtils.hasText(dto.getEmergencyContactPhone())) {
-				userRider.setEmergencyContactPhone(dto.getEmergencyContactPhone());
-			}
-			if (StringUtils.hasText(dto.getIdCardFrontUrl())) {
-				userRider.setIdCardFront(dto.getIdCardFrontUrl());
-			}
-			if (StringUtils.hasText(dto.getIdCardBackUrl())) {
-				userRider.setIdCardBack(dto.getIdCardBackUrl());
-			}
-			if (dto.getBalance() != null) {
-				userRider.setBalance(dto.getBalance());
-			}
-			if (dto.getTotalAmount() != null) {
-				userRider.setTotalAmount(dto.getTotalAmount());
-			}
-			userRiderMapper.updateById(userRider);
 		}
 	}
 
@@ -1002,15 +1038,18 @@ public class UserServiceImpl implements UserService {
 		sysWrapper.eq(UserSys::getBaseUserId, baseUser.getId());
 		UserSys userSys = userSysMapper.selectOne(sysWrapper);
 
-		if (userSys != null) {
-			if (StringUtils.hasText(dto.getRealName())) {
-				userSys.setRealName(dto.getRealName());
-			}
-			if (dto.getGender() != null) {
-				userSys.setGender(dto.getGender());
-			}
-			userSysMapper.updateById(userSys);
+		// 添加错误处理：如果拓展表记录不存在，抛出异常
+		if (userSys == null) {
+			throw new BusinessException("USER_EXT_NOT_FOUND", "系统用户扩展信息不存在，用户ID：" + baseUser.getId());
 		}
+
+		if (StringUtils.hasText(dto.getRealName())) {
+			userSys.setRealName(dto.getRealName());
+		}
+		if (dto.getGender() != null) {
+			userSys.setGender(dto.getGender());
+		}
+		userSysMapper.updateById(userSys);
 	}
 
 	private void updatePartnerUser(BaseUser baseUser, UpdateUserPartnerDTO dto) {
@@ -1233,6 +1272,28 @@ public class UserServiceImpl implements UserService {
 		userMch.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
 		userMchMapper.insert(userMch);
 
+		// 创建地址记录（如果有地址信息）
+		if (StringUtils.hasText(dto.getProvince()) || StringUtils.hasText(dto.getCity()) ||
+			StringUtils.hasText(dto.getDistrict()) || StringUtils.hasText(dto.getDetailAddress())) {
+			Address address = new Address();
+			if (StringUtils.hasText(dto.getProvince())) {
+				address.setProvince(dto.getProvince());
+			}
+			if (StringUtils.hasText(dto.getCity())) {
+				address.setCity(dto.getCity());
+			}
+			if (StringUtils.hasText(dto.getDistrict())) {
+				address.setDistrict(dto.getDistrict());
+			}
+			if (StringUtils.hasText(dto.getDetailAddress())) {
+				address.setDetailAddress(dto.getDetailAddress());
+			}
+			addressMapper.insert(address);
+			userMch.setAddressId(address.getId());
+			userMchMapper.updateById(userMch);
+			log.info("商家用户地址创建成功，用户ID：{}，地址ID：{}", baseUser.getId(), address.getId());
+		}
+
 		log.info("商家用户创建成功，用户ID：{}，用户名：{}，商户名：{}", baseUser.getId(), dto.getUsername(), dto.getMchName());
 
 		// 创建用户角色关联
@@ -1321,6 +1382,28 @@ public class UserServiceImpl implements UserService {
 		userRider.setBalance(dto.getBalance() != null ? dto.getBalance() : BigDecimal.ZERO);
 		userRider.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
 		userRiderMapper.insert(userRider);
+
+		// 创建地址记录（如果有地址信息）
+		if (StringUtils.hasText(dto.getProvince()) || StringUtils.hasText(dto.getCity()) ||
+			StringUtils.hasText(dto.getDistrict()) || StringUtils.hasText(dto.getDetailAddress())) {
+			Address address = new Address();
+			if (StringUtils.hasText(dto.getProvince())) {
+				address.setProvince(dto.getProvince());
+			}
+			if (StringUtils.hasText(dto.getCity())) {
+				address.setCity(dto.getCity());
+			}
+			if (StringUtils.hasText(dto.getDistrict())) {
+				address.setDistrict(dto.getDistrict());
+			}
+			if (StringUtils.hasText(dto.getDetailAddress())) {
+				address.setDetailAddress(dto.getDetailAddress());
+			}
+			addressMapper.insert(address);
+			userRider.setAddressId(address.getId());
+			userRiderMapper.updateById(userRider);
+			log.info("骑手用户地址创建成功，用户ID：{}，地址ID：{}", baseUser.getId(), address.getId());
+		}
 
 		log.info("骑手用户创建成功，用户ID：{}，用户名：{}，真实姓名：{}", baseUser.getId(), dto.getUsername(), dto.getRealName());
 
@@ -1606,8 +1689,9 @@ public class UserServiceImpl implements UserService {
 		Map<Long, UserApp> userAppMap = batchQueryUserApp(Collections.singletonList(id));
 		Map<Long, SysSchool> schoolMap = batchQuerySchools(userAppMap.values());
 		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+		Map<Long, List<Address>> appUserAddressMap = batchQueryAppUserAddresses(Collections.singletonList(id));
 
-		fillAppUserDetail(vo, baseUser.getId(), userAppMap, schoolMap);
+		fillAppUserDetail(vo, baseUser.getId(), userAppMap, schoolMap, appUserAddressMap);
 		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
 
 		return vo;
@@ -1641,8 +1725,9 @@ public class UserServiceImpl implements UserService {
 
 		Map<Long, UserMch> userMchMap = batchQueryUserMch(Collections.singletonList(id));
 		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+		Map<Long, Address> mchAddressMap = batchQueryMchAddresses(Collections.singletonList(id));
 
-		fillMchUserDetail(vo, baseUser.getId(), userMchMap);
+		fillMchUserDetail(vo, baseUser.getId(), userMchMap, mchAddressMap);
 		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
 
 		return vo;
@@ -1676,8 +1761,9 @@ public class UserServiceImpl implements UserService {
 
 		Map<Long, UserRider> userRiderMap = batchQueryUserRider(Collections.singletonList(id));
 		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(Collections.singletonList(id));
+		Map<Long, Address> riderAddressMap = batchQueryRiderAddresses(Collections.singletonList(id));
 
-		fillRiderUserDetail(vo, baseUser.getId(), userRiderMap);
+		fillRiderUserDetail(vo, baseUser.getId(), userRiderMap, riderAddressMap);
 		fillRoleInfo(vo, baseUser.getId(), userRoleMap);
 
 		return vo;

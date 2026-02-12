@@ -59,43 +59,10 @@ public class UserController {
 		return Result.ok(userInfo);
 	}
 
-	@GetMapping("/app-user/list")
-	@Operation(summary = "分页查询C端用户列表", description = "根据查询条件分页查询C端用户列表，支持按用户名、手机号、状态、学校、注册时间等条件筛选")
-	public Result<Page<UserAppListVO>> listAppUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
-		queryDTO.setUserType(2);
-		Page<UserAppListVO> page = userService.listAppUsers(queryDTO);
-		return Result.ok(page);
-	}
-
-	@GetMapping("/mch-user/list")
-	@Operation(summary = "分页查询商家用户列表", description = "根据查询条件分页查询商家用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	public Result<Page<UserMchListVO>> listMchUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
-		queryDTO.setUserType(3);
-		Page<UserMchListVO> page = userService.listMchUsers(queryDTO);
-		return Result.ok(page);
-	}
-
-	@GetMapping("/rider-user/list")
-	@Operation(summary = "分页查询骑手用户列表", description = "根据查询条件分页查询骑手用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	public Result<Page<UserRiderListVO>> listRiderUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
-		queryDTO.setUserType(4);
-		Page<UserRiderListVO> page = userService.listRiderUsers(queryDTO);
-		return Result.ok(page);
-	}
-
-	@GetMapping("/sys-user/list")
-	@Operation(summary = "分页查询系统用户列表", description = "根据查询条件分页查询系统用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	public Result<Page<UserSysListVO>> listSysUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
-		queryDTO.setUserType(1);
-		Page<UserSysListVO> page = userService.listSysUsers(queryDTO);
-		return Result.ok(page);
-	}
-
-	@GetMapping("/partner-user/list")
-	@Operation(summary = "分页查询合伙人用户列表", description = "根据查询条件分页查询合伙人用户列表，支持按用户名、手机号、状态、注册时间等条件筛选")
-	public Result<Page<UserPartnerListVO>> listPartnerUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
-		queryDTO.setUserType(5);
-		Page<UserPartnerListVO> page = userService.listPartnerUsers(queryDTO);
+	@GetMapping("/list")
+	@Operation(summary = "分页查询用户列表", description = "根据查询条件分页查询用户列表，支持按用户名、手机号、状态、用户类型、时间范围等条件筛选")
+	public Result<Page<CommonUserListVO>> listUsers(@Valid @ParameterObject UserQueryDTO queryDTO) {
+		Page<CommonUserListVO> page = userService.listUsers(queryDTO);
 		return Result.ok(page);
 	}
 

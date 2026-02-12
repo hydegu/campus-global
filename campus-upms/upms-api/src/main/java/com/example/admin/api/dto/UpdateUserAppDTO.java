@@ -31,12 +31,6 @@ public class UpdateUserAppDTO implements Serializable {
 	@Schema(description = "性别", example = "1")
 	private Integer gender;
 
-	@Schema(description = "生日", example = "2000-01-01")
-	private String birthday;
-
-	@Schema(description = "地址", example = "北京市海淀区")
-	private String address;
-
 	@Schema(description = "学号", example = "20240001")
 	private String stuCode;
 

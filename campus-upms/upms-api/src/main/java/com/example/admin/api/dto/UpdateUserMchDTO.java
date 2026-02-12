@@ -68,12 +68,6 @@ public class UpdateUserMchDTO implements Serializable {
 	@Schema(description = "合伙人ID", example = "1")
 	private Long partnerId;
 
-	@Schema(description = "经营范围（商品分类ID列表）", example = "[1, 2, 3]")
-	private List<Long> categoryIds;
-
-	@Schema(description = "分佣比例(%)", example = "15.00")
-	private BigDecimal commissionRate;
-
 	@Schema(description = "最低起送金额(元)", example = "20.00")
 	private BigDecimal minimumOrderAmount;
 

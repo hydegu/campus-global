@@ -12,15 +12,12 @@ public interface UserService {
 
 	UserInfo getUserInfoById(Long id);
 
-	Page<UserAppListVO> listAppUsers(UserQueryDTO queryDTO);
-
-	Page<UserMchListVO> listMchUsers(UserQueryDTO queryDTO);
-
-	Page<UserRiderListVO> listRiderUsers(UserQueryDTO queryDTO);
-
-	Page<com.example.admin.api.vo.UserSysListVO> listSysUsers(UserQueryDTO queryDTO);
-
-	Page<UserPartnerListVO> listPartnerUsers(UserQueryDTO queryDTO);
+	/**
+	 * 分页查询用户列表（统一接口）
+	 * @param queryDTO 查询条件DTO（包含username, phone, status, userType, page, size等）
+	 * @return 用户列表分页结果
+	 */
+	Page<CommonUserListVO> listUsers(UserQueryDTO queryDTO);
 
 	void updateUserStatus(Long id, UserStatusDTO statusDTO);
 
