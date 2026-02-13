@@ -50,9 +50,6 @@ public class FileServiceImpl extends ServiceImpl<AppFileMapper, AppFile> impleme
 
 	private final FileTemplate fileTemplate;
 
-	@Value("${file.url-prefix:http://localhost:8080/files}")
-	private String fileUrlPrefix;
-
 	/**
 	 * 文件大小限制（字节）
 	 */
@@ -445,7 +442,7 @@ public class FileServiceImpl extends ServiceImpl<AppFileMapper, AppFile> impleme
 	 * 构建文件访问URL
 	 */
 	private String buildFileUrl(String bucketName, String filePath) {
-		return fileUrlPrefix + "/" + bucketName + "/" + filePath;
+		return "/" + bucketName + "/" + filePath;
 	}
 
 	/**

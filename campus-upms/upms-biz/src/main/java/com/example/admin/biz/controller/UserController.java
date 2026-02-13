@@ -66,6 +66,13 @@ public class UserController {
 		return Result.ok(page);
 	}
 
+	@GetMapping("/partner/list")
+	@Operation(summary = "分页查询合伙人列表", description = "根据查询条件分页查询合伙人列表，支持按关键字、状态筛选，支持树形/平铺两种返回结构")
+	public Result<Object> listPartners(@Valid @ParameterObject PartnerQueryDTO queryDTO) {
+		Object result = userService.listPartners(queryDTO);
+		return Result.ok(result);
+	}
+
 	@PutMapping("/app-user/{id}/status")
 	@Operation(summary = "修改用户状态（拉黑/解封）", description = "修改指定用户的状态，支持拉黑或解封操作。需要提供目标状态和操作原因")
 	public Result<Void> updateUserStatus(@PathVariable Long id, @Valid @RequestBody com.example.admin.api.dto.UserStatusDTO statusDTO) {

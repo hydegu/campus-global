@@ -83,6 +83,13 @@ public interface UserService {
 	UserPartnerListVO getPartnerUserDetail(Long id);
 
 	/**
+	 * 分页查询合伙人列表（支持树形/平铺）
+	 * @param queryDTO 查询条件（包含treeType控制返回结构）
+	 * @return 合伙人列表分页结果（平铺）或树形结构结果
+	 */
+	Object listPartners(PartnerQueryDTO queryDTO);
+
+	/**
 	 * 根据商家用户ID获取商家信息
 	 * @param baseUserId 商家用户ID
 	 * @return 商家信息

@@ -9,6 +9,7 @@ import com.example.admin.api.dto.*;
 import com.example.admin.api.entity.*;
 import com.example.admin.api.entity.AppUserAddress;
 import com.example.admin.api.enums.MerchantBalanceUpdateTypeEnum;
+import com.example.admin.api.vo.*;
 import com.example.admin.biz.mapper.BaseUserMapper;
 import com.example.admin.biz.mapper.RoleMapper;
 import com.example.admin.biz.mapper.SysSchoolMapper;
@@ -21,13 +22,6 @@ import com.example.admin.biz.mapper.UserSysMapper;
 import com.example.admin.biz.mapper.AddressMapper;
 import com.example.admin.biz.mapper.AppUserAddressMapper;
 import com.example.admin.biz.service.UserService;
-import com.example.admin.api.vo.UserAppListVO;
-import com.example.admin.api.vo.UserMchListVO;
-import com.example.admin.api.vo.UserPartnerListVO;
-import com.example.admin.api.vo.UserRiderListVO;
-import com.example.admin.api.vo.UserSysListVO;
-import com.example.admin.api.vo.CommonUserListVO;
-import com.example.admin.api.vo.AbstractUserVO;
 import com.example.common.core.enums.Gender;
 import com.example.common.core.enums.UserType;
 import com.example.common.core.exception.BusinessException;
@@ -495,8 +489,14 @@ public class UserServiceImpl implements UserService {
 	private void fillRoleInfo(AbstractUserVO vo, Long userId, Map<Long, List<Role>> userRoleMap) {
 		List<Role> roles = userRoleMap.get(userId);
 		if (roles != null && !roles.isEmpty()) {
-			vo.setRoleId(String.valueOf(roles.get(0).getId()));
-			vo.setRoleName(roles.get(0).getRoleName());
+			List<Long> roleIds = roles.stream()
+					.map(Role::getId)
+					.collect(Collectors.toList());
+			List<String> roleNames = roles.stream()
+					.map(Role::getRoleName)
+					.collect(Collectors.toList());
+			vo.setRoleIds(roleIds);
+			vo.setRoleNames(roleNames);
 		}
 	}
 
@@ -1840,7 +1840,171 @@ public class UserServiceImpl implements UserService {
 
 
 		return vo;
+	}
 
+	@Override
+	public Object listPartners(PartnerQueryDTO queryDTO) {
+		// 参数校验和初始化
+		if (queryDTO == null) {
+			queryDTO = new PartnerQueryDTO();
+		}
+		if (queryDTO.getTreeType() == null) {
+			queryDTO.setTreeType(0); // 默认平铺
+		}
+
+		// 强制设置用户类型为合伙人
+		queryDTO.setUserType(UserType.PARTNER.getCode());
+
+		// 树形模式：忽略分页参数，查询全部数据
+		if (queryDTO.getTreeType() == 1) {
+			queryDTO.setPage(1);
+			queryDTO.setSize(Integer.MAX_VALUE);
+		} else {
+			// 平铺模式：校验分页参数
+			validatePageParams(queryDTO.getPage(), queryDTO.getSize());
+		}
+
+		// 查询base_user表
+		LambdaQueryWrapper<BaseUser> userWrapper = Wrappers.lambdaQuery();
+
+		// 关键字搜索：支持用户名、手机号、邮箱、昵称
+		if (StringUtils.hasText(queryDTO.getKeyword())) {
+			PartnerQueryDTO finalQueryDTO = queryDTO;
+			userWrapper.and(wrapper -> wrapper
+					.like(BaseUser::getUsername, finalQueryDTO.getKeyword())
+					.or()
+					.like(BaseUser::getPhone, finalQueryDTO.getKeyword())
+					.or()
+					.like(BaseUser::getEmail, finalQueryDTO.getKeyword())
+					.or()
+					.like(BaseUser::getNickname, finalQueryDTO.getKeyword()));
+		}
+
+		// 状态过滤
+		if (queryDTO.getStatus() != null) {
+			userWrapper.eq(BaseUser::getStatus, queryDTO.getStatus());
+		}
+
+		// 强制用户类型为合伙人
+		userWrapper.eq(BaseUser::getUserType, UserType.PARTNER.getCode());
+
+		// 分页查询
+		IPage<BaseUser> userPage = baseUserMapper.selectPage(
+				new Page<>(queryDTO.getPage(), queryDTO.getSize()),
+				userWrapper
+		);
+
+		if (userPage.getRecords().isEmpty()) {
+			if (queryDTO.getTreeType() == 1) {
+				return new PartnerTreeResult(Collections.emptyList(), 0L);
+			} else {
+				Page<UserPartnerListVO> emptyPage = new Page<>(queryDTO.getPage(), queryDTO.getSize());
+				emptyPage.setRecords(Collections.emptyList());
+				emptyPage.setTotal(0);
+				return emptyPage;
+			}
+		}
+
+		// 获取所有合伙人ID
+		List<Long> userIds = userPage.getRecords().stream()
+				.map(BaseUser::getId)
+				.collect(Collectors.toList());
+
+		// 批量查询合伙人扩展信息
+		Map<Long, UserPartner> userPartnerMap = batchQueryUserPartner(userIds);
+
+		// 批量查询角色信息
+		Map<Long, List<Role>> userRoleMap = batchQueryUserRoles(userIds);
+
+		// 构建VO列表
+		List<UserPartnerListVO> voList = userPage.getRecords().stream().map(user -> {
+			UserPartnerListVO vo = new UserPartnerListVO();
+			vo.setId(user.getId());
+			vo.setUsername(user.getUsername());
+			vo.setPhone(user.getPhone());
+			vo.setNickname(user.getNickname());
+			vo.setEmail(user.getEmail());
+			vo.setAvatar(user.getAvatar());
+			vo.setStatus(user.getStatus());
+			vo.setUserType(user.getUserType());
+			vo.setCreateTime(user.getCreateAt());
+
+			// 填充合伙人扩展信息
+			fillPartnerUserDetail(vo, user.getId(), userPartnerMap);
+
+			// 填充角色信息
+			fillRoleInfo(vo, user.getId(), userRoleMap);
+
+			return vo;
+		}).collect(Collectors.toList());
+
+		// 根据treeType返回不同结构
+		if (queryDTO.getTreeType() == 1) {
+			// 树形结构：构建树形关系
+			List<UserPartnerListVO> treeList = buildPartnerTree(voList);
+			return new PartnerTreeResult(treeList, (long) voList.size());
+		} else {
+			// 平铺结构：批量查询上级合伙人名称
+			Set<Long> parentIds = voList.stream()
+					.map(UserPartnerListVO::getParentId)
+					.filter(Objects::nonNull)
+					.filter(parentId -> parentId > 0)
+					.collect(Collectors.toSet());
+
+			if (!parentIds.isEmpty()) {
+				Map<Long, UserPartner> parentPartnerMap = batchQueryUserPartner(new ArrayList<>(parentIds));
+				voList.forEach(vo -> {
+					if (vo.getParentId() != null && vo.getParentId() > 0) {
+						UserPartner parentPartner = parentPartnerMap.get(vo.getParentId());
+						if (parentPartner != null) {
+							vo.setParentName(parentPartner.getPartnerName());
+						}
+					}
+				});
+			}
+
+			// 返回分页结果
+			Page<UserPartnerListVO> page = new Page<>(queryDTO.getPage(), queryDTO.getSize());
+			page.setRecords(voList);
+			page.setTotal(userPage.getTotal());
+			return page;
+		}
+	}
+
+	/**
+	 * 构建合伙人树形结构
+	 * @param partnerList 合伙人列表（平铺）
+	 * @return 树形结构的合伙人列表（仅包含根节点）
+	 */
+	private List<UserPartnerListVO> buildPartnerTree(List<UserPartnerListVO> partnerList) {
+		if (partnerList == null || partnerList.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		// 构建ID到VO的映射，便于快速查找
+		Map<Long, UserPartnerListVO> partnerMap = partnerList.stream()
+				.collect(Collectors.toMap(UserPartnerListVO::getId, Function.identity()));
+
+		// 识别根节点（parentId为null、0或不在查询结果中）
+		List<UserPartnerListVO> rootList = partnerList.stream()
+				.filter(vo -> vo.getParentId() == null || vo.getParentId() == 0 || !partnerMap.containsKey(vo.getParentId()))
+				.peek(vo -> buildChildren(vo, partnerMap))
+				.collect(Collectors.toList());
+
+		return rootList;
+	}
+
+	/**
+	 * 递归构建子节点
+	 * @param parent 父节点
+	 * @param partnerMap 所有合伙人映射
+	 */
+	private void buildChildren(UserPartnerListVO parent, Map<Long, UserPartnerListVO> partnerMap) {
+		List<UserPartnerListVO> children = partnerMap.values().stream()
+				.filter(child -> parent.getId().equals(child.getParentId()))
+				.peek(child -> buildChildren(child, partnerMap))
+				.collect(Collectors.toList());
+		parent.setChildren(children);
 	}
 
 	@Override

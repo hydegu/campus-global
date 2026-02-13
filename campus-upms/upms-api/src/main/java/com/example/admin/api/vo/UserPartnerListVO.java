@@ -6,6 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Schema(description = "合伙人用户列表VO")
@@ -63,4 +64,7 @@ public class UserPartnerListVO extends AbstractUserVO implements Serializable {
 
 	@Schema(description = "用户类型:1-系统用户 2-普通用户/服务者 3-商家 4-骑手")
 	private Integer userType;
+
+	@Schema(description = "下级合伙人列表（树形结构时使用）")
+	private List<UserPartnerListVO> children;
 }
