@@ -17,10 +17,7 @@ import com.example.order.api.dto.OrderPickupDTO;
 import com.example.order.api.dto.OrderQueryDTO;
 import com.example.order.api.entity.OrderDelivery;
 import com.example.order.api.entity.OrderMain;
-import com.example.order.api.enums.OrderEventsEnum;
-import com.example.order.api.enums.OrderStatusEnum;
-import com.example.order.api.enums.OrderTypeEnum;
-import com.example.order.api.enums.PayStatusEnum;
+import com.example.order.api.enums.*;
 import com.example.admin.api.dto.MerchantBalanceUpdateDTO;
 import com.example.common.core.constant.CommonConstants;
 import com.example.common.core.util.Result;
@@ -34,6 +31,7 @@ import com.example.order.api.vo.OrderVO;
 import com.example.order.biz.mapper.OrderDeliveryMapper;
 import com.example.order.biz.mapper.OrderMainMapper;
 import com.example.order.biz.processor.OrderProcessor;
+import com.example.order.biz.producer.OrderTimeoutProducer;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.DeliveryFeeService;
 import com.example.order.biz.service.OrderService;
@@ -44,12 +42,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.example.order.api.constants.OrderTimeoutConstants.ACCEPT_TIMEOUT_MS;
 
 @Slf4j
 @Service
@@ -64,6 +66,7 @@ public class OrderServiceImpl implements OrderService {
 	private final AmapService amapService;
 	private final RemoteCommissionConfigService commissionConfigService;
 	private final OrderProcessor orderProcessor;
+	private final OrderTimeoutProducer orderTimeoutProducer;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -145,7 +148,16 @@ public class OrderServiceImpl implements OrderService {
 
 		log.info("订单创建成功，订单ID：{}，订单编号：{}，用户ID：{}", 
 				orderMain.getId(), orderMain.getOrderNo(), currentUserId);
-
+		// 事务提交后发送消息
+		TransactionSynchronizationManager.registerSynchronization(
+				new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						orderTimeoutProducer.sendPayTimeoutMessage(orderMain.getId(), orderMain.getOrderNo(), currentUserId);
+						orderTimeoutProducer.sendAcceptTimeoutMessage(orderMain.getId(), orderMain.getOrderNo(), currentUserId);
+					}
+				}
+		);
 		return orderMain.getId();
 	}
 
@@ -258,6 +270,15 @@ public class OrderServiceImpl implements OrderService {
 		}
 
 		orderProcessor.process(orderMain, OrderEventsEnum.ARRIVE);
+		// 事务提交后发送消息
+		TransactionSynchronizationManager.registerSynchronization(
+				new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						orderTimeoutProducer.sendConfirmTimeoutMessage(orderMain.getId(), orderMain.getOrderNo(), SecurityUtils.getCurrentUserId());
+					}
+				}
+		);
 		orderMain.setActualDeliveryTime(LocalDateTime.now());
 
 		orderMainMapper.updateById(orderMain);
@@ -781,6 +802,124 @@ public class OrderServiceImpl implements OrderService {
 				.build();
 	}
 
+	@Override
+	public boolean isPendingPayment(Long orderId) {
+		if (orderId == null) {
+			return false;
+		}
+
+		OrderMain order = orderMainMapper.selectById(orderId);
+		if (order == null) {
+			return false;
+		}
+
+		// 支付状态为待支付
+		return PayStatusEnum.UNPAID.getCode().equals(order.getPayStatus());
+	}
+
+	@Override
+	public boolean isPendingAccept(Long orderId) {
+		if (orderId == null) {
+			return false;
+		}
+
+		OrderMain order = orderMainMapper.selectById(orderId);
+		if (order == null) {
+			return false;
+		}
+
+		// 订单状态为待接单
+		return OrderStatusEnum.WAIT_ACCEPT.getCode().equals(order.getOrderStatus());
+	}
+
+	@Override
+	public boolean isPendingConfirm(Long orderId) {
+		if (orderId == null) {
+			return false;
+		}
+
+		OrderMain order = orderMainMapper.selectById(orderId);
+		if (order == null) {
+			return false;
+		}
+
+		// 订单状态为已送达
+		return OrderStatusEnum.DELIVERED.getCode().equals(order.getOrderStatus());
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void cancelTimeoutOrder(Long orderId, TimeoutTypeEnum timeoutType) {
+		if (orderId == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		if (timeoutType == null) {
+			throw new BusinessException("INVALID_PARAM", "超时类型不能为空");
+		}
+
+		OrderMain order = orderMainMapper.selectById(orderId);
+		if (order == null) {
+			log.warn("订单不存在，无法取消。订单ID：{}", orderId);
+			return;
+		}
+
+		// 幂等性检查：订单已经是取消或完成状态，直接返回
+		if (OrderStatusEnum.CANCELLED.getCode().equals(order.getOrderStatus())) {
+			log.info("订单已取消，跳过处理。订单ID：{}", orderId);
+			return;
+		}
+
+		if (OrderStatusEnum.COMPLETED.getCode().equals(order.getOrderStatus())) {
+			log.info("订单已完成，跳过处理。订单ID：{}", orderId);
+			return;
+		}
+
+		// 如果是接单超时且用户已支付，需要退款
+		if (TimeoutTypeEnum.ACCEPT_TIMEOUT.equals(timeoutType)
+				&& PayStatusEnum.PAID.getCode().equals(order.getPayStatus())) {
+			refundToUser(order);
+		}
+
+		// 使用状态机取消订单
+		orderProcessor.process(order, OrderEventsEnum.CANCEL);
+
+		// 设置取消类型和取消时间
+		order.setCancelType(CancelTypeEnum.TIMEOUT_CANCEL.getCode());
+		order.setCancelTime(LocalDateTime.now());
+
+		// 更新订单
+		orderMainMapper.updateById(order);
+
+		log.info("订单超时取消成功，订单ID：{}，超时类型：{}", orderId, timeoutType.getDesc());
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void autoConfirmOrder(Long orderId) {
+		if (orderId == null) {
+			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
+		}
+
+		OrderMain order = orderMainMapper.selectById(orderId);
+		if (order == null) {
+			log.warn("订单不存在，无法自动确认。订单ID：{}", orderId);
+			return;
+		}
+
+		// 幂等性检查：订单不是已送达状态，跳过
+		if (!OrderStatusEnum.DELIVERED.getCode().equals(order.getOrderStatus())) {
+			log.info("订单状态不是已送达，跳过自动确认。订单ID：{}，当前状态：{}",
+					orderId, order.getOrderStatus());
+			return;
+		}
+
+		// 使用状态机确认订单
+		orderProcessor.process(order, OrderEventsEnum.CONFIRM);
+
+		log.info("订单自动确认完成，订单ID：{}", orderId);
+	}
+
 	/**
 	 * 生成流水号
 	 * 格式：FT + yyyyMMddHHmmss + 8位随机大写字符
@@ -788,5 +927,41 @@ public class OrderServiceImpl implements OrderService {
 	private String generateTransactionNo() {
 		return "FT" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
 			   + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+	}
+
+
+	/**
+	 * 退款给用户
+	 */
+	private void refundToUser(OrderMain order) {
+		// 记录退款流水
+		FinanceTransactionAddDTO refundTransaction = new FinanceTransactionAddDTO();
+		refundTransaction.setTransactionNo(generateTransactionNo());
+		refundTransaction.setUserId(order.getUserId());
+		refundTransaction.setTransactionType(TransactionTypeEnum.REFUND.getCode());
+		refundTransaction.setAmount(order.getActualAmount()); // 退款为正数
+		refundTransaction.setRelatedType(RelatedTypeEnum.ORDER.getCode());
+		refundTransaction.setRelatedId(order.getId());
+		refundTransaction.setRemark("订单超时退款：" + order.getOrderNo());
+
+		Result<Long> result = remoteFinanceService.createTransaction(refundTransaction);
+		if (result.getCode() != CommonConstants.SUCCESS) {
+			throw new BusinessException("REFUND_ERROR", "退款失败");
+		}
+
+		// 更新用户余额（增加）
+		MerchantBalanceUpdateDTO balanceUpdateDTO = new MerchantBalanceUpdateDTO();
+		balanceUpdateDTO.setUserId(order.getUserId());
+		balanceUpdateDTO.setUserType(0); // 普通用户
+		balanceUpdateDTO.setAmount(order.getActualAmount());
+		balanceUpdateDTO.setUpdateType(1); // 增加余额
+		remoteUserService.updateUserBalance(balanceUpdateDTO);
+
+		//TODO 调用微信SDK执行退款
+
+		// 更新订单支付状态为全额退款
+		order.setPayStatus(PayStatusEnum.FULL_REFUND.getCode());
+
+		log.info("订单超时退款成功，订单ID：{}，退款金额：{}", order.getId(), order.getActualAmount());
 	}
 }

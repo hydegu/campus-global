@@ -33,6 +33,7 @@ import com.example.order.api.vo.ErrandListVO;
 import com.example.order.biz.mapper.OrderErrandMapper;
 import com.example.order.biz.mapper.OrderMainMapper;
 import com.example.order.biz.processor.OrderProcessor;
+import com.example.order.biz.producer.OrderTimeoutProducer;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.ErrandService;
 import com.example.service.api.entity.CommissionConfig;
@@ -43,6 +44,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -63,6 +66,7 @@ public class ErrandServiceImpl implements ErrandService {
 	private final AmapService amapService;
 	private final RemoteCommissionConfigService commissionConfigService;
 	private final OrderProcessor orderProcessor;
+	private final OrderTimeoutProducer orderTimeoutProducer;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -184,7 +188,15 @@ public class ErrandServiceImpl implements ErrandService {
 
 		log.info("服务订单创建成功，订单ID：{}，订单编号：{}，用户ID：{}", 
 				orderMain.getId(), orderMain.getOrderNo(), currentUserId);
-
+		// 事务提交后发送消息
+		TransactionSynchronizationManager.registerSynchronization(
+				new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						orderTimeoutProducer.sendPayTimeoutMessage(orderMain.getId(), orderMain.getOrderNo(), currentUserId);
+					}
+				}
+		);
 		return orderMain.getId();
 	}
 
