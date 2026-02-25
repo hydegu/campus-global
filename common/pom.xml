@@ -21,6 +21,5 @@
         <module>common-security</module>
         <module>common-feign</module>
         <module>common-swagger</module>
-        <module>common-rabbitmq</module>
     </modules>
 </project>

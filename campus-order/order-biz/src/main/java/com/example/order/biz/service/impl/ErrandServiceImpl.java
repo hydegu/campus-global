@@ -18,6 +18,7 @@ import com.example.order.api.dto.ErrandPickupDTO;
 import com.example.order.api.dto.ErrandQueryDTO;
 import com.example.order.api.entity.OrderErrand;
 import com.example.order.api.entity.OrderMain;
+import com.example.order.api.enums.OrderEventsEnum;
 import com.example.order.api.enums.OrderStatusEnum;
 import com.example.order.api.enums.OrderTypeEnum;
 import com.example.order.api.enums.PayStatusEnum;
@@ -31,6 +32,7 @@ import com.example.order.api.vo.ErrandDetailVO;
 import com.example.order.api.vo.ErrandListVO;
 import com.example.order.biz.mapper.OrderErrandMapper;
 import com.example.order.biz.mapper.OrderMainMapper;
+import com.example.order.biz.processor.OrderProcessor;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.ErrandService;
 import com.example.service.api.entity.CommissionConfig;
@@ -60,6 +62,7 @@ public class ErrandServiceImpl implements ErrandService {
 	private final RemoteErrandCategoryService remoteErrandCategoryService;
 	private final AmapService amapService;
 	private final RemoteCommissionConfigService commissionConfigService;
+	private final OrderProcessor orderProcessor;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -210,7 +213,7 @@ public class ErrandServiceImpl implements ErrandService {
 			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许接单");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.WAIT_PICKUP.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.ACCEPT);
 		orderMain.setServiceProviderType(2);
 		orderMain.setServiceProviderId(staffId);
 		orderMain.setEstimatedStartTime(LocalDateTime.now());
@@ -257,7 +260,7 @@ public class ErrandServiceImpl implements ErrandService {
 			throw new BusinessException("PERMISSION_DENIED", "无权操作该订单");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.DELIVERING.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.PICK_UP);
 
 		orderMainMapper.updateById(orderMain);
 
@@ -293,7 +296,8 @@ public class ErrandServiceImpl implements ErrandService {
 			throw new BusinessException("PERMISSION_DENIED", "无权操作该订单");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.COMPLETED.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.ARRIVE);
+		orderProcessor.process(orderMain, OrderEventsEnum.CONFIRM);
 		orderMain.setActualDeliveryTime(LocalDateTime.now());
 
 		orderMainMapper.updateById(orderMain);
@@ -322,7 +326,7 @@ public class ErrandServiceImpl implements ErrandService {
 			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许取消");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.CANCELLED.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.CANCEL);
 		orderMain.setCancelType(cancelType);
 		orderMain.setCancelTime(LocalDateTime.now());
 

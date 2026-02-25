@@ -7,14 +7,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum OrderStatusEnum {
 
-	WAIT_PAY(1, "待支付"),
-	WAIT_ACCEPT(2, "待接单"),
-	WAIT_PICKUP(3, "待取货"),
-	DELIVERING(4, "配送中"),
-	DELIVERED(5, "已送达"),
-	CANCELLED(6, "已取消"),
-	COMPLETED(7, "已完成"),
-	AFTER_SALE(8, "售后中");
+	WAIT_ACCEPT(1, "待接单"),
+	WAIT_PICKUP(2, "待取货"),
+	DELIVERING(3, "配送中"),
+	DELIVERED(4, "已送达"),
+	CANCELLED(5, "已取消"),
+	COMPLETED(6, "已完成"),
+	AFTER_SALE(7, "售后中");
 
 	private final Integer code;
 

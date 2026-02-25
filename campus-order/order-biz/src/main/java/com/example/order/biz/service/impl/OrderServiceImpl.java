@@ -17,6 +17,7 @@ import com.example.order.api.dto.OrderPickupDTO;
 import com.example.order.api.dto.OrderQueryDTO;
 import com.example.order.api.entity.OrderDelivery;
 import com.example.order.api.entity.OrderMain;
+import com.example.order.api.enums.OrderEventsEnum;
 import com.example.order.api.enums.OrderStatusEnum;
 import com.example.order.api.enums.OrderTypeEnum;
 import com.example.order.api.enums.PayStatusEnum;
@@ -32,6 +33,7 @@ import com.example.order.api.vo.OrderDetailVO;
 import com.example.order.api.vo.OrderVO;
 import com.example.order.biz.mapper.OrderDeliveryMapper;
 import com.example.order.biz.mapper.OrderMainMapper;
+import com.example.order.biz.processor.OrderProcessor;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.DeliveryFeeService;
 import com.example.order.biz.service.OrderService;
@@ -61,6 +63,7 @@ public class OrderServiceImpl implements OrderService {
 	private final DeliveryFeeService deliveryFeeService;
 	private final AmapService amapService;
 	private final RemoteCommissionConfigService commissionConfigService;
+	private final OrderProcessor orderProcessor;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -120,7 +123,7 @@ public class OrderServiceImpl implements OrderService {
 		orderMain.setTotalAmount(goodsAmount);
 		orderMain.setActualAmount(goodsAmount);
 		orderMain.setPayStatus(PayStatusEnum.UNPAID.getCode());
-		orderMain.setOrderStatus(OrderStatusEnum.WAIT_PAY.getCode());
+		orderMain.setOrderStatus(OrderStatusEnum.WAIT_ACCEPT.getCode());
 		orderMain.setServiceProviderType(1);
 		orderMain.setServiceProviderId(createDTO.getMerchantId());
 		orderMain.setRemark(createDTO.getRemark());
@@ -171,7 +174,7 @@ public class OrderServiceImpl implements OrderService {
 			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许接单");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.WAIT_PICKUP.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.ACCEPT);
 		orderMain.setServiceProviderType(2);
 		orderMain.setServiceProviderId(riderId);
 		orderMain.setEstimatedStartTime(LocalDateTime.now());
@@ -218,7 +221,7 @@ public class OrderServiceImpl implements OrderService {
 			throw new BusinessException("PERMISSION_DENIED", "无权操作该订单");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.DELIVERING.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.PICK_UP);
 
 		orderMainMapper.updateById(orderMain);
 
@@ -254,7 +257,7 @@ public class OrderServiceImpl implements OrderService {
 			throw new BusinessException("PERMISSION_DENIED", "无权操作该订单");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.DELIVERED.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.ARRIVE);
 		orderMain.setActualDeliveryTime(LocalDateTime.now());
 
 		orderMainMapper.updateById(orderMain);
@@ -283,7 +286,7 @@ public class OrderServiceImpl implements OrderService {
 			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许取消");
 		}
 
-		orderMain.setOrderStatus(OrderStatusEnum.CANCELLED.getCode());
+		orderProcessor.process(orderMain, OrderEventsEnum.CANCEL);
 		orderMain.setCancelType(cancelType);
 		orderMain.setCancelTime(LocalDateTime.now());
 
@@ -435,7 +438,6 @@ public class OrderServiceImpl implements OrderService {
 		orderMain.setPayMethod(payDTO.getPayMethod());
 		orderMain.setPayTime(LocalDateTime.now());
 		orderMain.setPayChannelNo(payDTO.getPayChannelNo());
-		orderMain.setOrderStatus(OrderStatusEnum.WAIT_ACCEPT.getCode());
 
 		orderMainMapper.updateById(orderMain);
 
@@ -464,6 +466,7 @@ public class OrderServiceImpl implements OrderService {
 		}
 
 		// 更新订单状态为已完成
+		orderProcessor.process(orderMain, OrderEventsEnum.CONFIRM);
 		orderMain.setOrderStatus(OrderStatusEnum.COMPLETED.getCode());
 
 		orderMainMapper.updateById(orderMain);
@@ -696,7 +699,7 @@ public class OrderServiceImpl implements OrderService {
 		Long waitPayCount = orderMainMapper.selectCount(
 				Wrappers.lambdaQuery(OrderMain.class)
 						.eq(OrderMain::getUserId, userId)
-						.eq(OrderMain::getOrderStatus, OrderStatusEnum.WAIT_PAY.getCode())
+						.eq(OrderMain::getPayStatus, PayStatusEnum.UNPAID.getCode())
 						.apply(queryDTO.getOrderType() != null, "order_type = {0}", queryDTO.getOrderType())
 						.ge(queryDTO.getStartDate() != null, OrderMain::getCreateAt, queryDTO.getStartDate())
 						.le(queryDTO.getEndDate() != null, OrderMain::getCreateAt, queryDTO.getEndDate())
