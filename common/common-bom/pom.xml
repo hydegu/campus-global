@@ -73,7 +73,7 @@
             </dependency>
             <dependency>
                 <groupId>com.example</groupId>
-                <artifactId>common-websocket</artifactId>
+                <artifactId>common-rabbitmq</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
