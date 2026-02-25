@@ -1,6 +1,7 @@
 package com.example.order.biz.config;
 
 import com.example.common.core.exception.ResourceNotFoundException;
+import com.example.common.security.util.SecurityUtils;
 import com.example.order.api.entity.OrderMain;
 import com.example.order.api.enums.OrderEventsEnum;
 import com.example.order.api.enums.OrderStatusEnum;
@@ -71,14 +72,9 @@ public class OrderStateMachineConfig extends StateMachineConfigurerAdapter<Order
     public Guard<OrderStatusEnum, OrderEventsEnum> cancelGuard() {
         return context -> {
             // 从消息头中取出业务参数
-            String operatorId = (String) context.getMessageHeader("operatorId");
-            String orderId = (String) context.getMessageHeader("orderId");
-
-            // 查订单归属用户
-            OrderMain order = Optional.ofNullable(orderMainMapper.selectById(orderId)).orElseThrow(() -> new ResourceNotFoundException("未找到此订单"));
-
+            OrderMain order = (OrderMain) context.getMessageHeader("order");
             // 只有订单归属用户才能取消
-            return order.getUserId().equals(Long.valueOf(operatorId));
+            return order.getUserId().equals(Long.valueOf(SecurityUtils.getCurrentUserId()));
         };
     }
 
