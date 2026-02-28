@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.util.Result;
 import com.example.common.security.annotation.Inner;
 import com.example.finance.api.dto.FinanceWithdrawalApplyDTO;
-import com.example.finance.api.dto.FinanceWithdrawalAuditDTO;
 import com.example.finance.api.dto.FinanceWithdrawalQueryDTO;
 import com.example.finance.api.vo.FinanceWithdrawalVO;
 import com.example.finance.biz.service.FinanceWithdrawalService;

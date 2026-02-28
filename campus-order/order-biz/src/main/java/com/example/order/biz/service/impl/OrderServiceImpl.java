@@ -35,6 +35,8 @@ import com.example.order.biz.producer.OrderTimeoutProducer;
 import com.example.order.biz.service.AmapService;
 import com.example.order.biz.service.DeliveryFeeService;
 import com.example.order.biz.service.OrderService;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import com.example.service.api.entity.CommissionConfig;
 import com.example.service.api.feign.RemoteCommissionConfigService;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.example.order.api.constants.OrderTimeoutConstants.ACCEPT_TIMEOUT_MS;
 
@@ -62,11 +65,10 @@ public class OrderServiceImpl implements OrderService {
 	private final OrderDeliveryMapper orderDeliveryMapper;
 	private final RemoteUserService remoteUserService;
 	private final RemoteFinanceService remoteFinanceService;
-	private final DeliveryFeeService deliveryFeeService;
-	private final AmapService amapService;
 	private final RemoteCommissionConfigService commissionConfigService;
 	private final OrderProcessor orderProcessor;
 	private final OrderTimeoutProducer orderTimeoutProducer;
+	private final RedissonClient redissonClient;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -173,35 +175,55 @@ public class OrderServiceImpl implements OrderService {
 			throw new BusinessException("NOT_LOGIN", "骑手未登录");
 		}
 
-		OrderMain orderMain = orderMainMapper.selectById(acceptDTO.getOrderId());
-		if (orderMain == null) {
-			throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+		// Redisson 分布式锁：防止多骑手并发抢单
+		String lockKey = "order:accept:" + acceptDTO.getOrderId();
+		RLock lock = redissonClient.getLock(lockKey);
+
+		try {
+			// 尝试获取锁，等待时间3秒，锁自动过期时间10秒（看门狗会自动续期）
+			boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
+			if (!locked) {
+				throw new BusinessException("ORDER_ACCEPTTING", "订单正在被其他骑手抢接，请稍后重试");
+			}
+
+			OrderMain orderMain = orderMainMapper.selectById(acceptDTO.getOrderId());
+			if (orderMain == null) {
+				throw new BusinessException("ORDER_NOT_FOUND", "订单不存在");
+			}
+
+			if (!OrderTypeEnum.TAKEOUT.getCode().equals(orderMain.getOrderType())) {
+				throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
+			}
+
+			if (!OrderStatusEnum.WAIT_ACCEPT.getCode().equals(orderMain.getOrderStatus())) {
+				throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许接单");
+			}
+
+			orderProcessor.process(orderMain, OrderEventsEnum.ACCEPT);
+			orderMain.setServiceProviderType(2);
+			orderMain.setServiceProviderId(riderId);
+			orderMain.setEstimatedStartTime(LocalDateTime.now());
+
+			orderMainMapper.updateById(orderMain);
+
+			OrderDelivery orderDelivery = orderDeliveryMapper.selectOne(
+					Wrappers.lambdaQuery(OrderDelivery.class).eq(OrderDelivery::getOrderId, acceptDTO.getOrderId())
+			);
+			if (orderDelivery != null) {
+				orderDelivery.setRiderId(riderId);
+				orderDeliveryMapper.updateById(orderDelivery);
+			}
+
+			log.info("骑手接单成功，订单ID：{}，骑手ID：{}", acceptDTO.getOrderId(), riderId);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new BusinessException("LOCK_INTERRUPTED", "获取锁时被中断");
+		} finally {
+			// 只有当前线程持有锁时才释放
+			if (lock.isHeldByCurrentThread()) {
+				lock.unlock();
+			}
 		}
-
-		if (!OrderTypeEnum.TAKEOUT.getCode().equals(orderMain.getOrderType())) {
-			throw new BusinessException("INVALID_ORDER_TYPE", "订单类型不正确");
-		}
-
-		if (!OrderStatusEnum.WAIT_ACCEPT.getCode().equals(orderMain.getOrderStatus())) {
-			throw new BusinessException("INVALID_ORDER_STATUS", "订单状态不允许接单");
-		}
-
-		orderProcessor.process(orderMain, OrderEventsEnum.ACCEPT);
-		orderMain.setServiceProviderType(2);
-		orderMain.setServiceProviderId(riderId);
-		orderMain.setEstimatedStartTime(LocalDateTime.now());
-
-		orderMainMapper.updateById(orderMain);
-
-		OrderDelivery orderDelivery = orderDeliveryMapper.selectOne(
-				Wrappers.lambdaQuery(OrderDelivery.class).eq(OrderDelivery::getOrderId, acceptDTO.getOrderId())
-		);
-		if (orderDelivery != null) {
-			orderDelivery.setRiderId(riderId);
-			orderDeliveryMapper.updateById(orderDelivery);
-		}
-
-		log.info("骑手接单成功，订单ID：{}，骑手ID：{}", acceptDTO.getOrderId(), riderId);
 	}
 
 	@Override

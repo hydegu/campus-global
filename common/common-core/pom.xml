@@ -32,6 +32,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+        <!--redisson 分布式锁-->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+        </dependency>
         <!--server-api-->
         <dependency>
             <groupId>jakarta.servlet</groupId>
