@@ -5,17 +5,17 @@ USE `campus_upms_db`;
 /*
  Navicat Premium Dump SQL
 
- Source Server         : 腾讯云
+ Source Server         : baoer
  Source Server Type    : MySQL
- Source Server Version : 90500 (9.5.0)
- Source Host           : 49.232.245.147:3306
+ Source Server Version : 80024 (8.0.24)
+ Source Host           : 106.13.143.56:3306
  Source Schema         : campus_upms_db
 
  Target Server Type    : MySQL
- Target Server Version : 90500 (9.5.0)
+ Target Server Version : 80024 (8.0.24)
  File Encoding         : 65001
 
- Date: 10/02/2026 15:28:03
+ Date: 28/02/2026 18:03:23
 */
 
 SET NAMES utf8mb4;
@@ -135,7 +135,7 @@ CREATE TABLE `base_user`  (
   INDEX `idx_delete_time`(`delete_at` ASC) USING BTREE,
   INDEX `idx_user_type`(`user_type` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9005 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 9005 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '基础User表，用于认证授权' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of base_user
@@ -143,25 +143,25 @@ CREATE TABLE `base_user`  (
 INSERT INTO `base_user` VALUES (1001, 'admin', '超级管理员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, '/files/campus-default/default/2026/02/05/0abf36c3aeaf4af0abb4a3105110b203.png', '13800138001', 'admin@campus.com', 1, '2026-01-17 02:21:48', '2026-02-05 12:31:29', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (1002, 'sysadmin', '系统管理员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/sysadmin.jpg', '13800138002', 'sysadmin@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:32', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (1003, 'auditor', '审核员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/auditor.jpg', '13800138003', 'auditor@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:36', NULL, '2026-01-17 02:21:48', '127.0.0.1');
-INSERT INTO `base_user` VALUES (1004, 'operator', '运营人员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/operator.jpg', '13800138004', 'operator@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:39', NULL, '2026-01-17 02:21:48', '127.0.0.1');
-INSERT INTO `base_user` VALUES (1005, 'testuser', '测试用户', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/testuser.jpg', '13800138005', 'testuser@campus.com', 1, '2026-01-17 02:21:48', '2026-01-17 02:38:41', NULL, '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (1004, 'operator', '运营人员', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/operator.jpg', '13800138004', 'operator@campus.com', 1, '2026-01-17 02:21:48', '2026-02-11 15:52:33', '2026-02-11 15:52:32', '2026-01-17 02:21:48', '127.0.0.1');
+INSERT INTO `base_user` VALUES (1005, 'testuser', '测试用户', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/testuser.jpg', '13800138005', 'testuser@campus.com', 1, '2026-01-17 02:21:48', '2026-02-11 15:52:56', '2026-02-11 15:52:56', '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2001, 'student1', '学生张小明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student1.jpg', '13900139001', 'student1@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:43', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2002, 'student2', '学生李小红', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student2.jpg', '13900139002', 'student2@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:45', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2003, 'student3', '学生王小刚', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/student3.jpg', '13900139003', 'student3@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:47', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2004, 'student4', '学生赵小美', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student4.jpg', '13900139004', 'student4@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:50', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2005, 'student5', '学生陈小龙', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student5.jpg', '13900139005', 'student5@campus.com', 2, '2026-01-17 02:21:48', '2026-01-17 02:38:51', NULL, '2026-01-17 02:21:48', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2006, 'student6', '学生刘小花', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student6.jpg', '13900139006', 'student6@campus.com', 2, '2026-02-08 08:00:00', '2026-02-08 08:00:00', NULL, '2026-02-08 08:00:00', '127.0.0.1');
-INSERT INTO `base_user` VALUES (2007, 'student7', '学生陈小明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student7.jpg', '13900139007', 'student7@campus.com', 2, '2026-02-08 08:00:00', '2026-02-08 08:00:00', NULL, '2026-02-08 08:00:00', '127.0.0.1');
+INSERT INTO `base_user` VALUES (2007, 'student7', '学生陈小明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student7.jpg', '13900139007', 'student7@campus.com', 2, '2026-02-08 08:00:00', '2026-02-11 16:34:34', NULL, '2026-02-08 08:00:00', '127.0.0.1');
 INSERT INTO `base_user` VALUES (2008, 'student8', '学生周小丽', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/student8.jpg', '13900139008', 'student8@campus.com', 2, '2026-02-08 08:00:00', '2026-02-08 08:00:00', NULL, '2026-02-08 08:00:00', '127.0.0.1');
 INSERT INTO `base_user` VALUES (3001, 'rider1', '骑手刘大伟', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/rider1.jpg', '13700137001', 'rider1@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:54', NULL, '2026-01-17 02:23:06', '127.0.0.1');
 INSERT INTO `base_user` VALUES (3002, 'rider2', '骑手孙小芳', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/rider2.jpg', '13700137002', 'rider2@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:56', NULL, '2026-01-17 02:23:06', '127.0.0.1');
 INSERT INTO `base_user` VALUES (3003, 'rider3', '骑手周小军', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/rider3.jpg', '13700137003', 'rider3@campus.com', 4, '2026-01-17 02:23:06', '2026-01-17 02:38:58', NULL, '2026-01-17 02:23:06', '127.0.0.1');
 INSERT INTO `base_user` VALUES (4001, 'mch1', '校园便利店', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/mch1.jpg', '13600136001', 'mch1@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:00', NULL, '2026-01-17 02:24:01', '127.0.0.1');
-INSERT INTO `base_user` VALUES (4002, 'mch2', '美味餐厅', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/mch2.jpg', '13600136002', 'mch2@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:03', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (4002, 'mch2', '美味餐厅', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/mch2.jpg', '13600136002', 'mch2@campus.com', 3, '2026-01-17 02:24:01', '2026-02-11 19:19:35', NULL, '2026-01-17 02:24:01', '127.0.0.1');
 INSERT INTO `base_user` VALUES (4003, 'mch3', '水果超市', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/mch3.jpg', '13600136003', 'mch3@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:05', NULL, '2026-01-17 02:24:01', '127.0.0.1');
-INSERT INTO `base_user` VALUES (5001, 'partner1', '合伙人吴大明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/partner1.jpg', '13500135001', 'partner1@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:07', NULL, '2026-01-17 02:24:01', '127.0.0.1');
-INSERT INTO `base_user` VALUES (5002, 'partner2', '合伙人郑小红', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/partner2.jpg', '13500135002', 'partner2@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:09', NULL, '2026-01-17 02:24:01', '127.0.0.1');
-INSERT INTO `base_user` VALUES (5003, 'partner3', '合伙人王小华', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/partner3.jpg', '13500135003', 'partner3@campus.com', 3, '2026-01-17 02:24:01', '2026-01-17 02:39:12', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (5001, 'partner1', '合伙人吴大明', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/partner1.jpg', '13500135001', 'partner1@campus.com', 5, '2026-01-17 02:24:01', '2026-02-13 11:13:33', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (5002, 'partner2', '合伙人郑小红', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/partner2.jpg', '13500135002', 'partner2@campus.com', 5, '2026-01-17 02:24:01', '2026-02-13 11:13:35', NULL, '2026-01-17 02:24:01', '127.0.0.1');
+INSERT INTO `base_user` VALUES (5003, 'partner3', '合伙人王小华', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/partner3.jpg', '13500135003', 'partner3@campus.com', 5, '2026-01-17 02:24:01', '2026-02-13 11:13:39', NULL, '2026-01-17 02:24:01', '127.0.0.1');
 INSERT INTO `base_user` VALUES (9001, 'blocked_user', '被拉黑用户', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 0, 'https://example.com/avatar/blocked.jpg', '13900139999', 'blocked@campus.com', 2, '2026-01-17 02:24:02', '2026-01-17 02:39:15', NULL, '2026-01-17 02:24:02', '127.0.0.1');
 INSERT INTO `base_user` VALUES (9002, 'pending_rider', '待审核骑手', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/pending_rider.jpg', '13700137999', 'pending_rider@campus.com', 4, '2026-01-17 02:24:02', '2026-01-17 02:39:18', NULL, '2026-01-17 02:24:02', '127.0.0.1');
 INSERT INTO `base_user` VALUES (9003, 'pending_mch', '待审核商家', '$2a$10$D3wBqrrBC5Fsylxj7vr2CexvFD6NN.MH7efGyYwrQg1nywQDHyvvq', 1, 'https://example.com/avatar/pending_mch.jpg', '13600136999', 'pending_mch@campus.com', 3, '2026-01-17 02:24:02', '2026-01-17 02:39:20', NULL, '2026-01-17 02:24:02', '127.0.0.1');
@@ -404,13 +404,14 @@ CREATE TABLE `sys_menu`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_parent`(`parent_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
 -- ----------------------------
 INSERT INTO `sys_menu` VALUES (1, 0, 0, NULL, '系统设置', 0, NULL, 1, '/system', '', 1, '2026-02-05 12:02:08', '2026-02-06 11:47:26', NULL);
 INSERT INTO `sys_menu` VALUES (2, 1, 1, NULL, '系统用户', 0, NULL, 1, '/system/user', NULL, 1, '2026-02-06 08:20:04', '2026-02-06 08:50:25', NULL);
+INSERT INTO `sys_menu` VALUES (3, 0, 0, NULL, '商家管理', 2, NULL, 1, '/mch', NULL, 1, '2026-02-10 17:03:59', '2026-02-10 17:03:59', NULL);
 
 -- ----------------------------
 -- Table structure for sys_oauth_client_details
@@ -478,7 +479,7 @@ CREATE TABLE `undo_log`  (
   `log_modified` datetime(6) NOT NULL COMMENT 'modify datetime',
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of undo_log
@@ -556,7 +557,7 @@ CREATE TABLE `user_mch`  (
 -- Records of user_mch
 -- ----------------------------
 INSERT INTO `user_mch` VALUES (301, 4001, '校园便利店', 1, 'https://example.com/logo/mch1.jpg', '张老板', 'https://example.com/license/mch1.jpg', 5001, '110101198001011234', 10.00, '6222021234567890126', 2001, '08:00:00', '22:00:00', 1, NULL, 0.00, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
-INSERT INTO `user_mch` VALUES (302, 4002, '美味餐厅', 2, 'https://example.com/logo/mch2.jpg', '李大厨', 'https://example.com/license/mch2.jpg', 5001, '110101198002021235', 20.00, '6222021234567890127', 2002, '10:00:00', '21:00:00', 1, NULL, 0.00, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
+INSERT INTO `user_mch` VALUES (302, 4002, '美味餐厅', 2, 'https://example.com/logo/mch2.jpg', '李大厨', 'https://example.com/license/mch2.jpg', 5001, '110101198002021235', 20.00, '6222021234567890127', 2002, '10:00:00', '21:00:00', 1, 0.00, 0.00, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
 INSERT INTO `user_mch` VALUES (303, 4003, '水果超市', 3, 'https://example.com/logo/mch3.jpg', '王经理', 'https://example.com/license/mch3.jpg', 5002, '110101198003031236', 15.00, '6222021234567890128', 2003, '09:00:00', '20:00:00', 0, NULL, 0.00, '2026-01-17 02:24:01', '2026-01-17 02:24:01', NULL);
 INSERT INTO `user_mch` VALUES (901, 9003, '待审核商家', 5, 'https://example.com/logo/pending_mch.jpg', '待审核联系人', 'https://example.com/license/pending_mch.jpg', 5001, '110101198001019999', 10.00, '6222021234567890998', 3003, '08:00:00', '22:00:00', 0, NULL, 0.00, '2026-01-17 02:24:02', '2026-01-17 02:24:02', NULL);
 
@@ -649,8 +650,6 @@ CREATE TABLE `user_role`  (
 INSERT INTO `user_role` VALUES (1001, 1);
 INSERT INTO `user_role` VALUES (1002, 2);
 INSERT INTO `user_role` VALUES (1003, 3);
-INSERT INTO `user_role` VALUES (1004, 4);
-INSERT INTO `user_role` VALUES (1005, 5);
 
 -- ----------------------------
 -- Table structure for user_sys

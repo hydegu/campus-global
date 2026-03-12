@@ -53,19 +53,19 @@ public class ForumAnnouncement implements Serializable {
      * 添加日期
      */
     @Schema(description = "添加日期")
-    private LocalDateTime createdAt;
+    private LocalDateTime createAt;
 
     /**
      * 更新时间
      */
     @Schema(description = "更新时间")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateAt;
 
     /**
      * 删除时间
      */
     @Schema(description = "删除时间")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deleteAt;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

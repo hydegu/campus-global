@@ -56,9 +56,9 @@ public class OrderErrand implements Serializable {
 
 	@TableField(fill = FieldFill.INSERT)
 	@Schema(description = "创建时间", example = "2026-01-19T12:30:00")
-	private LocalDateTime createdAt;
+	private LocalDateTime createAt;
 
 	@TableField(fill = FieldFill.INSERT_UPDATE)
 	@Schema(description = "更新时间", example = "2026-01-19T12:58:00")
-	private LocalDateTime updatedAt;
+	private LocalDateTime updateAt;
 }

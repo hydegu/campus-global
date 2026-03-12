@@ -5,17 +5,17 @@ USE `campus_service_db`;
 /*
  Navicat Premium Dump SQL
 
- Source Server         : 腾讯云
+ Source Server         : baoer
  Source Server Type    : MySQL
- Source Server Version : 90500 (9.5.0)
- Source Host           : 49.232.245.147:3306
+ Source Server Version : 80024 (8.0.24)
+ Source Host           : 106.13.143.56:3306
  Source Schema         : campus_service_db
 
  Target Server Type    : MySQL
- Target Server Version : 90500 (9.5.0)
+ Target Server Version : 80024 (8.0.24)
  File Encoding         : 65001
 
- Date: 10/02/2026 15:27:48
+ Date: 28/02/2026 18:03:30
 */
 
 SET NAMES utf8mb4;
@@ -37,11 +37,15 @@ CREATE TABLE `commission_config`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_category`(`category_id` ASC) USING BTREE,
   CONSTRAINT `chk_rate` CHECK ((`commission_rate` >= 0) and (`commission_rate` <= 100))
-) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '服务分佣配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 49 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '服务分佣配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of commission_config
 -- ----------------------------
+INSERT INTO `commission_config` VALUES (45, NULL, 1, 10, 1, '2026-02-28 16:14:21', '2026-02-28 16:14:21', NULL);
+INSERT INTO `commission_config` VALUES (46, NULL, 2, 15, 1, '2026-02-28 16:14:21', '2026-02-28 16:14:21', NULL);
+INSERT INTO `commission_config` VALUES (47, NULL, 3, 20, 1, '2026-02-28 16:14:21', '2026-02-28 16:14:21', NULL);
+INSERT INTO `commission_config` VALUES (48, NULL, 4, 5, 1, '2026-02-28 16:14:21', '2026-02-28 16:14:21', NULL);
 
 -- ----------------------------
 -- Table structure for errand_category

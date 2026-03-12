@@ -1,5 +1,7 @@
 package com.example.order.biz.service.impl;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -72,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
+	@SentinelResource(value = "createOrder", blockHandler = "createOrderBlockHandler")
 	public Long createOrder(OrderCreateDTO createDTO) {
 		if (createDTO == null) {
 			throw new BusinessException("INVALID_PARAM", "订单创建参数不能为空");
@@ -163,8 +166,16 @@ public class OrderServiceImpl implements OrderService {
 		return orderMain.getId();
 	}
 
+	/**
+	 * createOrder 限流降级处理
+	 */
+	public Long createOrderBlockHandler(OrderCreateDTO createDTO, BlockException e) {
+		throw new BusinessException("RATE_LIMITED", "订单创建请求过于频繁，请稍后重试");
+	}
+
 	@Override
 	@Transactional(rollbackFor = Exception.class)
+	@SentinelResource(value = "acceptOrder", blockHandler = "acceptOrderBlockHandler")
 	public void acceptOrder(OrderAcceptDTO acceptDTO) {
 		if (acceptDTO == null || acceptDTO.getOrderId() == null) {
 			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
@@ -224,6 +235,13 @@ public class OrderServiceImpl implements OrderService {
 				lock.unlock();
 			}
 		}
+	}
+
+	/**
+	 * acceptOrder 限流降级处理
+	 */
+	public void acceptOrderBlockHandler(OrderAcceptDTO acceptDTO, BlockException e) {
+		throw new BusinessException("RATE_LIMITED", "接单请求过于频繁，请稍后重试");
 	}
 
 	@Override
@@ -340,6 +358,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
+	@SentinelResource(value = "payOrder", blockHandler = "payOrderBlockHandler")
 	public void payOrder(OrderPayDTO payDTO) {
 		if (payDTO == null || payDTO.getOrderId() == null) {
 			throw new BusinessException("INVALID_PARAM", "订单ID不能为空");
@@ -486,6 +505,13 @@ public class OrderServiceImpl implements OrderService {
 
 		log.info("订单支付成功，订单ID：{}，支付方式：{}，支付流水号：{}",
 				payDTO.getOrderId(), payDTO.getPayMethod(), payDTO.getPayChannelNo());
+	}
+
+	/**
+	 * payOrder 限流降级处理
+	 */
+	public void payOrderBlockHandler(OrderPayDTO payDTO, BlockException e) {
+		throw new BusinessException("RATE_LIMITED", "支付请求过于频繁，请稍后重试");
 	}
 
 	@Override

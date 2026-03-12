@@ -5,17 +5,17 @@ USE `campus_merchant_db`;
 /*
  Navicat Premium Dump SQL
 
- Source Server         : 腾讯云
+ Source Server         : baoer
  Source Server Type    : MySQL
- Source Server Version : 90500 (9.5.0)
- Source Host           : 49.232.245.147:3306
+ Source Server Version : 80024 (8.0.24)
+ Source Host           : 106.13.143.56:3306
  Source Schema         : campus_merchant_db
 
  Target Server Type    : MySQL
- Target Server Version : 90500 (9.5.0)
+ Target Server Version : 80024 (8.0.24)
  File Encoding         : 65001
 
- Date: 10/02/2026 15:27:19
+ Date: 28/02/2026 18:03:50
 */
 
 SET NAMES utf8mb4;
@@ -206,7 +206,7 @@ CREATE TABLE `mch_user_category`  (
   `delete_at` datetime NULL DEFAULT NULL,
   `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`mch_user_id`, `mch_category_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '商家用户-商品分类关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '商家用户-商品分类关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of mch_user_category
@@ -226,7 +226,7 @@ CREATE TABLE `undo_log`  (
   `log_modified` datetime(6) NOT NULL COMMENT 'modify datetime',
   UNIQUE INDEX `ux_undo_log`(`xid` ASC, `branch_id` ASC) USING BTREE,
   INDEX `ix_log_created`(`log_created` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AT transaction mode undo table' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of undo_log
